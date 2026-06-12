@@ -11,9 +11,12 @@ html,body{height:100%;overflow:hidden}
 body{font-family:'Roboto',sans-serif;font-size:14px;color:#13314c;background:#f5f8fa}
 input,button,select{font-family:'Roboto',sans-serif}
 button{cursor:pointer}
-::-webkit-scrollbar{width:8px;height:8px}
-::-webkit-scrollbar-track{background:#f5f8fa}
-::-webkit-scrollbar-thumb{background:#cedbe7;border-radius:4px}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:transparent;border-radius:4px}
+*:hover::-webkit-scrollbar-thumb{background:#cedbe7}
+*{scrollbar-width:thin;scrollbar-color:transparent transparent}
+*:hover{scrollbar-color:#cedbe7 transparent}
 
 /* ── App shell ── */
 .app{height:100vh;display:flex;flex-direction:column;overflow:hidden}
@@ -60,7 +63,7 @@ button{cursor:pointer}
 .bc-body{display:flex;flex:1;min-height:0;overflow:hidden}
 
 /* ── Accounts table ── */
-.bc-main{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;overflow:hidden;background:#fff;margin:24px 0 24px 24px;border-radius:4px;border:1px solid #cedbe7}
+.bc-main{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;overflow:hidden;background:#fff;margin:24px 24px 24px 0;border-radius:4px;border:1px solid #cedbe7}
 .bc-lbl{padding:16px 20px;font-size:14px;font-weight:600;color:#13314c;border-bottom:1px solid #eef2f7}
 .bc-scroll{flex:1;overflow:auto;min-height:0}
 .ao-tbl{width:100%;border-collapse:collapse}
@@ -81,7 +84,7 @@ button{cursor:pointer}
 .acct-sub{color:#b3b3b3;font-size:12px;margin-left:4px}
 
 /* ── BC sidebar ── */
-.bc-sidebar{width:460px;flex-shrink:0;overflow-y:auto;min-height:0;display:flex;flex-direction:column;gap:16px;padding:24px 24px 24px 16px}
+.bc-sidebar{width:460px;flex-shrink:0;overflow-y:auto;min-height:0;display:flex;flex-direction:column;gap:16px;padding:24px 16px 24px 24px}
 .bc-card{background:rgba(255,255,255,.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.6);border-radius:4px;padding:16px;box-shadow:0 4px 16px rgba(0,0,0,.06)}
 .bc-card.hi{border-color:#008dd5;min-height:160px}
 .bc-card-h{font-size:14px;font-weight:600;color:#13314c;margin-bottom:0;display:flex;align-items:center;gap:6px}
@@ -102,9 +105,22 @@ button{cursor:pointer}
 .bc-alert-dot{width:8px;height:8px;border-radius:50%;background:#f5a623}
 .bc-alert-dot.err{background:#eb343c}
 .insight-pill{font-size:13px;color:#13314c;padding:8px;background:#f5f8fa;border-radius:4px;line-height:1.5;margin-bottom:8px}
+.bc-card.hi{border-color:#008dd5}
+.ins-row{display:flex;flex-direction:column;gap:3px;padding:6px 0}
+.ins-row:first-child{padding-top:0}
+.ins-row+.ins-row{border-top:1px solid #eef2f7}
+.ins-title-row{display:flex;flex-direction:column;align-items:flex-start;gap:3px}
+.ins-title{font-size:13px;font-weight:500;color:#13314c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.ins-loz{display:inline-flex;align-items:center;gap:5px;height:20px;padding:0 6px;border-radius:4px;font-size:11px;color:#13314c;white-space:nowrap;flex-shrink:0}
+.ins-loz-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.ins-body{font-size:13px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ins-pane .ins-body{white-space:normal;overflow:visible;text-overflow:unset}
 .link-btn{background:none;border:none;color:#008dd5;font-size:14px;padding:0}
 .link-btn:hover{text-decoration:underline}
 .link-btn.sm{font-size:13px}
+.bc-card-footer{display:flex;align-items:center;justify-content:space-between}
+.bc-card-hover-btn{opacity:0;transition:opacity .15s;cursor:pointer}
+.bc-card:hover .bc-card-hover-btn{opacity:1}
 
 /* ── SVG icons ── */
 svg.ico{display:block;flex-shrink:0}
@@ -298,20 +314,44 @@ svg.ico{display:block;flex-shrink:0}
 /* ── Settings overlay ── */
 .settings-backdrop{position:fixed;inset:0;background:rgba(19,49,76,.35);z-index:400;display:flex;align-items:center;justify-content:center}
 /* ── Insights overlay ── */
-.insight-card{background:#f3f4f8;border-radius:4px;padding:12px;display:flex;flex-direction:column;gap:12px}
-.insight-loz{display:inline-flex;align-items:center;gap:8px;height:24px;padding:0 8px;border-radius:4px;font-size:12px;font-style:italic;font-weight:400;color:#13314c}
-.insight-loz.err{color:#dc2626}
-.insight-loz-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.insight-loz-dot.err{background:#dc2626}
-.insight-loz-dot.warn{background:#f59e0b}
+/* Insights pane */
+.ins-pane{position:fixed;top:88px;right:0;bottom:0;width:500px;background:#fff;border-left:1px solid #cedbe7;box-shadow:-4px 0 20px rgba(19,49,76,.1);z-index:301;display:flex;flex-direction:column;overflow:hidden}
+.ins-pane-hdr{display:flex;align-items:center;gap:8px;padding:16px;border-bottom:1px solid #cedbe7;flex-shrink:0}
+.ins-pane-count{font-size:14px;color:#666;font-style:italic}
+.ins-pane-body{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:8px 16px 16px}
+.ins-sec-hdr{background:#fff;border-bottom:1px solid #cedbe7;padding:8px 12px;font-size:12px;color:#666;margin:0 -16px;width:calc(100% + 32px);flex-shrink:0}
+.ins-card{border-radius:4px;overflow:hidden;flex-shrink:0}
+.ins-card-inner{border:1px solid #ebf1f5;padding:12px;display:flex;flex-direction:column;gap:12px}
+.ins-loz-row{display:flex;align-items:center;justify-content:space-between}
+.ins-loz{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 8px;border-radius:4px;font-size:12px;color:#13314c;flex-shrink:0}
+.ins-loz-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ins-ttl{font-size:16px;font-weight:500;color:#13314c;line-height:1.3}
+.ins-body{font-size:14px;color:#666;line-height:20px}
+.ins-body b{font-weight:600;color:#13314c}
+.ins-action-row{display:flex;align-items:center;gap:12px}
+.ins-why{display:flex;align-items:center;gap:6px;font-size:14px;color:#666;cursor:pointer}
+.ins-bar-item{display:flex;flex-direction:column;gap:4px}
+.ins-bar-label-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#666;white-space:nowrap}
+.ins-bar-label-row span:last-child{font-weight:600}
+.ins-bar-label-row span.neg{color:#eb343c}
+.ins-bar-label-row span.pos{color:#426e29}
+.ins-progress{height:12px;background:#e5e5e5;border-radius:200px;position:relative;overflow:hidden}
+.ins-progress-fill{position:absolute;top:0;height:12px;border-radius:200px}
+.ins-grad-wrap{position:relative}
+.ins-grad-bar{height:12px;border-radius:200px;background:linear-gradient(to right,#6eb744,#faa61c 50%,#eb343c)}
+.ins-grad-marker{position:absolute;top:-2px;width:2px;height:16px;background:#13314c;border:1px solid #fff;border-radius:1px}
+.ins-grad-labels{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:#b3b3b3;margin-top:2px}
+.ins-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.ins-tag{background:#e5e5e5;height:24px;padding:0 8px;border-radius:4px;font-size:13px;color:#13314c;display:inline-flex;align-items:center}
+.ins-tag.more{background:#fff;border:1px solid #008dd5;color:#008dd5}
+.ins-status-list{display:flex;flex-direction:column;gap:6px}
+.ins-status-row{display:flex;align-items:center;gap:8px;font-size:12px;color:#666}
+.ins-close-row{display:flex;gap:16px;align-items:center}
+.insight-dismiss{background:none;border:none;color:#999;cursor:pointer;display:flex;align-items:center;padding:2px}
+/* keep old classes so nothing else breaks */
+.insight-action{font-size:14px;color:#008dd5;cursor:pointer;background:none;border:none;padding:0}
 .insight-card-title{font-size:16px;font-weight:500;color:#13314c;line-height:1.3}
 .insight-card-body{font-size:14px;color:#666;line-height:20px}
-.insight-callout{background:#fff;border:1px solid #008dd5;border-radius:4px;padding:8px;display:flex;flex-direction:column;gap:8px}
-.insight-callout-hdr{display:flex;align-items:center;justify-content:space-between;cursor:pointer}
-.insight-callout-lead{display:flex;align-items:center;gap:8px;font-size:14px;color:#666}
-.insight-callout-body{font-size:14px;color:#13314c}
-.insight-action{font-size:14px;color:#008dd5;cursor:pointer;background:none;border:none;padding:0}
-.insight-dismiss{background:none;border:none;color:#999;cursor:pointer;display:flex;align-items:center;padding:2px}
 /* tile preview rows */
 .insight-preview-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid rgba(0,141,213,.15);cursor:pointer}
 .insight-preview-row:first-child{border-top:none}
@@ -375,7 +415,7 @@ svg.ico{display:block;flex-shrink:0}
 .br-top{background:#fff;border:1px solid #cedbe7;border-radius:4px;padding:0 16px;height:52px;display:flex;align-items:center;gap:0}
 .br-acct-sel{background:none;border:none;font-size:14px;font-weight:600;color:#008dd5;cursor:pointer;padding:0;appearance:none;-webkit-appearance:none;font-family:inherit;max-width:200px}
 .br-acct-sel-wrap{display:inline-flex;align-items:center;gap:4px;cursor:pointer}
-.br-bank-info{font-size:13px;color:#666;margin-left:10px}
+.br-bank-info{font-size:13px;color:#666;margin-left:10px;padding-right:16px}
 .br-balances{display:flex;align-items:center;gap:0;margin-left:0;font-size:13px;color:#666}
 .br-bal-item{padding:0 16px;border-left:1px solid #cedbe7;white-space:nowrap}
 .br-bal-val{font-weight:600;color:#13314c;margin-left:4px;font-variant-numeric:tabular-nums}
@@ -546,6 +586,12 @@ svg.ico{display:block;flex-shrink:0}
   </div>
 </div>
 
+<div class="screen" id="screen-cr">
+  <div class="br-layout">
+    <div id="cr-inner"></div>
+  </div>
+</div>
+
 <!-- SLIDEOUT + TOAST rendered by JS -->
 <div id="slideout-root"></div>
 <div id="toast-root"></div>
@@ -558,9 +604,42 @@ svg.ico{display:block;flex-shrink:0}
 <script>
 /* ── Data ──────────────────────────────────────────────── */
 const INSIGHTS = [
-  {id:'i1', severity:'err', tag:'ACTION REQUIRED', title:'Amex Business Gold has been disconnected for 5 days', body:'This account last connected on May 10. $7,365.75 in Rent Manager unverified against your Bank Balance. Reauthenticate your account to continue keeping transactions accurate.', actionLabel:'Reconnect Account', callout:null},
-  {id:'i2', severity:'warn', tag:'AGING ALERT', title:'18 transactions are older than your usual matching window', body:'You typically match Bank of America Checking transactions within 2 days. These 18 are 6–11 days old — the longest unmatched streak in 3 months.', actionLabel:'Match Transactions', callout:{label:'Why was this flagged', detail:'Based on your matching history over the past 90 days. Average time-to-match for this account: 1.8 days.'}},
-  {id:'i3', severity:'warn', tag:'SPENDING ANOMALY', title:'Repairs spending is unusually high — driven by a new vendor', body:'Repairs are up 14% vs. last month and up 22% vs. May 2025. $18,400 of the $32,100 total is from Hansen Contracting, a vendor with no prior history in Rent Manager.', actionLabel:'Review Transactions', callout:{label:'Why was this flagged', detail:null}},
+  {id:'i1', section:'action', borderColor:'#eb343c', lozBg:'#fbd6d8', dotColor:'#eb343c', lozTag:'OVERDRAFT RISK - MAINTENANCE ESCROW',
+    tag:'OVERDRAFT RISK', lozColor:'#fbd6d8', severity:'err',
+    title:'A scheduled payment overdraws this account on Jun 19',
+    subtitle:'$55k in payments clear before next deposit settles',
+    body:'Regions••••4471 holds <b>$44,363</b> but <b>$55,600</b> in vendor payments clear before the next deposit settles projecting a low of <b>−$11,200.</b>',
+    viz:'line-chart', actionLabel:'Action', callout:{label:'Why was this flagged?', detail:null}},
+  {id:'i2', section:'action', borderColor:'#eb343c', lozBg:'#fbd6d8', dotColor:'#eb343c', lozTag:'CASH FORECAST - OWNERS',
+    tag:'CASH FORECAST', lozColor:'#fbd6d8', severity:'err',
+    title:'3 owners will be negative after Friday\'s disbursement',
+    subtitle:'Castellano, Riverside, M. Tran',
+    body:'Regions••••4471 holds <b>$44,363</b> but <b>$55,600</b> in vendor payments clear before the next deposit settles projecting a low of <b>−$11,200.</b>',
+    viz:'owner-bars', actionLabel:'Action', callout:{label:'Why was this flagged?', detail:null}},
+  {id:'i3', section:'watch', borderColor:'#f79b4d', lozBg:'#feedd2', dotColor:'#faa61c', lozTag:'RETURN RISK - INCOMING ACH',
+    tag:'RETURN RISK', lozColor:'#feedd2', severity:'warn',
+    title:'$8,400 in tenant ACH shows elevated return risk',
+    subtitle:'6 payments, Zego 10-day blind spot',
+    body:'6 payments this cycle carry higher-than-usual NSF likelihood. Zego returns often aren\'t confirmed for 10+ days — long enough to miss eviction timelines.',
+    viz:'gradient-bar', actionLabel:'Action', callout:{label:'Why was this flagged?', detail:null}},
+  {id:'i4', section:'watch', borderColor:'#f79b4d', lozBg:'#feedd2', dotColor:'#faa61c', lozTag:'AGING ALERT - 1001 OPERATING',
+    tag:'AGING ALERT', lozColor:'#feedd2', severity:'warn',
+    title:'18 transactions are older than your usual matching window',
+    subtitle:'1001 Operating, up to 11 days',
+    body:'You typically match this account within 2 days. These 18 are 6–11 days old — the longest unmatched streak in 3 months.',
+    viz:null, actionLabel:'Match Transactions', actionFn:"closeInsights();openAcct('op3487')", callout:{label:'Why was this flagged?', detail:'Based on your matching history over the past 90 days. Average time-to-match for this account: 1.8 days.'}},
+  {id:'i5', section:'forecast', borderColor:'#178c7e', lozBg:'#d1f0ec', dotColor:'#178c7e', lozTag:'CLOSE FORECAST - MAY PERIOD',
+    tag:'CLOSE FORECAST', lozColor:'#d1f0ec', severity:'info',
+    title:'On track to close May by the 3rd — 3 blockers remain',
+    subtitle:'82% of accounts tied to bank',
+    body:'82% of accounts tie to the bank. At your usual pace you\'re two days ahead of last month\'s close.',
+    viz:'donut', actionLabel:'Action', callout:null},
+  {id:'i6', section:'forecast', borderColor:'#178c7e', lozBg:'#d1f0ec', dotColor:'#178c7e', lozTag:'CASH RUNWAY - OPERATING ACCOUNT',
+    tag:'CASH RUNWAY', lozColor:'#d1f0ec', severity:'info',
+    title:'Operating trends toward its reserve floor in ~7 weeks',
+    subtitle:'Chase••••3487, projected late July',
+    body:'Chase••••3487 is projected to reach your $600K working reserve by late July at the current pace of inflows and outflows.',
+    viz:'runway-chart', actionLabel:'Action', callout:null},
 ];
 
 const ACCOUNTS = [
@@ -769,14 +848,15 @@ function orionSpark(size=14){
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-'+id).classList.add('active');
-  const titles = { bc:'Banking Center', tr:'Transaction Review', br:'Bank Register' };
+  const titles = { bc:'Banking Center', tr:'Transaction Review', br:'Bank Register', cr:'Credit Card Register' };
   document.getElementById('ctx-title').textContent = titles[id] || id;
-  document.getElementById('ctx-extra').innerHTML = (id === 'tr' || id === 'br')
+  document.getElementById('ctx-extra').innerHTML = (id === 'tr' || id === 'br' || id === 'cr')
     ? `<button onclick="showScreen('bc')" style="background:none;border:none;color:#fff;font-size:14px;display:flex;align-items:center;gap:4px;cursor:pointer;padding:0;font-family:'Roboto',sans-serif">Banking Center <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v2.5l-3.5 3.5 3.5 3.5V17l-6-6 6-6zm8 0l6 6-6 6v-2.5l3.5-3.5-3.5-3.5V5z" style="display:none"/><path d="M16.01 11H4v2h12.01v3L20 12l-3.99-4v3z"/></svg></button>`
     : '';
   if (id==='bc') renderBC();
   if (id==='tr') renderTR();
-  if (id==='br') renderBR();
+  if (id==='br') { if (!BR_STATE.acctId) BR_STATE.acctId = ACCOUNTS.find(a=>a.kind==='bank').id; renderBR(); }
+  if (id==='cr') { if (!CR_STATE.acctId) CR_STATE.acctId = ACCOUNTS.find(a=>a.kind==='card').id; renderCR(); }
 }
 
 function fmtSync(min) {
@@ -893,45 +973,46 @@ function renderBC() {
   const allBanks = ACCOUNTS.filter(a => a.kind === 'bank');
 
   const TILE_HTML = {
-    orionInsights: `<div class="bc-card hi" style="min-height:unset;cursor:pointer" onclick="openInsights()">
-      <div class="bc-card-hrow"><span class="bc-ico-badge teal">${orionSpark(16)}</span><span class="bc-card-h">Banking Insights</span><span style="margin-left:auto;font-size:11px;color:#008dd5">View all →</span></div>
-      <div style="margin-top:8px">${INSIGHTS.map(ins=>`
-        <div class="insight-preview-row">
-          <div class="insight-preview-dot ${ins.severity}"></div>
-          <span class="insight-preview-text">${ins.title}</span>
-          <span class="insight-preview-tag">${ins.tag}</span>
+    orionInsights: `<div class="bc-card hi" style="min-height:unset">
+      <div class="bc-card-hrow" style="margin-bottom:8px"><span class="bc-ico-badge" style="background:#e2f1da">${orionSpark(16)}</span><span class="bc-card-h">Banking Insights</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="openInsights()">View All Insights</button></div>
+      <div>${INSIGHTS.slice(0,4).map(ins=>`
+        <div class="ins-row" onclick="openInsights()" style="cursor:pointer">
+          <div class="ins-title-row">
+            <span class="ins-loz" style="background:${ins.lozColor}"><span class="ins-loz-dot" style="background:${ins.dotColor}"></span>${ins.tag}</span>
+            <span class="ins-title">${ins.title}</span>
+          </div>
         </div>`).join('')}
       </div>
     </div>`,
     bankBalance: `<div class="bc-card">
-      <div class="bc-card-hrow"><span class="bc-ico-badge purple">${ic(P.bank,15,'#6b53be')}</span><span class="bc-card-h">Bank Balance</span><span class="bc-card-count">${banks.length} accounts</span></div>
+      <div class="bc-card-hrow"><span class="bc-ico-badge purple">${ic(P.bank,15,'#6b53be')}</span><span class="bc-card-h">Bank Balance</span><span class="bc-card-count" style="margin-left:4px">${banks.length} accounts</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="showScreen('br')">Bank Register</button></div>
       <div class="bc-num">${fmt(bankTotal)}</div>
       <div class="bc-div"></div>
       <div class="bc-rm-row">${RM_ICO}<span class="bc-rm-lbl">In Rent Manager</span><span style="font-size:12px;color:#999;margin-left:4px">${banks.length}/${allBanks.length} accounts</span></div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:4px"><span class="bc-num2">${fmt(bankRm)}</span><span class="loz-diff">${bankDiff>=0?'+':'−'}${fmt(Math.abs(bankDiff))}</span></div>
     </div>`,
     cardBalance: `<div class="bc-card">
-      <div class="bc-card-hrow"><span class="bc-ico-badge purple">${ic(P.card,15,'#6b53be')}</span><span class="bc-card-h">Credit Card Balance</span><span class="bc-card-count">${cards.length} accounts</span></div>
+      <div class="bc-card-hrow"><span class="bc-ico-badge purple">${ic(P.card,15,'#6b53be')}</span><span class="bc-card-h">Credit Card Balance</span><span class="bc-card-count" style="margin-left:4px">${cards.length} accounts</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="showScreen('cr')">Credit Card Register</button></div>
       <div class="bc-num">${fmt(cardTotal)}</div>
       <div class="bc-div"></div>
       <div class="bc-rm-row">${RM_ICO}<span class="bc-rm-lbl">In Rent Manager</span><span style="font-size:12px;color:#999;margin-left:4px">${cards.length}/${cards.length} accounts</span></div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:4px"><span class="bc-num2">${fmt(cardRm)}</span><span class="loz-diff">${cardDiff>=0?'+':'−'}${fmt(Math.abs(cardDiff))}</span></div>
     </div>`,
     unmatched: `<div class="bc-card">
-      <div class="bc-card-hrow"><span class="bc-ico-badge teal">${ic(P.money,15,'#178c7e')}</span><span class="bc-card-h">Unmatched Transactions</span></div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div class="bc-alert-dot"></div><span class="bc-num">34</span></div>
-      <div style="display:flex;align-items:center;justify-content:space-between"><span class="bc-sub">$47,820.15 across 5 accounts</span><button class="link-btn sm" onclick="showScreen('tr')">Review Transactions</button></div>
+      <div class="bc-card-hrow"><span class="bc-ico-badge teal">${ic(P.money,15,'#178c7e')}</span><span class="bc-card-h">Unmatched Transactions</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="showScreen('tr')">Review Transactions</button></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><div class="bc-alert-dot"></div><span class="bc-num">34</span></div>
+      <span class="bc-sub">$47,820.15 across 5 accounts</span>
     </div>`,
     connHealth: `<div class="bc-card">
-      <div class="bc-card-hrow"><span class="bc-ico-badge pink">${ic(P.refresh,15,'#c93467')}</span><span class="bc-card-h">Connection Health</span></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span style="display:flex;align-items:center;gap:8px"><div class="bc-alert-dot err"></div><span style="font-size:16px;font-weight:500;color:#13314c">1 Account Disconnected</span></span><button class="link-btn sm" onclick="openSettings('institutions')">Manage Connections</button></div>
+      <div class="bc-card-hrow"><span class="bc-ico-badge pink">${ic(P.refresh,15,'#c93467')}</span><span class="bc-card-h">Connection Health</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="openSettings('institutions')">Manage Connections</button></div>
+      <div style="display:flex;align-items:center;gap:8px"><div class="bc-alert-dot err"></div><span style="font-size:16px;font-weight:500;color:#13314c">1 Account Disconnected</span></div>
     </div>`,
   };
 
   const visibleTiles = QA.tilesOrder.filter(k => QA.tiles[k]);
   const sidebarHtml = `<div class="bc-sidebar" id="bc-sidebar">${visibleTiles.map(k => TILE_HTML[k]).join('')}</div>`;
 
-  document.getElementById('bc-body').innerHTML = tableHtml + sidebarHtml;
+  document.getElementById('bc-body').innerHTML = sidebarHtml + tableHtml;
 }
 
 const _insightCalloutOpen = {};
@@ -948,49 +1029,147 @@ function closeInsights() {
   renderInsights();
 }
 
+function insViz(ins) {
+  if (ins.viz === 'line-chart') return `
+    <div style="position:relative;height:108px;overflow:hidden;background:#fff">
+      <!-- pink highlight zone below $0 -->
+      <div style="position:absolute;left:0;right:0;top:62px;bottom:0;background:rgba(251,214,216,0.5)"></div>
+      <!-- $0 horizontal line -->
+      <div style="position:absolute;left:0;right:0;top:62px;height:1px;background:rgba(235,52,60,0.25)"></div>
+      <!-- labels -->
+      <div style="position:absolute;left:6px;top:53px;transform:translateY(-50%);font-size:10px;color:#eb343c">$0</div>
+      <div style="position:absolute;left:50%;top:11px;transform:translate(-50%,-50%);font-size:10px;color:#b3b3b3">Today</div>
+      <div style="position:absolute;left:331px;top:97px;transform:translateY(-50%);font-size:10px;color:#eb343c;font-weight:500">-$11.2k · Jun 19</div>
+      <svg viewBox="0 0 444 108" style="position:absolute;inset:0;width:100%;height:100%" fill="none">
+        <!-- vertical today line -->
+        <line x1="222" y1="0" x2="222" y2="108" stroke="#b3b3b3" stroke-dasharray="4 3" stroke-width="1"/>
+        <!-- blue past line: (11,22)→(222,46.5) smooth bezier -->
+        <path d="M 11,22 C 80,26 150,40 222,46.5" stroke="#008dd5" stroke-width="1.5" fill="none"/>
+        <!-- red future line: (222,46.5)→(368,82) dashed bezier, crosses $0 at ~y=62 -->
+        <path d="M 222,46.5 C 270,54 320,68 368,82" stroke="#eb343c" stroke-width="2" stroke-dasharray="5 3" fill="none"/>
+        <!-- endpoint dot -->
+        <circle cx="368" cy="82" r="3" fill="#eb343c"/>
+      </svg>
+    </div>`;
+  if (ins.viz === 'owner-bars') {
+    const bars = [
+      {name:'Castellano Holdings', val:'-$1,420', left:'26%',  width:'23.5%', color:'#eb343c'},
+      {name:'Riverside LLC',       val:'-$640',   left:'35.9%',width:'13.9%', color:'#eb343c'},
+      {name:'M. Tran',             val:'-$210',   left:'43%',  width:'6.95%', color:'#eb343c'},
+      {name:'Delgado Properties',  val:'+$8,900', left:'50%',  width:'36.3%', color:'#6eb744'},
+    ];
+    const isPos = b => b.color === '#6eb744';
+    return `<div style="display:flex;flex-direction:column;gap:8px">${bars.map(b=>`
+      <div class="ins-bar-item">
+        <div class="ins-bar-label-row"><span>${b.name}</span><span style="font-weight:600;color:${isPos(b)?'#426e29':'#eb343c'}">${b.val}</span></div>
+        <div class="ins-progress"><div class="ins-progress-fill" style="background:${b.color};left:${b.left};width:${b.width}"></div></div>
+      </div>`).join('')}</div>`;
+  }
+  if (ins.viz === 'gradient-bar') return `
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <div class="ins-grad-wrap">
+        <div class="ins-grad-bar"></div>
+        <div class="ins-grad-marker" style="left:71%"></div>
+      </div>
+      <div class="ins-grad-labels"><span>Low</span><span>Elevated</span><span>High</span></div>
+    </div>
+    <div class="ins-tags">
+      <span class="ins-tag">Unit 204 - $1,950</span>
+      <span class="ins-tag">Unit 117 - $1,400</span>
+      <span class="ins-tag">Unit 33B - $1,250</span>
+      <span class="ins-tag more">+3 ▾</span>
+    </div>`;
+  if (ins.viz === 'donut') {
+    const r=30, circ=2*Math.PI*r, fill=circ*0.82;
+    return `
+    <div class="ins-close-row">
+      <svg width="71" height="71" viewBox="0 0 71 71" style="flex-shrink:0">
+        <circle cx="35.5" cy="35.5" r="${r}" fill="none" stroke="#e5e5e5" stroke-width="10"/>
+        <circle cx="35.5" cy="35.5" r="${r}" fill="none" stroke="#6eb744" stroke-width="10"
+          stroke-dasharray="${fill} ${circ}" stroke-linecap="round" transform="rotate(-90 35.5 35.5)"/>
+        <text x="35.5" y="39" text-anchor="middle" font-size="10" font-weight="600" fill="#13314c">82%</text>
+      </svg>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <span style="font-size:16px;color:#666">Ready to close</span>
+        <span style="font-size:16px;font-weight:500;color:#13314c">Projected: by Jun 3</span>
+      </div>
+    </div>
+    <div class="ins-status-list">
+      <div class="ins-status-row"><span style="width:8px;height:8px;border-radius:50%;background:#f5a623;flex-shrink:0;display:inline-block"></span><span>1 Zego batch unreconciled</span></div>
+      <div class="ins-status-row"><span style="width:8px;height:8px;border-radius:50%;background:#f5a623;flex-shrink:0;display:inline-block"></span><span>2 checks outstanding past 45 days</span></div>
+    </div>`;
+  }
+  if (ins.viz === 'runway-chart') return `
+    <div style="position:relative;height:108px;overflow:hidden;background:#fff">
+      <div style="position:absolute;left:0;right:0;top:88px;height:1px;border-top:1px dashed #faa61c"></div>
+      <div style="position:absolute;left:4px;top:76px;transform:translateY(-50%);font-size:10px;color:#faa61c">$600k floor</div>
+      <div style="position:absolute;left:50%;top:11px;transform:translate(-50%,-50%);font-size:10px;color:#b3b3b3">Today</div>
+      <div style="position:absolute;right:8px;top:100px;transform:translateY(-50%);font-size:10px;color:#faa61c;font-weight:500">~late Jul</div>
+      <svg viewBox="0 0 444 108" style="position:absolute;inset:0;width:100%;height:100%" fill="none">
+        <line x1="222" y1="0" x2="222" y2="108" stroke="#e3edf5" stroke-dasharray="4 3"/>
+        <polyline points="11,32 80,35 140,40 222,47" stroke="#008dd5" stroke-width="1.5" fill="none"/>
+        <polyline points="222,47 300,62 370,82 430,96" stroke="#008dd5" stroke-width="1.5" stroke-dasharray="4 3" fill="none"/>
+        <circle cx="420" cy="93" r="3" fill="#faa61c"/>
+      </svg>
+    </div>`;
+  return '';
+}
+
 function renderInsights() {
   const root = document.getElementById('insights-root');
   if (!_insightsOpen) { root.innerHTML = ''; return; }
 
-  const cardsHtml = INSIGHTS.filter(ins => !ins._dismissed).map(ins => {
-    const calloutHtml = ins.callout ? `
-      <div class="insight-callout">
-        <div class="insight-callout-hdr" onclick="toggleInsightCallout('${ins.id}')">
-          <div class="insight-callout-lead">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path fill="#008dd5" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-            <span>${ins.callout.label}</span>
-          </div>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="transition:transform .2s;transform:${_insightCalloutOpen[ins.id]?'rotate(180deg)':'rotate(0deg)'}"><path fill="#666" d="M7 10l5 5 5-5H7z"/></svg>
+  const active = INSIGHTS.filter(ins => !ins._dismissed);
+  const CLOSE_ICO = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path fill="#999" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>`;
+  const INFO_ICO = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path fill="#666" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>`;
+
+  function insCard(ins) {
+    const vizHtml = insViz(ins);
+    const whyHtml = ins.callout ? `<div class="ins-why">${INFO_ICO}<span>${ins.callout.label}</span></div>` : '';
+    return `<div class="ins-card" style="border-left:2px solid ${ins.borderColor}">
+      <div class="ins-card-inner">
+        <div class="ins-loz-row">
+          <span class="ins-loz" style="background:${ins.lozBg}"><span class="ins-loz-dot" style="background:${ins.dotColor}"></span>${ins.lozTag}</span>
+          <button class="insight-dismiss" onclick="dismissInsight('${ins.id}')">${CLOSE_ICO}</button>
         </div>
-        ${ins.callout.detail && _insightCalloutOpen[ins.id] ? `<div class="insight-callout-body">${ins.callout.detail}</div>` : ''}
-      </div>` : '';
-    return `<div class="insight-card">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <span class="insight-loz ${ins.severity}"><span class="insight-loz-dot ${ins.severity}"></span>${ins.tag}</span>
-        <button class="insight-dismiss" onclick="dismissInsight('${ins.id}')" title="Dismiss">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path fill="#999" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-        </button>
+        <div class="ins-ttl">${ins.title}</div>
+        <div class="ins-body">${ins.body}</div>
+        ${vizHtml ? `<div>${vizHtml}</div>` : ''}
+        <div class="ins-action-row">
+          <button class="btn-primary" style="height:36px;padding:0 16px;font-size:14px" onclick="${ins.actionFn||''}">${ins.actionLabel}</button>
+          ${whyHtml}
+        </div>
       </div>
-      <div class="insight-card-title">${ins.title}</div>
-      <div class="insight-card-body">${ins.body}</div>
-      ${calloutHtml}
-      <button class="insight-action">${ins.actionLabel}</button>
     </div>`;
-  }).join('');
+  }
+
+  const sections = [
+    {key:'action', label:'Needs Action Now'},
+    {key:'watch', label:'Watch'},
+    {key:'forecast', label:'Forecast'},
+  ];
+
+  let bodyHtml = '';
+  sections.forEach(sec => {
+    const items = active.filter(i => i.section === sec.key);
+    if (!items.length) return;
+    bodyHtml += `<div class="ins-sec-hdr">${sec.label}</div>`;
+    bodyHtml += items.map(insCard).join('');
+  });
+  if (!bodyHtml) bodyHtml = '<p style="color:#999;font-size:14px;text-align:center;padding:32px 0">No active insights</p>';
 
   root.innerHTML = `
     <div class="slideout-bg" onclick="closeInsights()"></div>
-    <div class="slideout">
-      <div class="slideout-hdr">
-        <div style="display:flex;align-items:center;gap:8px">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M14.2 2.6c.9 3.7 3 5.8 6.7 6.7-3.7.9-5.8 3-6.7 6.7-.9-3.7-3-5.8-6.7-6.7 3.7-.9 5.8-3 6.7-6.7z" fill="#008dd5"/><path d="M6.6 13.2c.5 2 1.7 3.2 3.7 3.7-2 .5-3.2 1.7-3.7 3.7-.5-2-1.7-3.2-3.7-3.7 2-.5 3.2-1.7 3.7-3.7z" fill="#6eb744"/></svg>
-          <span style="font-size:16px;font-weight:600;color:#13314c">Banking Insights</span>
-        </div>
-        <button class="insight-dismiss" onclick="closeInsights()">
+    <div class="ins-pane">
+      <div class="ins-pane-hdr">
+        <span class="bc-ico-badge" style="background:#e2f1da">${orionSpark(16)}</span>
+        <span style="font-size:14px;font-weight:500;color:#13314c">Banking Insights</span>
+        <span class="ins-pane-count">${active.length} insights</span>
+        <button class="insight-dismiss" style="margin-left:auto" onclick="closeInsights()">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path fill="#666" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
       </div>
-      <div class="slideout-body">${cardsHtml || '<p style="color:#999;font-size:14px;text-align:center;padding:32px 0">No active insights</p>'}</div>
+      <div class="ins-pane-body">${bodyHtml}</div>
     </div>`;
 }
 
@@ -1120,7 +1299,7 @@ function renderRight() {
     <div class="acct-hdr-sync">${ic(P.refresh,14,'#aaa')}<span>${syncLbl}</span></div>
     <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
       <button style="background:none;border:none;display:flex;align-items:center;gap:5px;color:#008dd5;font-size:13px">${ic(P.edit,15,'#008dd5')} Edit Account</button>
-      <button class="btn-primary" style="height:34px;font-size:13px" onclick="openBR('${acct.id}')">Bank Register</button>
+      <button class="btn-primary" style="height:34px;font-size:13px" onclick="${acct.kind==='card'?`openCR('${acct.id}')`:`openBR('${acct.id}')`}">${acct.kind==='card'?'Credit Card Register':'Bank Register'}</button>
     </div>
   </div>
   <!-- Summary -->
@@ -2997,15 +3176,45 @@ function openBR(acctId) {
   showScreen('br');
 }
 
+/* ── Credit Card Register ── shares layout with Bank Register ── */
+const CR_STATE = { acctId: null, search: '', typeFilter: 'all' };
+
+function openCR(acctId) {
+  CR_STATE.acctId = acctId;
+  CR_STATE.search = '';
+  CR_STATE.typeFilter = 'all';
+  showScreen('cr');
+}
+
 function renderBR() {
-  const acct = ACCOUNTS.find(a=>a.id===BR_STATE.acctId);
+  _renderRegister(BR_STATE, {
+    mount:'br-inner', svar:'BR_STATE', rfn:'renderBR', selId:'br-acct',
+    accounts: ACCOUNTS.filter(a=>a.kind==='bank'),
+    bankInfoNoLink:'No bank account linked',
+    balLabel:'Bank Balance', depositLabel:'Deposit', paymentLabel:'Payment',
+    reconcileLabel:'Reconcile', reconcileIcon:P.bank,
+  });
+}
+
+function renderCR() {
+  _renderRegister(CR_STATE, {
+    mount:'cr-inner', svar:'CR_STATE', rfn:'renderCR', selId:'cr-acct',
+    accounts: ACCOUNTS.filter(a=>a.kind==='card'),
+    bankInfoNoLink:'No card linked',
+    balLabel:'Card Balance', depositLabel:'Payments', paymentLabel:'Charges',
+    reconcileLabel:'Reconcile', reconcileIcon:P.card||P.bank,
+  });
+}
+
+function _renderRegister(STATE, opts) {
+  const acct = ACCOUNTS.find(a=>a.id===STATE.acctId);
   if (!acct) return;
   const rows = genBRRows(acct.id);
 
   const filtered = rows.filter(r => {
-    if (BR_STATE.typeFilter !== 'all' && r.type.toLowerCase() !== BR_STATE.typeFilter) return false;
-    if (BR_STATE.search) {
-      const q = BR_STATE.search.toLowerCase();
+    if (STATE.typeFilter !== 'all' && r.type.toLowerCase() !== STATE.typeFilter) return false;
+    if (STATE.search) {
+      const q = STATE.search.toLowerCase();
       if (!r.info.toLowerCase().includes(q) && !r.ref.toLowerCase().includes(q) && !r.gl.toLowerCase().includes(q)) return false;
     }
     return true;
@@ -3038,18 +3247,18 @@ function renderBR() {
       <td style="text-align:center;width:32px"><button style="background:none;border:none;cursor:pointer;color:#9aa7b3;font-size:16px;padding:0 4px;line-height:1" title="More">⋮</button></td>
     </tr>`).join('');
 
-  document.getElementById('br-inner').innerHTML = `
+  document.getElementById(opts.mount).innerHTML = `
   <div class="br-layout">
     <div class="br-top-wrap">
       <div class="br-top">
         ${(()=>{
-          const acctOpts = ACCOUNTS.map(a=>({value:a.id,label:a.gl}));
-          const html = cSel('br-acct', BR_STATE.acctId, acctOpts, 'BR_STATE.acctId=value;renderBR()', 'min-width:180px');
+          const acctOpts = opts.accounts.map(a=>({value:a.id,label:a.gl}));
+          const html = cSel(opts.selId, STATE.acctId, acctOpts, opts.svar+'.acctId=value;'+opts.rfn+'()', 'min-width:180px');
           return html.replace('class="csel-btn"','class="csel-btn csel-btn--acct"');
         })()}
-        <span class="br-bank-info">${acct.bankName ? acct.bankName + ' ••••' + acct.last4 : 'No bank account linked'}</span>
+        <span class="br-bank-info">${acct.bankName ? acct.bankName + ' ••••' + acct.last4 : opts.bankInfoNoLink}</span>
         <div class="br-balances">
-          <span class="br-bal-item">Bank Balance: <span class="br-bal-val">${fmtN(bankBal)}</span></span>
+          <span class="br-bal-item">${opts.balLabel}: <span class="br-bal-val">${fmtN(bankBal)}</span></span>
           <span class="br-bal-item">Actual Balance: <span class="br-bal-val">${fmtN(actualBal)}</span></span>
           <span class="br-bal-item">Cleared Balance: <span class="br-bal-val">${fmtN(clearedBal)}</span></span>
         </div>
@@ -3058,14 +3267,14 @@ function renderBR() {
           <span style="font-size:13px;color:#666">Transactions to Review:</span>
           <span style="width:8px;height:8px;background:#f5a623;border-radius:50%;display:inline-block;margin-left:6px"></span>
           <span style="font-size:13px;font-weight:600;color:#13314c;margin-left:2px">${unmatchedCount}</span>
-          <a href="#" onclick="showScreen('tr');return false" style="color:#008dd5;text-decoration:none;font-size:13px;margin-left:6px">Review Transactions</a>
+          <a href="#" onclick="openAcct('${acct.id}');return false" style="color:#008dd5;text-decoration:none;font-size:13px;margin-left:6px">Review Transactions</a>
           ` : `
           <span style="width:8px;height:8px;background:#6eb744;border-radius:50%;display:inline-block"></span>
           <span style="font-size:13px;color:#666;margin-left:2px">All transactions matched</span>
           `}
         </div>
         <div class="br-top-right">
-          <button class="btn-primary" style="height:32px;padding:0 16px;font-size:13px;display:flex;align-items:center;gap:6px">${ic(P.bank,14,'#fff')} Reconcile</button>
+          <button class="btn-primary" style="height:32px;padding:0 16px;font-size:13px;display:flex;align-items:center;gap:6px">${ic(opts.reconcileIcon,14,'#fff')} ${opts.reconcileLabel}</button>
         </div>
       </div>
     </div>
@@ -3074,8 +3283,8 @@ function renderBR() {
         <label>Search</label>
         <div style="position:relative;display:flex;align-items:center">
           <span style="position:absolute;left:8px;top:50%;transform:translateY(-50%);pointer-events:none">${ic(P.search,14,'#9aa7b3')}</span>
-          <input class="flt-input" style="width:220px;padding-left:30px" placeholder="Find a transaction" value="${BR_STATE.search}"
-            oninput="BR_STATE.search=this.value;renderBR()">
+          <input class="flt-input" style="width:220px;padding-left:30px" placeholder="Find a transaction" value="${STATE.search}"
+            oninput="${opts.svar}.search=this.value;${opts.rfn}()">
         </div>
       </div>
       <div class="br-fld">
@@ -3114,8 +3323,8 @@ function renderBR() {
             <th>Information</th>
             <th>Account</th>
             <th style="text-align:center">Cleared</th>
-            <th class="r">Deposit</th>
-            <th class="r">Payment</th>
+            <th class="r">${opts.depositLabel}</th>
+            <th class="r">${opts.paymentLabel}</th>
             <th class="r">Balance</th>
             <th style="text-align:center">${ic(P.cols,14,'#fff')}</th>
           </tr>
