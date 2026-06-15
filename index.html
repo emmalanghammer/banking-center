@@ -1447,7 +1447,7 @@ function renderTxRow(tx) {
     const label = isMulti ? 'Select Match' : 'Match';
     const action = isMulti ? `toggleRow('${tx.id}','match')` : `doMatch('${tx.id}')`;
     actionCell = `<div class="match-badge">
-      <button class="match-badge-btn" onclick="event.stopPropagation();${action}">${label}</button>
+      <button id="match-action-${tx.id}" class="match-badge-btn" onclick="event.stopPropagation();${action}">${label}</button>
       <button class="match-badge-arr" onclick="event.stopPropagation();toggleRow('${tx.id}','match')">${ic(P.down,14,'#008dd5')}</button>
     </div>`;
   } else {
@@ -1598,6 +1598,7 @@ function doMatch(id) {
   S.matchedIds.add(id); S.expandedId=null;
   showToast('Transaction matched successfully');
   renderRight(); renderSidebar();
+  _ubMatchedSignal(id);
   setTimeout(() => showRulePopup(id), 400);
 }
 function doAdd(id) {
@@ -2287,6 +2288,7 @@ function saveSplit() {
   S.matchedIds.add(id); S.expandedId = null;
   renderRight(); renderSidebar();
   showToast('Transaction split and recorded');
+  _ubMatchedSignal(id);
 }
 
 function renderSplit() {
@@ -2382,6 +2384,7 @@ function confirmFindMatch() {
   S.matchedIds.add(id); S.expandedId = null;
   renderRight(); renderSidebar();
   showToast('Transaction matched successfully');
+  _ubMatchedSignal(id);
 }
 
 function renderFindMatch() {
@@ -3671,6 +3674,11 @@ function _ubCloseOverlaySignal() {
   _ubOverlay = null;
   if (_ubSuppress) return;
   history.pushState({ view: _ubView }, '', '?view=' + _ubView);
+}
+function _ubMatchedSignal(id) {
+  _ubOverlay = null;
+  if (_ubSuppress) return;
+  history.pushState({ view: _ubView, matched: id }, '', '?view=' + _ubView + '&matched=' + id);
 }
 function _ubCloseAllOverlays() {
   if (_addTxOpen) closeAddTx();
