@@ -73,7 +73,7 @@ button{cursor:pointer}
 .ao-tbl tbody td.r{text-align:right;font-variant-numeric:tabular-nums}
 .ao-tbl tbody tr:hover td{background:#f7fbff}
 .ao-conn{display:flex;align-items:center;gap:6px;font-size:13px;color:#666}
-.ao-loz-err{background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;font-size:12px;padding:2px 8px;border-radius:12px;white-space:nowrap}
+.ao-loz-err{display:inline-flex;align-items:center;background:#fbd6d8;color:#13314c;font-size:14px;padding:4px 8px;border-radius:4px;white-space:nowrap}
 .ao-tx{display:inline-flex;align-items:center;gap:8px;height:24px;padding:4px 8px;border-radius:4px;font-size:14px;font-style:italic;color:#13314c;white-space:nowrap}
 .ao-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;display:inline-block}
 .loz{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-style:italic;color:#13314c;white-space:nowrap}
@@ -951,7 +951,7 @@ function renderBC() {
     if (a.connection === 'none') {
       connCell = '';
     } else if (a.connection === 'login') {
-      connCell = `<span class="ao-loz-err">Login Required</span> <button class="acct-link" style="font-size:13px" onclick="event.stopPropagation()">Reconnect</button>`;
+      connCell = `<span style="display:inline-flex;align-items:center;gap:8px"><span class="ao-conn">${SYNC_ICO} ${fmtSync(a.syncedMin)}</span><span class="ao-loz-err">Login Required</span><button class="acct-link" style="font-size:14px" onclick="event.stopPropagation()">Reconnect</button></span>`;
     } else {
       connCell = `<span class="ao-conn">${SYNC_ICO} ${fmtSync(a.syncedMin)}</span>`;
     }
