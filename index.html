@@ -329,7 +329,10 @@ svg.ico{display:block;flex-shrink:0}
 .ins-body{font-size:14px;color:#666;line-height:20px}
 .ins-body b{font-weight:600;color:#13314c}
 .ins-action-row{display:flex;align-items:center;gap:12px}
-.ins-why{display:flex;align-items:center;gap:6px;font-size:14px;color:#666;cursor:pointer}
+.ins-why{position:relative;display:inline-flex;align-items:center;gap:6px;font-size:14px;color:#666;cursor:pointer}
+.ins-why-tip{display:none;position:absolute;bottom:calc(100% + 10px);left:0;width:300px;max-width:84vw;background:#13314c;color:#fff;font-size:13px;font-weight:400;line-height:1.45;padding:10px 12px;border-radius:6px;box-shadow:0 6px 20px rgba(19,49,76,.25);z-index:20;cursor:default}
+.ins-why-tip.open{display:block}
+.ins-why-tip::after{content:'';position:absolute;top:100%;left:14px;border:6px solid transparent;border-top-color:#13314c}
 .ins-bar-item{display:flex;flex-direction:column;gap:4px}
 .ins-bar-label-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#666;white-space:nowrap}
 .ins-bar-label-row span:last-child{font-weight:600}
@@ -648,19 +651,19 @@ const INSIGHTS = [
     title:'A scheduled payment overdraws this account on Jun 19',
     subtitle:'$55k in payments clear before next deposit settles',
     body:'Regions••••4471 holds <b>$44,363</b> but <b>$55,600</b> in vendor payments clear before the next deposit settles projecting a low of <b>−$11,200.</b>',
-    viz:'line-chart', actionLabel:'Action', callout:{label:'Why was this flagged?', detail:null}},
+    viz:'line-chart', actionLabel:'Action', callout:{label:'Why was this flagged?', detail:'Orion projects this account\'s running balance against scheduled payments and expected deposits. It flagged this because $55,600 in vendor payments are dated to clear before the next deposit settles, pushing the projected balance below $0 on Jun 19.'}},
   {id:'i2', section:'action', borderColor:'#eb343c', lozBg:'#fbd6d8', dotColor:'#eb343c', lozTag:'CASH FORECAST - OWNERS',
     tag:'CASH FORECAST', lozColor:'#fbd6d8', severity:'err',
     title:'3 owners will be negative after Friday\'s disbursement',
     subtitle:'Castellano, Riverside, M. Tran',
     body:'Regions••••4471 holds <b>$44,363</b> but <b>$55,600</b> in vendor payments clear before the next deposit settles projecting a low of <b>−$11,200.</b>',
-    viz:'owner-bars', actionLabel:'Action', callout:{label:'Why was this flagged?', detail:null}},
+    viz:'owner-bars', actionLabel:'Action', callout:{label:'Why was this flagged?', detail:'Orion models each owner\'s cash position after Friday\'s scheduled disbursement. Castellano, Riverside, and M. Tran are projected negative because their disbursements exceed the owner funds currently on hand.'}},
   {id:'i3', section:'watch', borderColor:'#f79b4d', lozBg:'#feedd2', dotColor:'#faa61c', lozTag:'RETURN RISK - INCOMING ACH',
     tag:'RETURN RISK', lozColor:'#feedd2', severity:'warn',
     title:'$8,400 in tenant ACH shows elevated return risk',
     subtitle:'6 payments, Zego 10-day blind spot',
     body:'6 payments this cycle carry higher-than-usual NSF likelihood. Zego returns often aren\'t confirmed for 10+ days — long enough to miss eviction timelines.',
-    viz:'gradient-bar', actionLabel:'Action', callout:{label:'Why was this flagged?', detail:null}},
+    viz:'gradient-bar', actionLabel:'Action', callout:{label:'Why was this flagged?', detail:'Orion scores incoming ACH payments using NSF history, payment timing, and processor behavior. These 6 payments scored above your normal return threshold, and Zego typically doesn\'t confirm returns for 10+ days.'}},
   {id:'i4', section:'watch', borderColor:'#f79b4d', lozBg:'#feedd2', dotColor:'#faa61c', lozTag:'AGING ALERT - 1001 OPERATING',
     tag:'AGING ALERT', lozColor:'#feedd2', severity:'warn',
     title:'18 transactions are older than your usual matching window',
@@ -672,13 +675,13 @@ const INSIGHTS = [
     title:'On track to close May by the 3rd — 3 blockers remain',
     subtitle:'82% of accounts tied to bank',
     body:'82% of accounts tie to the bank. At your usual pace you\'re two days ahead of last month\'s close.',
-    viz:'donut', actionLabel:'Action', callout:null},
+    viz:'donut', actionLabel:'Action', callout:{label:'Why was this flagged?', detail:'Orion compares your reconciliation progress and pace against prior months. 82% of accounts already tie to the bank, but 3 items (1 Zego batch and 2 outstanding checks) still need to clear before close.'}},
   {id:'i6', section:'forecast', borderColor:'#178c7e', lozBg:'#d1f0ec', dotColor:'#178c7e', lozTag:'CASH RUNWAY - OPERATING ACCOUNT',
     tag:'CASH RUNWAY', lozColor:'#d1f0ec', severity:'info',
     title:'Operating trends toward its reserve floor in ~7 weeks',
     subtitle:'Chase••••3487, projected late July',
     body:'Chase••••3487 is projected to reach your $600K working reserve by late July at the current pace of inflows and outflows.',
-    viz:'runway-chart', actionLabel:'Action', callout:null},
+    viz:'runway-chart', actionLabel:'Action', callout:{label:'Why was this flagged?', detail:'Orion projects this account\'s balance from your typical inflow and outflow pace. At the current rate it reaches your $600K working-reserve floor in about 7 weeks (late July).'}},
 ];
 
 const ACCOUNTS = [
@@ -1071,6 +1074,20 @@ function closeInsights() {
   _ubCloseOverlaySignal();
 }
 
+function toggleWhyTip(e, id) {
+  e.stopPropagation();
+  const tip = document.getElementById('why-tip-' + id);
+  if (!tip) return;
+  const wasOpen = tip.classList.contains('open');
+  document.querySelectorAll('.ins-why-tip.open').forEach(t => t.classList.remove('open'));
+  if (!wasOpen) tip.classList.add('open');
+}
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.ins-why')) {
+    document.querySelectorAll('.ins-why-tip.open').forEach(t => t.classList.remove('open'));
+  }
+});
+
 function insViz(ins) {
   if (ins.viz === 'line-chart') return `
     <div style="position:relative;height:108px;overflow:hidden;background:#fff">
@@ -1167,7 +1184,7 @@ function renderInsights() {
 
   function insCard(ins) {
     const vizHtml = insViz(ins);
-    const whyHtml = ins.callout ? `<div class="ins-why">${INFO_ICO}<span>${ins.callout.label}</span></div>` : '';
+    const whyHtml = ins.callout ? `<div class="ins-why" onclick="toggleWhyTip(event,'${ins.id}')">${INFO_ICO}<span>${ins.callout.label}</span>${ins.callout.detail ? `<div class="ins-why-tip" id="why-tip-${ins.id}">${ins.callout.detail}</div>` : ''}</div>` : '';
     return `<div class="ins-card" style="border-left:2px solid ${ins.borderColor}">
       <div class="ins-card-inner">
         <div class="ins-loz-row">
