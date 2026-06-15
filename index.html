@@ -1177,10 +1177,7 @@ function renderInsights() {
         <div class="ins-ttl">${ins.title}</div>
         <div class="ins-body">${ins.body}</div>
         ${vizHtml ? `<div>${vizHtml}</div>` : ''}
-        <div class="ins-action-row">
-          <button class="btn-primary" style="height:36px;padding:0 16px;font-size:14px" onclick="${ins.actionFn||''}">${ins.actionLabel}</button>
-          ${whyHtml}
-        </div>
+        ${whyHtml ? `<div class="ins-action-row">${whyHtml}</div>` : ''}
       </div>
     </div>`;
   }
