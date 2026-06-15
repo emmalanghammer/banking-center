@@ -74,7 +74,8 @@ button{cursor:pointer}
 .ao-tbl tbody tr:hover td{background:#f7fbff}
 .ao-conn{display:flex;align-items:center;gap:6px;font-size:13px;color:#666}
 .ao-loz-err{background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;font-size:12px;padding:2px 8px;border-radius:12px;white-space:nowrap}
-.ao-tx{display:flex;align-items:center;gap:6px;font-size:13px;white-space:nowrap}
+.ao-tx{display:inline-flex;align-items:center;gap:8px;height:24px;padding:4px 8px;border-radius:4px;font-size:14px;font-style:italic;color:#13314c;white-space:nowrap}
+.ao-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;display:inline-block}
 .loz{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-style:italic;color:#13314c;white-space:nowrap}
 .loz-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .loz-dot.ok{background:#6eb744}
@@ -967,9 +968,9 @@ function renderBC() {
     // Transactions cell
     let txCell;
     if (a.txStatus.type === 'matched') {
-      txCell = `<span class="ao-tx"><span style="width:8px;height:8px;border-radius:50%;background:#6eb744;display:inline-block;flex-shrink:0"></span> <em style="color:#6eb744;font-style:normal">All matched</em></span>`;
+      txCell = `<span class="ao-tx"><span class="ao-dot" style="background:#6eb744"></span>All matched</span>`;
     } else {
-      txCell = `<span class="ao-tx"><span style="width:8px;height:8px;border-radius:50%;background:#f5a623;display:inline-block;flex-shrink:0"></span> <em style="color:#f5a623;font-style:normal">${a.txStatus.count} to review</em></span>`;
+      txCell = `<span class="ao-tx"><span class="ao-dot" style="background:#f5a623"></span>${a.txStatus.count} to review</span>`;
     }
     return `<tr onclick="openAcct('${a.id}')" style="cursor:pointer">
       <td style="width:44px;text-align:center">${ico}</td>
