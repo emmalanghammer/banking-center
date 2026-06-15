@@ -518,6 +518,43 @@ svg.ico{display:block;flex-shrink:0}
 .at-tbl-foot-btn.muted{color:#9aa7b3;cursor:default}
 .at-tbl-total{margin-left:auto;font-size:13px;font-weight:500;color:#13314c}
 .at-footer{height:48px;border-top:1px solid #cedbe7;display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:0 16px;flex-shrink:0;background:#fff}
+.at-cancel{height:36px;padding:0 16px;background:#fff;border:1px solid #008dd5;border-radius:4px;font-size:14px;color:#008dd5;cursor:pointer;font-family:Roboto,sans-serif}
+/* ── Split Transaction ── */
+.split-alloc{padding:8px 16px 12px;background:#f5f8fa;flex-shrink:0}
+.split-alloc-row{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#666;margin-bottom:6px;min-height:32px}
+.split-alloc-right{display:flex;align-items:center;gap:16px}
+.split-rem{color:#666}
+.split-rem.neg{color:#eb343c}
+.split-add-btn{height:32px;padding:0 14px;display:inline-flex;align-items:center;gap:6px;font-size:13px}
+.split-bar{height:8px;background:#e5e5e5;border-radius:200px;overflow:hidden}
+.split-bar-fill{height:8px;background:#008dd5;border-radius:200px;transition:width .15s}
+.split-empty{flex:1;display:flex;align-items:center;justify-content:center}
+.split-empty .split-add-btn{height:36px;padding:0 16px;font-size:14px}
+.split-item{background:#fff;border:1px solid #cedbe7;border-radius:4px;margin-bottom:12px;overflow:hidden}
+.split-item-hdr{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid #e3edf5}
+.split-item-num{font-size:14px;font-weight:600;color:#13314c}
+.split-item-ico{background:none;border:none;display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:4px;color:#9aa7b3;cursor:pointer}
+.split-item-ico:hover{background:#f5f8fa}
+.split-item-body{padding:16px}
+/* ── Find Transaction Matches ── */
+.fm-sub{display:flex;align-items:flex-start;justify-content:space-between;padding:12px 16px 0;background:#f5f8fa;flex-shrink:0;gap:16px}
+.fm-sub-title{font-size:14px;font-weight:600;color:#13314c;margin-bottom:8px}
+.fm-orion{display:flex;align-items:center;gap:6px;font-size:13px;color:#666}
+.fm-orion a{color:#008dd5;text-decoration:none;margin-left:4px}
+.fm-bal{font-size:13px;color:#666;display:grid;grid-template-columns:auto auto;gap:2px 24px;white-space:nowrap}
+.fm-bal .v{text-align:right;font-weight:600;color:#13314c;font-variant-numeric:tabular-nums}
+.fm-filters{display:flex;align-items:flex-end;gap:16px;padding:12px 16px;background:#f5f8fa;flex-shrink:0}
+.fm-fld{display:flex;flex-direction:column;gap:4px}
+.fm-fld label{font-size:12px;color:#008dd5;font-weight:500}
+.fm-tbl-wrap{flex:1;overflow-y:auto;min-height:0;padding:0 16px 12px;background:#f5f8fa}
+.fm-tbl{width:100%;border-collapse:collapse;font-size:13px;background:#fff}
+.fm-tbl thead th{background:#596775;color:#fff;font-size:12px;font-weight:500;padding:0 10px;height:32px;text-align:left;white-space:nowrap}
+.fm-tbl thead th.r{text-align:right}
+.fm-tbl tbody td{padding:0 10px;height:40px;color:#13314c;border-bottom:1px solid #eef2f7;white-space:nowrap}
+.fm-tbl tbody td.r{text-align:right;font-weight:600}
+.fm-tbl tbody tr:hover{background:#f5f8fa}
+.fm-tbl tbody tr.sel{background:#eaf5fb}
+.fm-cb{width:15px;height:15px;accent-color:#008dd5;cursor:pointer}
 </style>
 </head>
 <body>
@@ -600,6 +637,8 @@ svg.ico{display:block;flex-shrink:0}
 <div id="insights-root"></div>
 <div id="add-rule-root"></div>
 <div id="add-tx-root"></div>
+<div id="split-root"></div>
+<div id="find-match-root"></div>
 
 <script>
 /* ── Data ──────────────────────────────────────────────── */
@@ -857,6 +896,7 @@ function showScreen(id) {
   if (id==='tr') renderTR();
   if (id==='br') { if (!BR_STATE.acctId) BR_STATE.acctId = ACCOUNTS.find(a=>a.kind==='bank').id; renderBR(); }
   if (id==='cr') { if (!CR_STATE.acctId) CR_STATE.acctId = ACCOUNTS.find(a=>a.kind==='card').id; renderCR(); }
+  _ubSetView(_UB_SCREEN_TO_SLUG[id] || id);
 }
 
 function fmtSync(min) {
@@ -974,7 +1014,7 @@ function renderBC() {
 
   const TILE_HTML = {
     orionInsights: `<div class="bc-card hi" style="min-height:unset">
-      <div class="bc-card-hrow" style="margin-bottom:8px"><span class="bc-ico-badge" style="background:#e2f1da">${orionSpark(16)}</span><span class="bc-card-h">Banking Insights</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="openInsights()">View All Insights</button></div>
+      <div class="bc-card-hrow" style="margin-bottom:8px"><span class="bc-ico-badge" style="background:#e2f1da">${orionSpark(16)}</span><span class="bc-card-h">Banking Insights</span><button id="open-orion-insight" class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="openInsights()">View All Insights</button></div>
       <div>${INSIGHTS.slice(0,4).map(ins=>`
         <div class="ins-row" onclick="openInsights()" style="cursor:pointer">
           <div class="ins-title-row">
@@ -1022,11 +1062,13 @@ let _insightsOpen = false;
 function openInsights() {
   _insightsOpen = true;
   renderInsights();
+  _ubOpenOverlaySignal('orion');
 }
 
 function closeInsights() {
   _insightsOpen = false;
   renderInsights();
+  _ubCloseOverlaySignal();
 }
 
 function insViz(ins) {
@@ -1401,9 +1443,11 @@ function renderTxRow(tx) {
   if (matched) {
     actionCell = `<button class="tx-view-btn" onclick="event.stopPropagation();openSlideout('${tx.id}')">View</button>`;
   } else if (tx.matchStatus==='match'||tx.matchStatus==='multi') {
-    const label = tx.matchStatus==='multi' ? 'Select Match' : 'Match';
+    const isMulti = tx.matchStatus==='multi';
+    const label = isMulti ? 'Select Match' : 'Match';
+    const action = isMulti ? `toggleRow('${tx.id}','match')` : `doMatch('${tx.id}')`;
     actionCell = `<div class="match-badge">
-      <button class="match-badge-btn" onclick="event.stopPropagation();toggleRow('${tx.id}','match')">${label}</button>
+      <button class="match-badge-btn" onclick="event.stopPropagation();${action}">${label}</button>
       <button class="match-badge-arr" onclick="event.stopPropagation();toggleRow('${tx.id}','match')">${ic(P.down,14,'#008dd5')}</button>
     </div>`;
   } else {
@@ -1474,8 +1518,10 @@ function renderExpandedMatch(tx) {
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between">
       <div class="act-btns">
-        <button class="btn-primary" onclick="doMatch('${tx.id}')">${ic(P.check,14,'#fff')} Match</button>
-        <button class="btn-outline">${ic(P.search,13,'#008dd5')} Find other matches</button>
+        <button id="confirm-match" class="btn-primary" onclick="doMatch('${tx.id}')">Match</button>
+        <button class="btn-outline" onclick="openFindMatch('${tx.id}')">Find Other Matches</button>
+        <button id="open-create-rule" class="link-btn" style="font-size:14px;color:#008dd5" onclick="openAddRule()">Create Rule</button>
+        <button class="link-btn" style="font-size:14px;color:#008dd5">Exclude</button>
       </div>
       ${renderHelpful(tx.id)}
     </div>`;
@@ -1504,10 +1550,10 @@ function renderExpandedMulti(tx) {
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between">
       <div class="act-btns">
-        <button class="btn-primary" onclick="doMatch('${tx.id}')">${ic(P.check,14,'#fff')} Confirm Match</button>
-        <button class="btn-outline">${ic(P.search,13,'#008dd5')} Find other matches</button>
-        <button class="btn-ghost">${ic(P.split,14,'#666')} Split</button>
-        <div class="btn-split-group"><button>${ic(P.exclude,14,'#666')} Exclude</button><button>${ic(P.down,14,'#666')}</button></div>
+        <button id="confirm-match" class="btn-primary" onclick="doMatch('${tx.id}')">Match</button>
+        <button class="btn-outline" onclick="openFindMatch('${tx.id}')">Find Other Matches</button>
+        <button id="open-create-rule" class="link-btn" style="font-size:14px;color:#008dd5" onclick="openAddRule()">Create Rule</button>
+        <button class="link-btn" style="font-size:14px;color:#008dd5">Exclude</button>
       </div>
       ${renderHelpful(tx.id)}
     </div>`;
@@ -1522,10 +1568,10 @@ function renderExpandedAdd(tx) {
     <div style="padding:12px;display:flex;flex-direction:column;gap:12px">
       <div style="font-size:14px;color:#666">What would you like to do with this transaction?</div>
       <div style="display:flex;align-items:center;gap:16px">
-        <button class="btn-primary" style="height:36px;display:flex;align-items:center;gap:6px" onclick="doAdd('${tx.id}')">${ic(P.add,18,'#fff')} Add</button>
-        <button style="height:36px;padding:0 12px;background:#fff;border:1px solid #008dd5;border-radius:4px;color:#008dd5;font-size:14px;cursor:pointer;font-family:Roboto,sans-serif">Split</button>
-        <button class="link-btn" style="font-size:14px;color:#008dd5">Find Match</button>
-        <button class="link-btn" style="font-size:14px;color:#008dd5">Create Rule</button>
+        <button id="open-add-transaction" class="btn-primary" style="height:36px;padding:0 16px" onclick="doAdd('${tx.id}')">Add</button>
+        <button id="open-split-add" style="height:36px;padding:0 12px;background:#fff;border:1px solid #008dd5;border-radius:4px;color:#008dd5;font-size:14px;cursor:pointer;font-family:Roboto,sans-serif" onclick="openSplit('${tx.id}')">Split</button>
+        <button id="open-find-match" class="link-btn" style="font-size:14px;color:#008dd5" onclick="openFindMatch('${tx.id}')">Find Match</button>
+        <button id="open-create-rule" class="link-btn" style="font-size:14px;color:#008dd5" onclick="openAddRule()">Create Rule</button>
         <button class="link-btn" style="font-size:14px;color:#008dd5">Exclude</button>
       </div>
     </div>`;
@@ -1585,10 +1631,12 @@ function openAddTx(txId) {
   const types = getTxTypes(acct, tx||{});
   _addTxType = types[0];
   renderAddTx();
+  _ubOpenOverlaySignal('add-transaction');
 }
 function closeAddTx() {
   _addTxOpen = false;
   document.getElementById('add-tx-root').innerHTML = '';
+  _ubCloseOverlaySignal();
 }
 function setAddTxType(t) {
   _addTxType = t;
@@ -1604,6 +1652,17 @@ function confirmAddTx() {
   renderRight(); renderSidebar();
   showToast('Transaction recorded');
   setTimeout(() => showRulePopup(txId), 400);
+}
+
+function addTxFormBody(type, tx, amt, acct) {
+  if (type === 'Bill') return renderAddTxBill(tx, amt, acct);
+  if (type === 'Check') return renderAddTxCheck(tx, amt, acct);
+  if (type === 'Receipt') return renderAddTxReceipt(tx, amt, acct);
+  if (type === 'Deposit') return renderAddTxDeposit(tx, amt, acct);
+  if (type === 'Journal Entry') return renderAddTxJournal(tx, amt, acct);
+  if (type === 'Credit Card Charge') return renderAddTxCCCharge(tx, amt, acct);
+  if (type === 'Credit Card Credit') return renderAddTxCCCredit(tx, amt, acct);
+  return renderAddTxGeneric(tx, amt, acct);
 }
 
 function renderAddTx() {
@@ -1625,24 +1684,7 @@ function renderAddTx() {
     `<option value="${t}"${t===_addTxType?' selected':''}>${t}</option>`
   ).join('');
 
-  let formBody = '';
-  if (_addTxType === 'Bill') {
-    formBody = renderAddTxBill(tx, amt, acct);
-  } else if (_addTxType === 'Check') {
-    formBody = renderAddTxCheck(tx, amt, acct);
-  } else if (_addTxType === 'Receipt') {
-    formBody = renderAddTxReceipt(tx, amt, acct);
-  } else if (_addTxType === 'Deposit') {
-    formBody = renderAddTxDeposit(tx, amt, acct);
-  } else if (_addTxType === 'Journal Entry') {
-    formBody = renderAddTxJournal(tx, amt, acct);
-  } else if (_addTxType === 'Credit Card Charge') {
-    formBody = renderAddTxCCCharge(tx, amt, acct);
-  } else if (_addTxType === 'Credit Card Credit') {
-    formBody = renderAddTxCCCredit(tx, amt, acct);
-  } else {
-    formBody = renderAddTxGeneric(tx, amt, acct);
-  }
+  const formBody = addTxFormBody(_addTxType, tx, amt, acct);
 
   root.innerHTML = `
   <div class="at-overlay" onclick="if(event.target===this)closeAddTx()">
@@ -1677,7 +1719,7 @@ function renderAddTx() {
       </div>
       <div class="at-body${_addTxType==='Deposit'?' at-body--picker':''}">${formBody}</div>
       <div class="at-footer">
-        <button class="btn-primary" style="height:36px;padding:0 20px" onclick="confirmAddTx()">Add</button>
+        <button id="save-transaction" class="btn-primary" style="height:36px;padding:0 20px" onclick="confirmAddTx()">Add</button>
         <button class="btn-primary" style="height:36px;padding:0 20px;background:#13314c;border-color:#13314c" onclick="confirmAddTx()">Add &amp; Pay</button>
         <button style="height:36px;padding:0 16px;background:#fff;border:1px solid #cedbe7;border-radius:4px;font-size:14px;color:#13314c;cursor:pointer;font-family:Roboto,sans-serif" onclick="closeAddTx()">Cancel</button>
       </div>
@@ -2172,6 +2214,262 @@ function renderDetailTable(tx, amt) {
   </div>
   </div>`;
 }
+/* ── Shared overlay bits ── */
+const AT_HELP_ICO = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#008dd5" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" stroke-width="3" stroke-linecap="round"/></svg>`;
+const AT_X_ICO = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#008dd5" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+const TRASH_ICO = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#9aa7b3"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`;
+const CHEV_UP_SM = `<svg width="20" height="20" viewBox="0 0 24 24" fill="#9aa7b3"><path d="M7 14l5-5 5 5z"/></svg>`;
+const CHEV_DN_SM = `<svg width="20" height="20" viewBox="0 0 24 24" fill="#9aa7b3"><path d="M7 10l5 5 5-5z"/></svg>`;
+
+function txBar(tx, acct) {
+  const amt = tx.payment != null ? tx.payment : tx.deposit;
+  const amtFmt = amt != null ? amt.toFixed(2) : '0.00';
+  return `
+    <div class="at-tx-bar-wrap">
+      <div class="at-tx-bar">
+        <div class="at-tx-left">
+          <span class="at-tx-date">${tx.date}</span>
+          <span class="at-tx-desc">${tx.desc}</span>
+          <span class="at-tx-amt">${amtFmt}</span>
+        </div>
+        <div class="at-tx-right">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#13314c"><path d="M4 10v7h3v-7H4zm6 0v7h3v-7h-3zM2 22h19v-3H2v3zm14-12v7h3v-7h-3zm-4.5-9L2 6v2h19V6l-9.5-5z"/></svg>
+          <span class="at-tx-acct">${acct ? acct.gl : ''}</span>
+          <span class="at-tx-bank">${acct ? acct.bankName||'' : ''}</span>
+          <span class="at-tx-last4">${acct && acct.last4 ? '••••'+acct.last4 : ''}</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ── Split Transaction overlay ── */
+let _splitOpen = false;
+let _splitTxId = null;
+let _splitItems = [];
+let _splitSeq = 0;
+
+function openSplit(txId) {
+  _splitTxId = txId;
+  _splitOpen = true;
+  _splitItems = [];
+  renderSplit();
+  _ubOpenOverlaySignal('split');
+}
+function closeSplit() {
+  _splitOpen = false;
+  document.getElementById('split-root').innerHTML = '';
+  _ubCloseOverlaySignal();
+}
+function _splitTx() { return acctTxs().find(t=>t.id===_splitTxId); }
+function splitTotal() {
+  const tx = _splitTx();
+  if (!tx) return 0;
+  return tx.payment != null ? tx.payment : (tx.deposit != null ? tx.deposit : 0);
+}
+function splitAllocated() {
+  return _splitItems.reduce((s,i)=> s + (parseFloat(i.amount)||0), 0);
+}
+function addSplitItem() {
+  const tx = _splitTx();
+  const acct = ACCOUNTS.find(a=>a.id===S.activeId);
+  const remaining = Math.max(0, splitTotal() - splitAllocated());
+  const types = getTxTypes(acct, tx||{});
+  _splitItems.push({ id: ++_splitSeq, type: types[0], amount: remaining, collapsed: false });
+  renderSplit();
+}
+function removeSplitItem(id) { _splitItems = _splitItems.filter(i=>i.id!==id); renderSplit(); }
+function setSplitItemType(id, type) { const it=_splitItems.find(i=>i.id===id); if(it) it.type=type; renderSplit(); }
+function toggleSplitItem(id) { const it=_splitItems.find(i=>i.id===id); if(it) it.collapsed=!it.collapsed; renderSplit(); }
+function saveSplit() {
+  const id = _splitTxId;
+  closeSplit();
+  if (!id) return;
+  S.matchedIds.add(id); S.expandedId = null;
+  renderRight(); renderSidebar();
+  showToast('Transaction split and recorded');
+}
+
+function renderSplit() {
+  const root = document.getElementById('split-root');
+  if (!_splitOpen) { root.innerHTML=''; return; }
+  const tx = _splitTx();
+  if (!tx) { root.innerHTML=''; return; }
+  const acct = ACCOUNTS.find(a=>a.id===S.activeId);
+  const total = splitTotal();
+  const allocated = splitAllocated();
+  const remaining = total - allocated;
+  const pct = total > 0 ? Math.max(0, Math.min(100, allocated/total*100)) : 0;
+  const hasItems = _splitItems.length > 0;
+
+  const itemsHtml = _splitItems.map((it,i) => {
+    const typeOpts = getTxTypes(acct, tx).map(t=>`<option value="${t}"${t===it.type?' selected':''}>${t}</option>`).join('');
+    return `
+      <div class="split-item">
+        <div class="split-item-hdr">
+          <span class="split-item-num">${i+1}.</span>
+          <select class="at-type-select" style="min-width:200px" onchange="setSplitItemType(${it.id},this.value)">${typeOpts}</select>
+          <div style="flex:1"></div>
+          <button class="split-item-ico" title="Remove" onclick="removeSplitItem(${it.id})">${TRASH_ICO}</button>
+          <button class="split-item-ico" title="${it.collapsed?'Expand':'Collapse'}" onclick="toggleSplitItem(${it.id})">${it.collapsed?CHEV_DN_SM:CHEV_UP_SM}</button>
+        </div>
+        ${it.collapsed ? '' : `<div class="split-item-body">${addTxFormBody(it.type, tx, (parseFloat(it.amount)||0), acct)}</div>`}
+      </div>`;
+  }).join('');
+
+  root.innerHTML = `
+    <div class="at-overlay" onclick="if(event.target===this)closeSplit()">
+      <div class="at-modal">
+        <div class="at-hdr">
+          <span class="at-hdr-title">Split Transaction</span>
+          <button class="at-hdr-ico" title="Help">${AT_HELP_ICO}</button>
+          <button class="at-hdr-ico" onclick="closeSplit()" title="Close">${AT_X_ICO}</button>
+        </div>
+        ${txBar(tx, acct)}
+        <div class="split-alloc">
+          <div class="split-alloc-row">
+            <span>${fmt(total)} to allocate</span>
+            <div class="split-alloc-right">
+              <span class="split-rem${remaining < 0 ? ' neg' : ''}">${remaining < 0 ? '-' : ''}${fmt(Math.abs(remaining))} remaining</span>
+              ${hasItems ? `<button class="btn-primary split-add-btn" onclick="addSplitItem()">${ic(P.add,16,'#fff')} Add Transaction</button>` : ''}
+            </div>
+          </div>
+          <div class="split-bar"><div class="split-bar-fill" style="width:${pct}%"></div></div>
+        </div>
+        <div class="at-body" style="display:flex;flex-direction:column">
+          ${hasItems ? itemsHtml : `<div class="split-empty"><button class="btn-primary split-add-btn" onclick="addSplitItem()">${ic(P.add,18,'#fff')} Add Transaction</button></div>`}
+        </div>
+        <div class="at-footer">
+          <button id="save-split" class="btn-primary" style="height:36px;padding:0 20px" onclick="saveSplit()">Save</button>
+          <button class="at-cancel" onclick="closeSplit()">Cancel</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ── Find Transaction Matches overlay ── */
+let _findMatchOpen = false;
+let _findMatchTxId = null;
+let _findMatchSel = new Set();
+
+function fmCandidates(tx) {
+  const amt = (tx.payment != null ? tx.payment : tx.deposit) || 0;
+  return [
+    { date:'01/01/2026', type:'Bill',  ref:'',     property:'Riverview Apartments', info:'Jane Doe - Rent Charge', comment:'January Rent',          amount:amt },
+    { date:'01/06/2026', type:'Bill',  ref:'1',    property:'Riverview Apartments', info:'Jane Doe',               comment:'Bill #1',              amount:amt },
+    { date:'01/12/2026', type:'Check', ref:'ePay', property:'Riverview Apartments', info:'Jane Doe',               comment:'Security Deposit Refund', amount:amt },
+  ];
+}
+function openFindMatch(txId) {
+  _findMatchTxId = txId;
+  _findMatchOpen = true;
+  _findMatchSel = new Set();
+  renderFindMatch();
+  _ubOpenOverlaySignal('find-match');
+}
+function closeFindMatch() {
+  _findMatchOpen = false;
+  document.getElementById('find-match-root').innerHTML = '';
+  _ubCloseOverlaySignal();
+}
+function toggleFmRow(i) {
+  if (_findMatchSel.has(i)) _findMatchSel.delete(i); else _findMatchSel.add(i);
+  renderFindMatch();
+}
+function confirmFindMatch() {
+  const id = _findMatchTxId;
+  closeFindMatch();
+  if (!id) return;
+  S.matchedIds.add(id); S.expandedId = null;
+  renderRight(); renderSidebar();
+  showToast('Transaction matched successfully');
+}
+
+function renderFindMatch() {
+  const root = document.getElementById('find-match-root');
+  if (!_findMatchOpen) { root.innerHTML=''; return; }
+  const tx = acctTxs().find(t=>t.id===_findMatchTxId);
+  if (!tx) { root.innerHTML=''; return; }
+  const acct = ACCOUNTS.find(a=>a.id===S.activeId);
+  const bankAmt = (tx.payment != null ? tx.payment : tx.deposit) || 0;
+  const cands = fmCandidates(tx);
+  const selected = [..._findMatchSel].reduce((s,i)=> s + (cands[i]?cands[i].amount:0), 0);
+  const diff = bankAmt - selected;
+
+  const rowsHtml = cands.map((c,i)=>`
+    <tr class="${_findMatchSel.has(i)?'sel':''}" onclick="toggleFmRow(${i})" style="cursor:pointer">
+      <td style="width:36px"><input class="fm-cb" type="checkbox" ${_findMatchSel.has(i)?'checked':''} onclick="event.stopPropagation();toggleFmRow(${i})"></td>
+      <td>${c.date}</td>
+      <td>${c.type}</td>
+      <td>${c.ref}</td>
+      <td>${c.property}</td>
+      <td>${c.info}</td>
+      <td>${c.comment}</td>
+      <td class="r">${fmt(c.amount)}</td>
+    </tr>`).join('');
+
+  root.innerHTML = `
+    <div class="at-overlay" onclick="if(event.target===this)closeFindMatch()">
+      <div class="at-modal">
+        <div class="at-hdr">
+          <span class="at-hdr-title">Find Transaction Matches</span>
+          <button class="at-hdr-ico" title="Help">${AT_HELP_ICO}</button>
+          <button class="at-hdr-ico" onclick="closeFindMatch()" title="Close">${AT_X_ICO}</button>
+        </div>
+        ${txBar(tx, acct)}
+        <div class="fm-sub">
+          <div>
+            <div class="fm-sub-title">Find and select transaction(s) to match</div>
+            <div class="fm-orion">${orionSpark(16)}<span>${cands.length} possible matches containing ${fmt(bankAmt)}</span><a href="#" onclick="_findMatchSel=new Set([0,1]);renderFindMatch();return false">Select Matches</a></div>
+          </div>
+          <div class="fm-bal">
+            <span>Bank Transaction Amount:</span><span class="v">${fmt(bankAmt)}</span>
+            <span>Selected Amount:</span><span class="v">${fmt(selected)}</span>
+            <span>Difference:</span><span class="v" style="color:${diff===0?'#426e29':'#13314c'}">${fmt(diff)}</span>
+          </div>
+        </div>
+        <div class="fm-filters">
+          <div class="fm-fld">
+            <label>Search</label>
+            <input class="flt-input" style="width:280px" placeholder="Find a transaction">
+          </div>
+          <div class="fm-fld">
+            <label>Transaction Type</label>
+            <select class="at-select" style="width:200px;height:32px"><option>2 Selected</option></select>
+          </div>
+          <div class="fm-fld">
+            <label>Date Range</label>
+            <div style="display:flex;align-items:center;gap:6px">
+              <input class="at-input at-input-date" style="width:130px;height:32px" value="01/01/2026">
+              <input class="at-input at-input-date" style="width:130px;height:32px" value="01/15/2026">
+              <button style="background:none;border:1px solid #cedbe7;border-radius:4px;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">${ic(P.filter,15,'#666')}</button>
+            </div>
+          </div>
+        </div>
+        <div class="fm-tbl-wrap">
+          <table class="fm-tbl">
+            <thead>
+              <tr>
+                <th style="width:36px"><input class="fm-cb" type="checkbox" ${_findMatchSel.size===cands.length?'checked':''} onclick="_findMatchSel=this.checked?new Set(${JSON.stringify(cands.map((_,i)=>i))}):new Set();renderFindMatch()"></th>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Reference</th>
+                <th>Property</th>
+                <th>Information</th>
+                <th>Comment</th>
+                <th class="r">Amount</th>
+              </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+        </div>
+        <div class="at-footer">
+          <button class="btn-primary" style="height:36px;padding:0 20px" onclick="confirmFindMatch()">Match</button>
+          <button class="at-cancel" onclick="closeFindMatch()">Cancel</button>
+        </div>
+      </div>
+    </div>`;
+}
+
 function setHelpful(id, dir) {
   S.helpfulMap[id] = S.helpfulMap[id]===dir ? null : dir;
   renderTxRows();
@@ -2206,8 +2504,9 @@ function openSlideout(txId) {
   if (!S.matchedIds.has(txId) && !tx.matchRow && tx.matchStatus !== 'match') return;
   S.slideoutTx = txId;
   renderSlideout();
+  _ubOpenOverlaySignal('match');
 }
-function closeSlideout() { S.slideoutTx=null; renderSlideout(); }
+function closeSlideout() { S.slideoutTx=null; renderSlideout(); _ubCloseOverlaySignal(); }
 
 function renderSlideout() {
   const el = document.getElementById('slideout-root');
@@ -2243,7 +2542,7 @@ function renderSlideout() {
         <button class="btn-ghost" style="height:34px" onclick="closeSlideout()">Close</button>
         ${isMatched
           ? `<button class="btn-primary" style="height:34px" onclick="closeSlideout()">${ic(P.check,14,'#fff')} Done</button>`
-          : `<button class="btn-primary" style="height:34px" onclick="doMatch('${tx.id}');closeSlideout()">${ic(P.check,14,'#fff')} Match</button>`}
+          : `<button id="confirm-match-detail" class="btn-primary" style="height:34px" onclick="doMatch('${tx.id}');closeSlideout()">${ic(P.check,14,'#fff')} Match</button>`}
       </div>
     </div>`;
 }
@@ -2257,12 +2556,19 @@ function showToast(msg) {
   _toastTimer = setTimeout(() => { document.getElementById('toast-root').innerHTML=''; }, 3000);
 }
 
+let _rulePopupTimer;
+function dismissRulePopup() {
+  clearTimeout(_rulePopupTimer);
+  const el = document.getElementById('rule-popup-root');
+  if (el) el.innerHTML = '';
+}
 function showRulePopup(txId) {
   const tx = TRANSACTIONS.find(t=>t.id===txId);
   if (!tx) return;
   const desc = tx.desc.split(' ').slice(0,3).join(' ').toUpperCase();
   const el = document.getElementById('rule-popup-root');
   if (!el) return;
+  clearTimeout(_rulePopupTimer);
   el.innerHTML = `
     <div class="toast-rule">
       <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
@@ -2273,10 +2579,11 @@ function showRulePopup(txId) {
 
       <div style="width:1px;background:#cedbe7;align-self:stretch;flex-shrink:0;margin:0 4px"></div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:12px;flex-shrink:0">
-        <button class="btn-primary" style="height:36px;white-space:nowrap" onclick="document.getElementById('rule-popup-root').innerHTML='';openAddRule()">Add Rule</button>
-        <button class="link-btn" style="font-size:14px;color:#008dd5" onclick="document.getElementById('rule-popup-root').innerHTML=''">Dismiss</button>
+        <button class="btn-primary" style="height:36px;white-space:nowrap" onclick="dismissRulePopup();openAddRule()">Add Rule</button>
+        <button class="link-btn" style="font-size:14px;color:#008dd5" onclick="dismissRulePopup()">Dismiss</button>
 
     </div>`;
+  _rulePopupTimer = setTimeout(dismissRulePopup, 5000);
 }
 
 /* ── Settings overlay ─────────────────────────────────── */
@@ -2719,10 +3026,12 @@ function openAddRule() {
   _addRuleOpen = true;
   _addRuleConditions = [{id: Date.now()}];
   renderAddRule();
+  _ubOpenOverlaySignal('create-rule');
 }
 function closeAddRule() {
   _addRuleOpen = false;
   document.getElementById('add-rule-root').innerHTML = '';
+  _ubCloseOverlaySignal();
 }
 
 function addRuleCondition() {
@@ -2863,7 +3172,7 @@ function renderAddRule() {
 
         <!-- Footer -->
         <div style="display:flex;align-items:center;justify-content:flex-end;gap:16px;padding:8px 16px;background:#f5f8fa;border-top:1px solid #cedbe7;border-radius:0 0 4px 4px;flex-shrink:0">
-          <button onclick="saveRule()" class="btn-primary" style="height:36px">Save Rule</button>
+          <button id="save-rule" onclick="saveRule()" class="btn-primary" style="height:36px">Save Rule</button>
           <button onclick="closeAddRule()" style="height:36px;padding:0 16px;border:1px solid #008dd5;border-radius:4px;background:#fff;color:#008dd5;font-size:14px;cursor:pointer;font-family:Roboto,sans-serif">Cancel</button>
         </div>
       </div>
@@ -3338,7 +3647,72 @@ function _renderRegister(STATE, opts) {
   </div>`;
 }
 
+/* ── Useberry screen instrumentation ──────────────────────
+   Adds URL/state signals + back-button support only.
+   No visual, layout, or interaction behavior is changed. ── */
+const _UB_SCREEN_TO_SLUG = { bc:'banking-center', tr:'matching', br:'register', cr:'card-register' };
+const _UB_SLUG_TO_SCREEN = { 'banking-center':'bc', 'matching':'tr', 'register':'br', 'card-register':'cr' };
+let _ubView = 'banking-center';
+let _ubOverlay = null;
+let _ubSuppress = false;   // true while restoring from popstate, so we don't re-push
+
+function _ubSetView(slug) {
+  _ubView = slug; _ubOverlay = null;
+  if (_ubSuppress) return;
+  history.pushState({ view: slug }, '', '?view=' + slug);
+}
+function _ubOpenOverlaySignal(slug) {
+  _ubOverlay = slug;
+  if (_ubSuppress) return;
+  history.pushState({ view: _ubView, overlay: slug }, '', '?view=' + _ubView + '&overlay=' + slug);
+}
+function _ubCloseOverlaySignal() {
+  if (!_ubOverlay) return;
+  _ubOverlay = null;
+  if (_ubSuppress) return;
+  history.pushState({ view: _ubView }, '', '?view=' + _ubView);
+}
+function _ubCloseAllOverlays() {
+  if (_addTxOpen) closeAddTx();
+  if (_insightsOpen) closeInsights();
+  if (S.slideoutTx) closeSlideout();
+  if (_addRuleOpen) closeAddRule();
+  if (_splitOpen) closeSplit();
+  if (_findMatchOpen) closeFindMatch();
+}
+window.addEventListener('popstate', function () {
+  const p = new URLSearchParams(location.search);
+  const slug = p.get('view') || 'banking-center';
+  const overlay = p.get('overlay');
+  const screen = _UB_SLUG_TO_SCREEN[slug] || 'bc';
+  _ubSuppress = true;
+  const active = document.querySelector('.screen.active');
+  if (!active || active.id !== 'screen-' + screen) showScreen(screen);
+  _ubView = slug;
+  if (_ubOverlay && _ubOverlay !== overlay) _ubCloseAllOverlays();
+  if (overlay && overlay !== _ubOverlay && overlay === 'orion') openInsights();
+  _ubOverlay = overlay || null;
+  _ubSuppress = false;
+});
+function _ubInit() {
+  const p = new URLSearchParams(location.search);
+  const slug = p.get('view');
+  if (slug && _UB_SLUG_TO_SCREEN[slug]) {
+    const screen = _UB_SLUG_TO_SCREEN[slug];
+    _ubSuppress = true;
+    if (screen !== 'bc') showScreen(screen);
+    _ubView = slug;
+    _ubSuppress = false;
+    history.replaceState({ view: slug }, '', '?view=' + slug);
+  } else {
+    _ubView = 'banking-center';
+    history.replaceState({ view: 'banking-center' }, '', '?view=banking-center');
+  }
+}
+
 renderBC();
+_ubInit();
 </script>
+<script src="https://api.useberry.com/integrations/liveUrl/scripts/useberryScript.js"></script>
 </body>
 </html>
