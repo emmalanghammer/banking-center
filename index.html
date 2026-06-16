@@ -1513,7 +1513,9 @@ function renderTxRow(tx) {
 
   // Matched rows have no dropdown — clicking opens the slideout instead.
   const rowClick = matched ? `openSlideout('${tx.id}')` : `toggleRow('${tx.id}','${tx.matchStatus==='none'?'add':'match'}')`;
-  const chevronCell = matched ? ic(P.check,16,'#6eb744') : ic(exp?P.down:P.right,16,'#008dd5');
+  const CHEV_DOWN_MAT = 'M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6z';
+  const CHEV_UP_MAT = 'M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z';
+  const chevronCell = matched ? ic(P.check,16,'#6eb744') : ic(exp?CHEV_UP_MAT:CHEV_DOWN_MAT,20,'#008dd5');
 
   let html = `<div class="tx-row-wrap" id="row-${tx.id}">
     <div class="${'tx-main-row'}${exp?' exp':''}" style="${GRID}" onclick="${rowClick}">
@@ -1522,8 +1524,8 @@ function renderTxRow(tx) {
       <div class="tx-cell" style="overflow:hidden"><span class="desc">${tx.desc}</span></div>
       <div class="tx-cell r"><span class="amt">${tx.deposit?fmtN(tx.deposit):''}</span></div>
       <div class="tx-cell r"><span class="amt">${tx.payment?fmtN(tx.payment):''}</span></div>
-      <div class="tx-cell" onclick="event.stopPropagation()" style="overflow:hidden">${rmCell}</div>
-      <div class="tx-cell r" onclick="event.stopPropagation()">${actionCell}</div>
+      <div class="tx-cell" style="overflow:hidden">${rmCell}</div>
+      <div class="tx-cell r">${actionCell}</div>
     </div>`;
 
   if (exp) {
