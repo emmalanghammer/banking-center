@@ -443,6 +443,34 @@ svg.ico{display:block;flex-shrink:0}
 .br-footer{padding:8px 20px;background:#f5f8fa;display:flex;align-items:center;justify-content:flex-end;flex-shrink:0}
 .br-footer-count{font-size:12px;color:#9aa7b3}
 
+/* ── Electronic Bank Reconcile ── */
+.rec-layout{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;background:#f5f8fa}
+.rec-cols{flex:1;display:flex;gap:16px;min-height:0;padding:16px 20px;overflow:hidden}
+.rec-panel{flex:1;display:flex;flex-direction:column;min-width:0;background:#fff;border:1px solid #cedbe7;border-radius:4px;overflow:hidden}
+.rec-panel-hdr{display:flex;align-items:center;gap:16px;padding:12px 16px;flex-shrink:0;font-size:13px;flex-wrap:wrap}
+.rec-panel-title{font-size:14px;font-weight:600;color:#13314c}
+.rec-panel-count{font-size:13px;color:#9aa7b3}
+.rec-panel-bal{margin-left:auto;font-size:13px;color:#666;display:flex;gap:20px;white-space:nowrap}
+.rec-panel-bal b{color:#13314c;font-weight:600;font-variant-numeric:tabular-nums;margin-left:4px}
+.rec-tbl-wrap{flex:1;overflow-y:auto;min-height:0}
+.rec-tbl{width:100%;border-collapse:collapse;font-size:13px}
+.rec-tbl thead th{position:sticky;top:0;background:#596775;color:#fff;font-size:12px;font-weight:500;padding:0 8px;height:28px;text-align:left;white-space:nowrap;z-index:1}
+.rec-tbl thead th.r{text-align:right}
+.rec-tbl tbody td{padding:0 8px;height:36px;border-bottom:1px solid #eef2f7;color:#13314c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec-tbl tbody td.r{text-align:right;font-variant-numeric:tabular-nums}
+.rec-tbl tbody tr.matched{background:#f3faf4}
+.rec-tbl tbody tr:hover{background:#f5f8fa}
+.rec-cb{width:15px;height:15px;cursor:pointer;accent-color:#6eb744}
+.rec-loz{display:inline-flex;align-items:center;height:24px;padding:4px 8px;border-radius:4px;font-size:13px;white-space:nowrap}
+.rec-loz.matched{background:#d8f0d8;color:#2e7d32}
+.rec-loz.unmatched{background:#eef2f7;color:#666}
+.rec-foot{display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:10px 20px;background:#f5f8fa;border-top:1px solid #cedbe7;flex-shrink:0}
+.rec-toggle{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:#666}
+.rec-switch{width:36px;height:20px;border-radius:200px;background:#cedbe7;position:relative;cursor:pointer;transition:background .15s}
+.rec-switch.on{background:#008dd5}
+.rec-switch::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s}
+.rec-switch.on::after{left:18px}
+
 /* ── Add Transaction overlay ── */
 .at-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;display:flex;align-items:center;justify-content:center}
 .at-modal{background:#fff;border-radius:4px;width:min(80vw,1200px);height:min(85vh,900px);display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.22)}
@@ -631,6 +659,10 @@ svg.ico{display:block;flex-shrink:0}
   <div class="br-layout">
     <div id="cr-inner"></div>
   </div>
+</div>
+
+<div class="screen" id="screen-rec">
+  <div class="rec-layout" id="rec-inner"></div>
 </div>
 
 <!-- SLIDEOUT + TOAST rendered by JS -->
@@ -891,15 +923,16 @@ function orionSpark(size=14){
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-'+id).classList.add('active');
-  const titles = { bc:'Banking Center', tr:'Transaction Review', br:'Bank Register', cr:'Credit Card Register' };
+  const titles = { bc:'Banking Center', tr:'Transaction Review', br:'Bank Register', cr:'Credit Card Register', rec:'Electronic Bank Reconcile' };
   document.getElementById('ctx-title').textContent = titles[id] || id;
-  document.getElementById('ctx-extra').innerHTML = (id === 'tr' || id === 'br' || id === 'cr')
+  document.getElementById('ctx-extra').innerHTML = (id === 'tr' || id === 'br' || id === 'cr' || id === 'rec')
     ? `<button onclick="showScreen('bc')" style="background:none;border:none;color:#fff;font-size:14px;display:flex;align-items:center;gap:4px;cursor:pointer;padding:0;font-family:'Roboto',sans-serif">Banking Center <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v2.5l-3.5 3.5 3.5 3.5V17l-6-6 6-6zm8 0l6 6-6 6v-2.5l3.5-3.5-3.5-3.5V5z" style="display:none"/><path d="M16.01 11H4v2h12.01v3L20 12l-3.99-4v3z"/></svg></button>`
     : '';
   if (id==='bc') renderBC();
   if (id==='tr') renderTR();
   if (id==='br') { if (!BR_STATE.acctId) BR_STATE.acctId = ACCOUNTS.find(a=>a.kind==='bank').id; renderBR(); }
   if (id==='cr') { if (!CR_STATE.acctId) CR_STATE.acctId = ACCOUNTS.find(a=>a.kind==='card').id; renderCR(); }
+  if (id==='rec') { if (!REC_STATE.acctId) REC_STATE.acctId = ACCOUNTS.find(a=>a.kind==='bank').id; renderReconcile(); }
   _ubSetView(_UB_SCREEN_TO_SLUG[id] || id);
 }
 
@@ -1356,7 +1389,7 @@ function renderRight() {
     <div class="acct-hdr-sync">${ic(P.refresh,14,'#aaa')}<span>${syncLbl}</span></div>
     <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
       <button style="background:none;border:none;display:flex;align-items:center;gap:5px;color:#008dd5;font-size:13px" onclick="${acct.kind==='card'?`openCR('${acct.id}')`:`openBR('${acct.id}')`}">${acct.kind==='card'?'Credit Card Register':'Bank Register'}</button>
-      <button class="btn-primary" style="height:34px;font-size:13px">Reconcile</button>
+      <button class="btn-primary" style="height:34px;font-size:13px" onclick="openReconcile('${acct.id}')">Reconcile</button>
     </div>
   </div>
   <!-- Summary -->
@@ -3533,6 +3566,110 @@ function renderCR() {
   });
 }
 
+/* ── Electronic Bank Reconcile ── */
+const REC_STATE = { acctId: null, hideReconciled: false };
+
+function openReconcile(acctId) {
+  if (acctId) REC_STATE.acctId = acctId;
+  showScreen('rec');
+}
+
+// Build the two reconcile ledgers for an account from its register data.
+// Bank side mirrors the cleared book entries (plus a bank-only fee); rows that
+// share date + amount + description across the two sides auto-match.
+function recData(acctId) {
+  const src = BR_TX[acctId] || [];
+  const rmList = src.map((r, i) => ({
+    id: 'rm' + i, date: r.date, ref: r.ref, desc: r.info, account: r.gl,
+    amount: r.deposit != null ? r.deposit : (r.payment != null ? r.payment : 0),
+    inflow: r.deposit != null, cleared: !!r.cleared
+  }));
+  const bankList = src.filter(r => r.cleared).map((r, i) => ({
+    id: 'bk' + i, date: r.date, ref: r.ref, desc: r.info,
+    amount: r.deposit != null ? r.deposit : (r.payment != null ? r.payment : 0),
+    inflow: r.deposit != null
+  }));
+  const first = src[0];
+  bankList.unshift({ id: 'bkfee', date: first ? first.date : '', ref: '—', desc: 'MONTHLY SERVICE FEE', amount: 25.00, inflow: false });
+  const key = x => `${x.date}|${x.amount.toFixed(2)}|${x.desc.toLowerCase()}`;
+  const bankSeen = new Set(bankList.map(key));
+  const rmSeen = new Set(rmList.map(key));
+  const ov = REC_STATE._overrides || {};
+  rmList.forEach(r => { const o = 'rm:' + acctId + ':' + r.id; r.matched = (o in ov) ? ov[o] : bankSeen.has(key(r)); });
+  bankList.forEach(b => { const o = 'bk:' + acctId + ':' + b.id; b.matched = (o in ov) ? ov[o] : rmSeen.has(key(b)); });
+  return { rmList, bankList };
+}
+
+function toggleRecRow(side, id) {
+  // Manual check/uncheck overrides the auto-match for the prototype.
+  const { rmList, bankList } = recData(REC_STATE.acctId);
+  const row = (side === 'rm' ? rmList : bankList).find(r => r.id === id);
+  if (!row) return;
+  REC_STATE._overrides = REC_STATE._overrides || {};
+  REC_STATE._overrides[side + ':' + REC_STATE.acctId + ':' + id] = !row.matched;
+  renderReconcile();
+}
+
+function renderReconcile() {
+  const acct = ACCOUNTS.find(a => a.id === REC_STATE.acctId);
+  if (!acct) return;
+  const { rmList, bankList } = recData(acct.id);
+
+  const panel = (title, list, side, balLabel, totalBal) => {
+    const matched = list.filter(r => r.matched).length;
+    const rows = list.map(r => `
+      <tr class="${r.matched ? 'matched' : ''}">
+        <td style="text-align:center;width:32px"><input type="checkbox" class="rec-cb" ${r.matched ? 'checked' : ''} onclick="toggleRecRow('${side}','${r.id}')"></td>
+        <td><span class="rec-loz ${r.matched ? 'matched' : 'unmatched'}">${r.matched ? 'Matched' : 'Unmatched'}</span></td>
+        <td>${r.date}</td>
+        <td>${r.ref}</td>
+        <td style="max-width:0">${r.desc}</td>
+        ${side === 'rm' ? `<td class="muted" style="max-width:0;color:#666">${r.account}</td>` : ''}
+        <td class="r">${fmtN(r.amount)}</td>
+      </tr>`).join('');
+    return `
+      <div class="rec-panel">
+        <div class="rec-panel-hdr">
+          <span class="rec-panel-title">${title}</span>
+          <span class="rec-panel-count">${matched}/${list.length}</span>
+          <span class="rec-panel-bal"><span>Current Match: <b>${fmt(acct.cleared)}</b></span><span>Total Balance: <b>${fmt(totalBal)}</b></span></span>
+        </div>
+        <div class="rec-tbl-wrap">
+          <table class="rec-tbl">
+            <thead><tr>
+              <th style="width:32px"></th><th style="width:110px">Status</th><th style="width:96px">Date</th><th style="width:100px">Reference</th><th>Description</th>${side === 'rm' ? '<th style="width:150px">Account</th>' : ''}<th class="r" style="width:110px">Amount</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>`;
+  };
+
+  const acctOpts = ACCOUNTS.filter(a => a.kind === 'bank').map(a => ({ value: a.id, label: a.gl }));
+  const selHtml = cSel('rec-acct', REC_STATE.acctId, acctOpts, 'REC_STATE.acctId=value;renderReconcile()', 'min-width:180px')
+    .replace('class="csel-btn"', 'class="csel-btn csel-btn--acct"');
+
+  document.getElementById('rec-inner').innerHTML = `
+    <div class="br-top-wrap">
+      <div class="br-top">
+        ${selHtml}
+        <span class="br-bank-info">${acct.bankName ? acct.bankName + ' ••••' + acct.last4 : 'No bank account linked'}</span>
+        <div class="br-top-right">
+          <span class="rec-toggle">Unreconciled<span class="rec-switch${REC_STATE.hideReconciled ? ' on' : ''}" onclick="REC_STATE.hideReconciled=!REC_STATE.hideReconciled;renderReconcile()"></span></span>
+        </div>
+      </div>
+    </div>
+    <div class="rec-cols">
+      ${panel('Rent Manager Transactions', rmList, 'rm', 'Total Balance', acct.inRm)}
+      ${panel('Bank Transactions', bankList, 'bk', 'Total Balance', acct.bankBalance)}
+    </div>
+    <div class="rec-foot">
+      <button class="btn-primary" style="height:36px;padding:0 16px" onclick="showToast('Reconciliation saved');showScreen('br')">Save &amp; Finish</button>
+      <button class="at-cancel" onclick="showToast('Progress saved');showScreen('br')">Save For Later</button>
+      <button class="link-btn" style="font-size:14px" onclick="showScreen('br')">Cancel</button>
+    </div>`;
+}
+
 function _renderRegister(STATE, opts) {
   const acct = ACCOUNTS.find(a=>a.id===STATE.acctId);
   if (!acct) return;
@@ -3601,7 +3738,7 @@ function _renderRegister(STATE, opts) {
           `}
         </div>
         <div class="br-top-right">
-          <button class="btn-primary" style="height:32px;padding:0 16px;font-size:13px;display:flex;align-items:center;gap:6px">${ic(opts.reconcileIcon,14,'#fff')} ${opts.reconcileLabel}</button>
+          <button class="btn-primary" style="height:32px;padding:0 16px;font-size:13px;display:flex;align-items:center;gap:6px" onclick="openReconcile('${acct.id}')">${ic(opts.reconcileIcon,14,'#fff')} ${opts.reconcileLabel}</button>
         </div>
       </div>
     </div>
@@ -3668,8 +3805,8 @@ function _renderRegister(STATE, opts) {
 /* ── Useberry screen instrumentation ──────────────────────
    Adds URL/state signals + back-button support only.
    No visual, layout, or interaction behavior is changed. ── */
-const _UB_SCREEN_TO_SLUG = { bc:'banking-center', tr:'matching', br:'register', cr:'card-register' };
-const _UB_SLUG_TO_SCREEN = { 'banking-center':'bc', 'matching':'tr', 'register':'br', 'card-register':'cr' };
+const _UB_SCREEN_TO_SLUG = { bc:'banking-center', tr:'matching', br:'register', cr:'card-register', rec:'reconcile' };
+const _UB_SLUG_TO_SCREEN = { 'banking-center':'bc', 'matching':'tr', 'register':'br', 'card-register':'cr', 'reconcile':'rec' };
 let _ubView = 'banking-center';
 let _ubOverlay = null;
 let _ubSuppress = false;   // true while restoring from popstate, so we don't re-push
