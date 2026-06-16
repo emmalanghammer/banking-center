@@ -269,6 +269,8 @@ svg.ico{display:block;flex-shrink:0}
 .act-btns{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .btn-primary{height:32px;padding:0 16px;background:#008dd5;color:#fff;border:none;border-radius:4px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:5px}
 .btn-primary:hover{background:#0079b8}
+.btn-primary:disabled{opacity:.45;cursor:not-allowed}
+.btn-primary:disabled:hover{background:#008dd5}
 .btn-outline{height:32px;padding:0 14px;background:#fff;color:#008dd5;border:1px solid #008dd5;border-radius:4px;font-size:13px;display:flex;align-items:center;gap:5px}
 .btn-outline:hover{background:#f0f8fd}
 .btn-ghost{height:32px;padding:0 12px;background:#fff;color:#13314c;border:1px solid #cedbe7;border-radius:4px;font-size:13px;display:flex;align-items:center;gap:5px}
@@ -562,7 +564,7 @@ svg.ico{display:block;flex-shrink:0}
 .split-bar-fill{height:8px;background:#008dd5;border-radius:200px;transition:width .15s}
 .split-empty{flex:1;display:flex;align-items:center;justify-content:center}
 .split-empty .split-add-btn{height:36px;padding:0 16px;font-size:14px}
-.split-item{background:#fff;border:1px solid #cedbe7;border-radius:4px;margin-bottom:12px;overflow:hidden}
+.split-item{background:#fff;border:1px solid #cedbe7;border-radius:4px;margin-bottom:12px;overflow:hidden;flex-shrink:0}
 .split-item-hdr{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid #e3edf5}
 .split-item-num{font-size:14px;font-weight:600;color:#13314c}
 .split-item-ico{background:none;border:none;display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:4px;color:#9aa7b3;cursor:pointer}
@@ -673,7 +675,6 @@ svg.ico{display:block;flex-shrink:0}
 <div id="insights-root"></div>
 <div id="add-rule-root"></div>
 <div id="add-tx-root"></div>
-<div id="split-root"></div>
 <div id="find-match-root"></div>
 
 <script>
@@ -1617,7 +1618,6 @@ function renderExpandedAdd(tx) {
       <div style="font-size:14px;color:#666">What would you like to do with this transaction?</div>
       <div style="display:flex;align-items:center;gap:16px">
         <button id="open-add-transaction" class="btn-primary" style="height:36px;padding:0 16px" onclick="doAdd('${tx.id}')">Add</button>
-        <button id="open-split-add" style="height:36px;padding:0 12px;background:#fff;border:1px solid #008dd5;border-radius:4px;color:#008dd5;font-size:14px;cursor:pointer;font-family:Roboto,sans-serif" onclick="openSplit('${tx.id}')">Split</button>
         <button id="open-find-match" class="link-btn" style="font-size:14px;color:#008dd5" onclick="openFindMatch('${tx.id}')">Find Match</button>
         <button id="open-create-rule" class="link-btn" style="font-size:14px;color:#008dd5" onclick="openAddRule()">Create Rule</button>
         <button class="link-btn" style="font-size:14px;color:#008dd5">Exclude</button>
@@ -1653,10 +1653,11 @@ function doAdd(id) {
   openAddTx(id);
 }
 
-/* ── Add Transaction overlay ── */
+/* ── Add Transaction overlay (single or multi-line) ── */
 let _addTxOpen = false;
 let _addTxId = null;
-let _addTxType = 'Bill';
+let _addTxItems = [];
+let _addTxSeq = 0;
 
 function getTxTypes(acct, tx) {
   const isCard = acct && acct.kind === 'card';
@@ -1672,13 +1673,28 @@ function getTxTypes(acct, tx) {
     : ['Deposit', 'Journal Entry'];
 }
 
+function _addTx() { return acctTxs().find(t=>t.id===_addTxId); }
+function addTxTotal() {
+  const tx = _addTx();
+  if (!tx) return 0;
+  return tx.payment != null ? tx.payment : (tx.deposit != null ? tx.deposit : 0);
+}
+function addTxAllocated() {
+  return _addTxItems.reduce((s,i)=> s + (parseFloat(i.amount)||0), 0);
+}
+function addTxBalanced() {
+  if (_addTxItems.length <= 1) return true;
+  return Math.abs(addTxTotal() - addTxAllocated()) < 0.005;
+}
+
 function openAddTx(txId) {
   _addTxOpen = true;
   _addTxId = txId;
   const tx = acctTxs().find(t=>t.id===txId);
   const acct = ACCOUNTS.find(a=>a.id===S.activeId);
   const types = getTxTypes(acct, tx||{});
-  _addTxType = types[0];
+  const amt = tx ? (tx.payment != null ? tx.payment : (tx.deposit != null ? tx.deposit : 0)) : 0;
+  _addTxItems = [{ id: ++_addTxSeq, type: types[0], amount: amt, collapsed: false }];
   renderAddTx();
   _ubOpenOverlaySignal('add-transaction');
 }
@@ -1687,11 +1703,38 @@ function closeAddTx() {
   document.getElementById('add-tx-root').innerHTML = '';
   _ubCloseOverlaySignal();
 }
-function setAddTxType(t) {
-  _addTxType = t;
+function addAddTxItem() {
+  const tx = _addTx();
+  const acct = ACCOUNTS.find(a=>a.id===S.activeId);
+  const remaining = Math.max(0, addTxTotal() - addTxAllocated());
+  const types = getTxTypes(acct, tx||{});
+  _addTxItems.push({ id: ++_addTxSeq, type: types[0], amount: remaining, collapsed: false });
   renderAddTx();
 }
+function removeAddTxItem(id) { _addTxItems = _addTxItems.filter(i=>i.id!==id); renderAddTx(); }
+function setAddTxItemType(id, type) { const it=_addTxItems.find(i=>i.id===id); if(it) it.type=type; renderAddTx(); }
+function toggleAddTxItem(id) { const it=_addTxItems.find(i=>i.id===id); if(it) it.collapsed=!it.collapsed; renderAddTx(); }
+function setAddTxItemAmount(id, val) {
+  const it = _addTxItems.find(i=>i.id===id);
+  if (it) it.amount = val;
+  recalcAddTxAlloc();
+}
+// Update the allocation bar + Save state in place (keeps amount inputs focused).
+function recalcAddTxAlloc() {
+  const total = addTxTotal();
+  const remaining = total - addTxAllocated();
+  const balanced = Math.abs(remaining) < 0.005;
+  const remEl = document.getElementById('addtx-remaining');
+  if (remEl) {
+    remEl.textContent = `${remaining < 0 ? '-' : ''}${fmt(Math.abs(remaining))} remaining`;
+    remEl.classList.toggle('neg', !balanced);
+  }
+  const fill = document.getElementById('addtx-bar-fill');
+  if (fill) fill.style.width = (total > 0 ? Math.max(0, Math.min(100, addTxAllocated()/total*100)) : 0) + '%';
+  document.querySelectorAll('.addtx-save').forEach(b => { b.disabled = !balanced; });
+}
 function confirmAddTx() {
+  if (!addTxBalanced()) return;
   const txId = _addTxId;
   closeAddTx();
   const txs = acctTxs();
@@ -1700,6 +1743,7 @@ function confirmAddTx() {
   S.matchedIds.add(txId); S.expandedId=null;
   renderRight(); renderSidebar();
   showToast('Transaction recorded');
+  _ubMatchedSignal(txId);
   setTimeout(() => showRulePopup(txId), 400);
 }
 
@@ -1722,55 +1766,71 @@ function renderAddTx() {
   if (!tx) { root.innerHTML=''; return; }
 
   const acct = ACCOUNTS.find(a=>a.id===S.activeId);
-  const amt = tx.payment != null ? tx.payment : tx.deposit;
-  const isPayment = tx.payment != null;
-  const amtFmt = `${isPayment ? '' : ''}${amt ? amt.toFixed(2) : '0.00'}`;
-  const bankLabel = acct ? `${acct.gl}` : '';
-  const bankSub = acct ? `${acct.bankName||''} ••••${acct.last4||''}` : '';
-
   const availableTypes = getTxTypes(acct, tx);
-  const typeOpts = availableTypes.map(t =>
-    `<option value="${t}"${t===_addTxType?' selected':''}>${t}</option>`
-  ).join('');
+  const multi = _addTxItems.length > 1;
+  const total = addTxTotal();
+  const remaining = total - addTxAllocated();
+  const balanced = addTxBalanced();
+  const pct = total > 0 ? Math.max(0, Math.min(100, addTxAllocated()/total*100)) : 0;
 
-  const formBody = addTxFormBody(_addTxType, tx, amt, acct);
+  const typeSelect = (it, w) => {
+    const opts = availableTypes.map(t=>`<option value="${t}"${t===it.type?' selected':''}>${t}</option>`).join('');
+    return `<select class="at-type-select"${w?` style="min-width:${w}px"`:''} onchange="setAddTxItemType(${it.id},this.value)">${opts}</select>`;
+  };
+
+  let bodyInner;
+  if (multi) {
+    bodyInner = _addTxItems.map((it,i) => `
+      <div class="split-item">
+        <div class="split-item-hdr">
+          <span class="split-item-num">${i+1}.</span>
+          ${typeSelect(it, 200)}
+          <div style="flex:1"></div>
+          <div class="at-amount-wrap" style="width:120px">
+            <input class="at-input" type="text" value="${(parseFloat(it.amount)||0).toFixed(2)}" style="text-align:right" oninput="setAddTxItemAmount(${it.id},this.value)">
+          </div>
+          <button class="split-item-ico" title="Remove" onclick="removeAddTxItem(${it.id})">${TRASH_ICO}</button>
+          <button class="split-item-ico" title="${it.collapsed?'Expand':'Collapse'}" onclick="toggleAddTxItem(${it.id})">${it.collapsed?CHEV_DN_SM:CHEV_UP_SM}</button>
+        </div>
+        ${it.collapsed ? '' : `<div class="split-item-body">${addTxFormBody(it.type, tx, (parseFloat(it.amount)||0), acct)}</div>`}
+      </div>`).join('');
+  } else {
+    const it = _addTxItems[0];
+    bodyInner = `
+      <div class="at-type-row" style="display:flex;align-items:flex-end;justify-content:space-between">
+        <div><div class="at-type-label">Transaction Type</div>${typeSelect(it)}</div>
+        <button class="link-btn" style="font-size:13px;display:flex;align-items:center;gap:4px;padding-bottom:6px" onclick="addAddTxItem()">${ic(P.add,15,'#008dd5')} Add another transaction</button>
+      </div>
+      <div class="at-body${it.type==='Deposit'?' at-body--picker':''}" style="padding-top:0">${addTxFormBody(it.type, tx, (parseFloat(it.amount)||0), acct)}</div>`;
+  }
+
+  const allocBar = multi ? `
+    <div class="split-alloc">
+      <div class="split-alloc-row">
+        <span>${fmt(total)} to allocate</span>
+        <div class="split-alloc-right">
+          <span id="addtx-remaining" class="split-rem${balanced ? '' : ' neg'}">${remaining < 0 ? '-' : ''}${fmt(Math.abs(remaining))} remaining</span>
+          <button class="btn-primary split-add-btn" onclick="addAddTxItem()">${ic(P.add,16,'#fff')} Add another transaction</button>
+        </div>
+      </div>
+      <div class="split-bar"><div class="split-bar-fill" id="addtx-bar-fill" style="width:${pct}%"></div></div>
+    </div>` : '';
 
   root.innerHTML = `
   <div class="at-overlay" onclick="if(event.target===this)closeAddTx()">
     <div class="at-modal">
       <div class="at-hdr">
         <span class="at-hdr-title">Add Transaction</span>
-        <button class="at-hdr-ico" title="Help">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#008dd5" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17" stroke-width="3" stroke-linecap="round"/></svg>
-        </button>
-        <button class="at-hdr-ico" onclick="closeAddTx()" title="Close">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#008dd5" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+        <button class="at-hdr-ico" title="Help">${AT_HELP_ICO}</button>
+        <button class="at-hdr-ico" onclick="closeAddTx()" title="Close">${AT_X_ICO}</button>
       </div>
-      <div class="at-tx-bar-wrap">
-      <div class="at-tx-bar">
-        <div class="at-tx-left">
-          <span class="at-tx-date">${tx.date}</span>
-          <span class="at-tx-desc">${tx.desc}</span>
-          <span class="at-tx-amt">${amtFmt}</span>
-        </div>
-        <div class="at-tx-right">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="#13314c"><path d="M4 6C2.9 6 2 6.9 2 8v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2H4zm0 2h16v2H4V8zm0 4h16v8H4v-8z"/></svg>
-          <span class="at-tx-acct">${bankLabel}</span>
-          <span class="at-tx-bank">${acct ? acct.bankName||'' : ''}</span>
-          <span class="at-tx-last4">${acct && acct.last4 ? '••••'+acct.last4 : ''}</span>
-        </div>
-      </div>
-      </div>
-      <div class="at-type-row">
-        <div class="at-type-label">Transaction Type</div>
-        <select class="at-type-select" onchange="setAddTxType(this.value)">${typeOpts}</select>
-      </div>
-      <div class="at-body${_addTxType==='Deposit'?' at-body--picker':''}">${formBody}</div>
+      ${txBar(tx, acct)}
+      ${allocBar}
+      <div class="at-body"${multi ? ' style="display:flex;flex-direction:column"' : ' style="padding:0"'}>${multi ? bodyInner : `<div style="padding:0 16px 16px">${bodyInner}</div>`}</div>
       <div class="at-footer">
-        <button id="save-transaction" class="btn-primary" style="height:36px;padding:0 20px" onclick="confirmAddTx()">Add</button>
-        <button class="btn-primary" style="height:36px;padding:0 20px;background:#13314c;border-color:#13314c" onclick="confirmAddTx()">Add &amp; Pay</button>
-        <button style="height:36px;padding:0 16px;background:#fff;border:1px solid #cedbe7;border-radius:4px;font-size:14px;color:#13314c;cursor:pointer;font-family:Roboto,sans-serif" onclick="closeAddTx()">Cancel</button>
+        <button id="save-transaction" class="btn-primary addtx-save" style="height:36px;padding:0 20px" onclick="confirmAddTx()"${balanced?'':' disabled'}>Add</button>
+        <button class="btn-primary addtx-save" style="height:36px;padding:0 20px;background:#13314c;border-color:#13314c" onclick="confirmAddTx()"${balanced?'':' disabled'}>Add &amp; Pay</button>
+        <button class="at-cancel" onclick="closeAddTx()">Cancel</button>
       </div>
     </div>
   </div>`;
@@ -2286,111 +2346,6 @@ function txBar(tx, acct) {
           <span class="at-tx-acct">${acct ? acct.gl : ''}</span>
           <span class="at-tx-bank">${acct ? acct.bankName||'' : ''}</span>
           <span class="at-tx-last4">${acct && acct.last4 ? '••••'+acct.last4 : ''}</span>
-        </div>
-      </div>
-    </div>`;
-}
-
-/* ── Split Transaction overlay ── */
-let _splitOpen = false;
-let _splitTxId = null;
-let _splitItems = [];
-let _splitSeq = 0;
-
-function openSplit(txId) {
-  _splitTxId = txId;
-  _splitOpen = true;
-  _splitItems = [];
-  renderSplit();
-  _ubOpenOverlaySignal('split');
-}
-function closeSplit() {
-  _splitOpen = false;
-  document.getElementById('split-root').innerHTML = '';
-  _ubCloseOverlaySignal();
-}
-function _splitTx() { return acctTxs().find(t=>t.id===_splitTxId); }
-function splitTotal() {
-  const tx = _splitTx();
-  if (!tx) return 0;
-  return tx.payment != null ? tx.payment : (tx.deposit != null ? tx.deposit : 0);
-}
-function splitAllocated() {
-  return _splitItems.reduce((s,i)=> s + (parseFloat(i.amount)||0), 0);
-}
-function addSplitItem() {
-  const tx = _splitTx();
-  const acct = ACCOUNTS.find(a=>a.id===S.activeId);
-  const remaining = Math.max(0, splitTotal() - splitAllocated());
-  const types = getTxTypes(acct, tx||{});
-  _splitItems.push({ id: ++_splitSeq, type: types[0], amount: remaining, collapsed: false });
-  renderSplit();
-}
-function removeSplitItem(id) { _splitItems = _splitItems.filter(i=>i.id!==id); renderSplit(); }
-function setSplitItemType(id, type) { const it=_splitItems.find(i=>i.id===id); if(it) it.type=type; renderSplit(); }
-function toggleSplitItem(id) { const it=_splitItems.find(i=>i.id===id); if(it) it.collapsed=!it.collapsed; renderSplit(); }
-function saveSplit() {
-  const id = _splitTxId;
-  closeSplit();
-  if (!id) return;
-  S.matchedIds.add(id); S.expandedId = null;
-  renderRight(); renderSidebar();
-  showToast('Transaction split and recorded');
-  _ubMatchedSignal(id);
-}
-
-function renderSplit() {
-  const root = document.getElementById('split-root');
-  if (!_splitOpen) { root.innerHTML=''; return; }
-  const tx = _splitTx();
-  if (!tx) { root.innerHTML=''; return; }
-  const acct = ACCOUNTS.find(a=>a.id===S.activeId);
-  const total = splitTotal();
-  const allocated = splitAllocated();
-  const remaining = total - allocated;
-  const pct = total > 0 ? Math.max(0, Math.min(100, allocated/total*100)) : 0;
-  const hasItems = _splitItems.length > 0;
-
-  const itemsHtml = _splitItems.map((it,i) => {
-    const typeOpts = getTxTypes(acct, tx).map(t=>`<option value="${t}"${t===it.type?' selected':''}>${t}</option>`).join('');
-    return `
-      <div class="split-item">
-        <div class="split-item-hdr">
-          <span class="split-item-num">${i+1}.</span>
-          <select class="at-type-select" style="min-width:200px" onchange="setSplitItemType(${it.id},this.value)">${typeOpts}</select>
-          <div style="flex:1"></div>
-          <button class="split-item-ico" title="Remove" onclick="removeSplitItem(${it.id})">${TRASH_ICO}</button>
-          <button class="split-item-ico" title="${it.collapsed?'Expand':'Collapse'}" onclick="toggleSplitItem(${it.id})">${it.collapsed?CHEV_DN_SM:CHEV_UP_SM}</button>
-        </div>
-        ${it.collapsed ? '' : `<div class="split-item-body">${addTxFormBody(it.type, tx, (parseFloat(it.amount)||0), acct)}</div>`}
-      </div>`;
-  }).join('');
-
-  root.innerHTML = `
-    <div class="at-overlay" onclick="if(event.target===this)closeSplit()">
-      <div class="at-modal">
-        <div class="at-hdr">
-          <span class="at-hdr-title">Split Transaction</span>
-          <button class="at-hdr-ico" title="Help">${AT_HELP_ICO}</button>
-          <button class="at-hdr-ico" onclick="closeSplit()" title="Close">${AT_X_ICO}</button>
-        </div>
-        ${txBar(tx, acct)}
-        <div class="split-alloc">
-          <div class="split-alloc-row">
-            <span>${fmt(total)} to allocate</span>
-            <div class="split-alloc-right">
-              <span class="split-rem${remaining < 0 ? ' neg' : ''}">${remaining < 0 ? '-' : ''}${fmt(Math.abs(remaining))} remaining</span>
-              ${hasItems ? `<button class="btn-primary split-add-btn" onclick="addSplitItem()">${ic(P.add,16,'#fff')} Add Transaction</button>` : ''}
-            </div>
-          </div>
-          <div class="split-bar"><div class="split-bar-fill" style="width:${pct}%"></div></div>
-        </div>
-        <div class="at-body" style="display:flex;flex-direction:column">
-          ${hasItems ? itemsHtml : `<div class="split-empty"><button class="btn-primary split-add-btn" onclick="addSplitItem()">${ic(P.add,18,'#fff')} Add Transaction</button></div>`}
-        </div>
-        <div class="at-footer">
-          <button id="save-split" class="btn-primary" style="height:36px;padding:0 20px" onclick="saveSplit()">Save</button>
-          <button class="at-cancel" onclick="closeSplit()">Cancel</button>
         </div>
       </div>
     </div>`;
@@ -3837,7 +3792,6 @@ function _ubCloseAllOverlays() {
   if (_insightsOpen) closeInsights();
   if (S.slideoutTx) closeSlideout();
   if (_addRuleOpen) closeAddRule();
-  if (_splitOpen) closeSplit();
   if (_findMatchOpen) closeFindMatch();
 }
 window.addEventListener('popstate', function () {
