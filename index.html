@@ -290,6 +290,11 @@ svg.ico{display:block;flex-shrink:0}
 /* No match */
 .no-match-msg{font-size:13px;color:#666}
 .no-match-msg button{background:none;border:none;color:#008dd5;font-size:13px;text-decoration:underline;cursor:pointer;padding:0}
+.exp-top{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.exp-links{display:flex;align-items:center;gap:12px}
+.exp-links .link-btn{font-size:14px;color:#008dd5}
+.exp-links-div{color:#cedbe7}
+.exp-none-card{border:1px solid #cedbe7;border-radius:4px;background:#fff;padding:16px;display:flex;flex-direction:column;gap:14px}
 
 /* RM Slideout */
 .slideout-bg{position:fixed;inset:0;background:rgba(19,49,76,.12);z-index:300}
@@ -1522,19 +1527,8 @@ function renderTxRow(tx) {
     </div>`;
 
   if (exp) {
-    const tab = S.activeTab;
-    html += `<div class="tx-exp-wrap">
-      <div style="padding:8px 36px 0">
-        <div class="seg-toggle">
-          <button class="${tab==='match'?'act':''}" onclick="setTab('${tx.id}','match')">Match</button>
-          <button class="${tab==='add'?'act':''}" onclick="setTab('${tx.id}','add')">Add</button>
-        </div>
-      </div>
-      <div class="tx-tab-body">`;
-
-    if (tab==='add') {
-      html += renderExpandedAdd(tx);
-    } else if (matched) {
+    html += `<div class="tx-exp-wrap"><div class="tx-tab-body">`;
+    if (matched) {
       html += `<div class="matched-banner">${ic(P.check,16,'#6eb744')} Matched to ${tx.rmLink}</div>`;
     } else if (tx.matchStatus==='match') {
       html += renderExpandedMatch(tx);
@@ -1549,14 +1543,37 @@ function renderTxRow(tx) {
   return html;
 }
 
-function renderExpandedMatch(tx) {
+const CIRCLE_PLUS = 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z';
+
+// Shared action row for the match / multi-match dropdowns.
+function expActionRow(tx) {
   return `
-    <div class="orion-msg">${orionSpark(16)}<span>${tx.orion}</span></div>
-    <div class="sub-tbl">
-      <div class="sub-tbl-hdr" style="grid-template-columns:100px 1.1fr 1.2fr 1.2fr 1fr 100px">
-        ${['Date','Transaction','GL Account','Property','Comment','Total Amount'].map(h=>`<div class="sub-tbl-hdr-cell">${h}${h?ic(P.filter,11,'#bbb'):''}</div>`).join('')}
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div class="act-btns">
+        <button id="confirm-match" class="btn-primary" style="height:36px" onclick="doMatch('${tx.id}')">${ic(P.check,15,'#fff')} Match</button>
+        <button class="btn-outline" style="height:36px" onclick="openFindMatch('${tx.id}')">${ic(P.search,14,'#008dd5')} Find Other Matches</button>
+        <button class="btn-outline" style="height:36px" onclick="openAddTx('${tx.id}')">${ic(CIRCLE_PLUS,16,'#008dd5')} Add New Transaction</button>
       </div>
-      <div class="sub-tbl-row" style="grid-template-columns:100px 1.1fr 1.2fr 1.2fr 1fr 100px">
+      <div class="exp-links">
+        <button id="open-create-rule" class="link-btn" onclick="openAddRule()">Create Rule</button>
+        <span class="exp-links-div">|</span>
+        <button class="link-btn">Exclude</button>
+      </div>
+    </div>`;
+}
+
+function renderExpandedMatch(tx) {
+  const cols = 'grid-template-columns:120px 1.3fr 1.4fr 1.3fr 1.3fr 110px';
+  return `
+    <div class="exp-top">
+      <div class="orion-msg">${orionSpark(16)}<span>${tx.orion}</span></div>
+      ${renderHelpful(tx.id)}
+    </div>
+    <div class="sub-tbl">
+      <div class="sub-tbl-hdr" style="${cols}">
+        ${['Deposit Date','Reference','Bank Account','Property','Comment','Total Amount'].map((h,i)=>`<div class="sub-tbl-hdr-cell"${i===5?' style="justify-content:flex-end"':''}>${h}</div>`).join('')}
+      </div>
+      <div class="sub-tbl-row" style="${cols}">
         <div class="sub-tbl-cell">${tx.matchRow.date}</div>
         <div class="sub-tbl-cell"><button class="tx-rm-link" onclick="openSlideout('${tx.id}')">${tx.matchRow.ref}</button></div>
         <div class="sub-tbl-cell">${tx.matchRow.account}</div>
@@ -1565,62 +1582,51 @@ function renderExpandedMatch(tx) {
         <div class="sub-tbl-cell r">${fmtN(tx.matchRow.amount)}</div>
       </div>
     </div>
-    <div style="display:flex;align-items:center;justify-content:space-between">
-      <div class="act-btns">
-        <button id="confirm-match" class="btn-primary" onclick="doMatch('${tx.id}')">Match</button>
-        <button class="btn-outline" onclick="openFindMatch('${tx.id}')">Find Other Matches</button>
-        <button id="open-create-rule" class="link-btn" style="font-size:14px;color:#008dd5" onclick="openAddRule()">Create Rule</button>
-        <button class="link-btn" style="font-size:14px;color:#008dd5">Exclude</button>
-      </div>
-      ${renderHelpful(tx.id)}
-    </div>`;
+    ${expActionRow(tx)}`;
 }
 
 function renderExpandedMulti(tx) {
   const sel = S.multiSel[tx.id]??0;
+  const cols = 'grid-template-columns:40px 110px 1.5fr 1.3fr 1.2fr 1.2fr 110px';
   const rows = tx.multiMatches.map((r,i) => `
-    <div class="sub-tbl-row${sel===i?' sel':''}" style="grid-template-columns:28px 100px 1.1fr 1.2fr 1.2fr 1fr 100px;cursor:pointer" onclick="setMultiSel('${tx.id}',${i})">
-      <div class="sub-tbl-cell" style="display:flex;align-items:center"><div class="radio-dot${sel===i?' sel':''}"></div></div>
+    <div class="sub-tbl-row${sel===i?' sel':''}" style="${cols};cursor:pointer" onclick="setMultiSel('${tx.id}',${i})">
+      <div class="sub-tbl-cell" style="display:flex;align-items:center;justify-content:center"><div class="radio-dot${sel===i?' sel':''}"></div></div>
       <div class="sub-tbl-cell">${r.date}</div>
       <div class="sub-tbl-cell"><button class="tx-rm-link">${r.ref}</button></div>
-      <div class="sub-tbl-cell">${r.account}</div>
       <div class="sub-tbl-cell">${r.property||'—'}</div>
+      <div class="sub-tbl-cell">${r.account}</div>
       <div class="sub-tbl-cell">${r.comment}</div>
       <div class="sub-tbl-cell r">${fmtN(r.amount)}</div>
     </div>`).join('');
   return `
-    <div class="orion-msg">${orionSpark(16)}<span>${tx.multiOrion}</span></div>
-    <div style="font-size:13px;color:#666">Select the matching transaction or create a new Rent Manager record.</div>
+    <div class="exp-top">
+      <div class="orion-msg">${orionSpark(16)}<span>${tx.multiOrion}</span></div>
+      ${renderHelpful(tx.id)}
+    </div>
     <div class="sub-tbl">
-      <div class="sub-tbl-hdr" style="grid-template-columns:28px 100px 1.1fr 1.2fr 1.2fr 1fr 100px">
-        ${['','Date','Transaction','GL Account','Property','Comment','Total Amount'].map(h=>`<div class="sub-tbl-hdr-cell">${h}${h?ic(P.filter,11,'#bbb'):''}</div>`).join('')}
+      <div style="font-size:13px;color:#666;padding:10px 12px;border-bottom:1px solid #eef2f7;background:#fff">Select the matching transaction or create a new Rent Manager record.</div>
+      <div class="sub-tbl-hdr" style="${cols}">
+        ${['','Bill Date','Transaction','Property','Vendor','Memo','Amount'].map((h,i)=>`<div class="sub-tbl-hdr-cell"${i===6?' style="justify-content:flex-end"':''}>${h}</div>`).join('')}
       </div>
       ${rows}
     </div>
-    <div style="display:flex;align-items:center;justify-content:space-between">
-      <div class="act-btns">
-        <button id="confirm-match" class="btn-primary" onclick="doMatch('${tx.id}')">Match</button>
-        <button class="btn-outline" onclick="openFindMatch('${tx.id}')">Find Other Matches</button>
-        <button id="open-create-rule" class="link-btn" style="font-size:14px;color:#008dd5" onclick="openAddRule()">Create Rule</button>
-        <button class="link-btn" style="font-size:14px;color:#008dd5">Exclude</button>
-      </div>
-      ${renderHelpful(tx.id)}
-    </div>`;
+    ${expActionRow(tx)}`;
 }
 
 function renderExpandedNone(tx) {
-  return `<div class="no-match-msg">There is no match suggestion for this transaction. <button onclick="">Find match</button></div>`;
-}
-
-function renderExpandedAdd(tx) {
   return `
-    <div style="padding:12px;display:flex;flex-direction:column;gap:12px">
-      <div style="font-size:14px;color:#666">What would you like to do with this transaction?</div>
-      <div style="display:flex;align-items:center;gap:16px">
-        <button id="open-add-transaction" class="btn-primary" style="height:36px;padding:0 16px" onclick="doAdd('${tx.id}')">Add</button>
-        <button id="open-find-match" class="link-btn" style="font-size:14px;color:#008dd5" onclick="openFindMatch('${tx.id}')">Find Match</button>
-        <button id="open-create-rule" class="link-btn" style="font-size:14px;color:#008dd5" onclick="openAddRule()">Create Rule</button>
-        <button class="link-btn" style="font-size:14px;color:#008dd5">Exclude</button>
+    <div class="exp-none-card">
+      <div style="font-size:14px;color:#666">There is no match suggestion for this transaction. How would you like to record this transaction?</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <div class="act-btns">
+          <button id="open-add-transaction" class="btn-primary" style="height:36px" onclick="openAddTx('${tx.id}')">${ic(CIRCLE_PLUS,18,'#fff')} Add New Transaction</button>
+          <button id="open-find-match" class="btn-outline" style="height:36px" onclick="openFindMatch('${tx.id}')">${ic(P.search,14,'#008dd5')} Find Matches</button>
+        </div>
+        <div class="exp-links">
+          <button id="open-create-rule" class="link-btn" onclick="openAddRule()">Create Rule</button>
+          <span class="exp-links-div">|</span>
+          <button class="link-btn">Exclude</button>
+        </div>
       </div>
     </div>`;
 }
