@@ -1355,8 +1355,8 @@ function renderRight() {
     <span class="acct-hdr-bank">••••${acct.last4}</span>
     <div class="acct-hdr-sync">${ic(P.refresh,14,'#aaa')}<span>${syncLbl}</span></div>
     <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
-      <button style="background:none;border:none;display:flex;align-items:center;gap:5px;color:#008dd5;font-size:13px" onclick="${acct.kind==='card'?`openCR('${acct.id}')`:`openBR('${acct.id}')`}">${ic(acct.kind==='card'?P.card:P.bank,15,'#008dd5')} ${acct.kind==='card'?'Credit Card Register':'Bank Register'}</button>
-      <button class="btn-primary" style="height:34px;font-size:13px;display:flex;align-items:center;gap:6px">${ic(P.bank,14,'#fff')} Reconcile</button>
+      <button style="background:none;border:none;display:flex;align-items:center;gap:5px;color:#008dd5;font-size:13px" onclick="${acct.kind==='card'?`openCR('${acct.id}')`:`openBR('${acct.id}')`}">${acct.kind==='card'?'Credit Card Register':'Bank Register'}</button>
+      <button class="btn-primary" style="height:34px;font-size:13px">Reconcile</button>
     </div>
   </div>
   <!-- Summary -->
