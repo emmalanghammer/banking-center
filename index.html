@@ -472,11 +472,12 @@ svg.ico{display:block;flex-shrink:0}
 .rec-loz.matched{background:#d8f0d8;color:#2e7d32}
 .rec-loz.unmatched{background:#eef2f7;color:#666}
 .rec-foot{display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:10px 20px;background:#f5f8fa;border-top:1px solid #cedbe7;flex-shrink:0}
-.rec-toggle{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:#666}
-.rec-switch{width:36px;height:20px;border-radius:200px;background:#cedbe7;position:relative;cursor:pointer;transition:background .15s}
-.rec-switch.on{background:#008dd5}
-.rec-switch::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s}
-.rec-switch.on::after{left:18px}
+.rec-seg{display:inline-flex}
+.rec-seg-btn{height:36px;min-width:58px;padding:0 16px;font-size:14px;color:#666;background:#fff;border:1px solid #cedbe7;cursor:pointer;font-family:'Roboto',sans-serif;display:flex;align-items:center;justify-content:center}
+.rec-seg-btn+.rec-seg-btn{margin-left:-1px}
+.rec-seg-btn:first-child{border-radius:4px 0 0 4px}
+.rec-seg-btn:last-child{border-radius:0 4px 4px 0}
+.rec-seg-btn.on{background:#ebf1f5;border-color:#008dd5;font-weight:600;position:relative;z-index:1}
 
 /* ── Add Transaction overlay ── */
 .at-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;display:flex;align-items:center;justify-content:center}
@@ -3530,7 +3531,7 @@ function renderCR() {
 }
 
 /* ── Electronic Bank Reconcile ── */
-const REC_STATE = { acctId: null, hideReconciled: false };
+const REC_STATE = { acctId: null, recFilter: 'all' };
 
 function openReconcile(acctId) {
   if (acctId) REC_STATE.acctId = acctId;
@@ -3580,7 +3581,8 @@ function renderReconcile() {
 
   const panel = (title, list, side, balLabel, totalBal) => {
     const matched = list.filter(r => r.matched).length;
-    const rows = list.map(r => `
+    const shown = REC_STATE.recFilter === 'unmatched' ? list.filter(r => !r.matched) : list;
+    const rows = shown.map(r => `
       <tr class="${r.matched ? 'matched' : ''}">
         <td style="text-align:center;width:32px"><input type="checkbox" class="rec-cb" ${r.matched ? 'checked' : ''} onclick="toggleRecRow('${side}','${r.id}')"></td>
         <td><span class="rec-loz ${r.matched ? 'matched' : 'unmatched'}">${r.matched ? 'Matched' : 'Unmatched'}</span></td>
@@ -3618,7 +3620,10 @@ function renderReconcile() {
         ${selHtml}
         <span class="br-bank-info">${acct.bankName ? acct.bankName + ' ••••' + acct.last4 : 'No bank account linked'}</span>
         <div class="br-top-right">
-          <span class="rec-toggle">Unreconciled<span class="rec-switch${REC_STATE.hideReconciled ? ' on' : ''}" onclick="REC_STATE.hideReconciled=!REC_STATE.hideReconciled;renderReconcile()"></span></span>
+          <div class="rec-seg">
+            <button class="rec-seg-btn${REC_STATE.recFilter==='unmatched'?' on':''}" onclick="REC_STATE.recFilter='unmatched';renderReconcile()">Unmatched</button>
+            <button class="rec-seg-btn${REC_STATE.recFilter==='all'?' on':''}" onclick="REC_STATE.recFilter='all';renderReconcile()">All</button>
+          </div>
         </div>
       </div>
     </div>
