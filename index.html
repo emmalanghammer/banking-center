@@ -3562,19 +3562,22 @@ function recData(acctId) {
   const key = x => `${x.date}|${x.amount.toFixed(2)}`;
   const bankSeen = new Set(bankList.map(key));
   const rmSeen = new Set(rmList.map(key));
+  // A row and its mirror counterpart share one matched state (paired by index),
+  // so unchecking a Rent Manager row also unmatches the matching bank row.
   const ov = REC_STATE._overrides || {};
-  rmList.forEach(r => { const o = 'rm:' + acctId + ':' + r.id; r.matched = (o in ov) ? ov[o] : bankSeen.has(key(r)); });
-  bankList.forEach(b => { const o = 'bk:' + acctId + ':' + b.id; b.matched = (o in ov) ? ov[o] : rmSeen.has(key(b)); });
+  rmList.forEach((r, i) => { const o = acctId + ':' + i; r.matched = (o in ov) ? ov[o] : bankSeen.has(key(r)); });
+  bankList.forEach((b, i) => { const o = acctId + ':' + i; b.matched = (o in ov) ? ov[o] : rmSeen.has(key(b)); });
   return { rmList, bankList };
 }
 
 function toggleRecRow(side, id) {
-  // Manual check/uncheck overrides the auto-match for the prototype.
-  const { rmList, bankList } = recData(REC_STATE.acctId);
-  const row = (side === 'rm' ? rmList : bankList).find(r => r.id === id);
+  // Manual check/uncheck overrides the auto-match for both sides (paired by index).
+  const i = id.replace(/^(rm|bk)/, '');
+  const { rmList } = recData(REC_STATE.acctId);
+  const row = rmList[+i];
   if (!row) return;
   REC_STATE._overrides = REC_STATE._overrides || {};
-  REC_STATE._overrides[side + ':' + REC_STATE.acctId + ':' + id] = !row.matched;
+  REC_STATE._overrides[REC_STATE.acctId + ':' + i] = !row.matched;
   renderReconcile();
 }
 
