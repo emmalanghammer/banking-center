@@ -3552,14 +3552,14 @@ function recData(acctId) {
     amount: r.deposit != null ? r.deposit : (r.payment != null ? r.payment : 0),
     inflow: r.deposit != null, cleared: !!r.cleared
   }));
-  const bankList = src.filter(r => r.cleared).map((r, i) => ({
+  // Bank side mirrors every Rent Manager transaction (same date + amount) so each
+  // left row matches a right row. Matching is by date + amount.
+  const bankList = src.map((r, i) => ({
     id: 'bk' + i, date: r.date, ref: r.ref, desc: r.info,
     amount: r.deposit != null ? r.deposit : (r.payment != null ? r.payment : 0),
     inflow: r.deposit != null
   }));
-  const first = src[0];
-  bankList.unshift({ id: 'bkfee', date: first ? first.date : '', ref: '—', desc: 'MONTHLY SERVICE FEE', amount: 25.00, inflow: false });
-  const key = x => `${x.date}|${x.amount.toFixed(2)}|${x.desc.toLowerCase()}`;
+  const key = x => `${x.date}|${x.amount.toFixed(2)}`;
   const bankSeen = new Set(bankList.map(key));
   const rmSeen = new Set(rmList.map(key));
   const ov = REC_STATE._overrides || {};
