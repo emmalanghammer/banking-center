@@ -11,6 +11,10 @@ html,body{height:100%;overflow:hidden}
 body{font-family:'Roboto',sans-serif;font-size:14px;color:#13314c;background:#f5f8fa}
 input,button,select{font-family:'Roboto',sans-serif}
 button{cursor:pointer}
+/* Checkbox — design system: white box w/ grey border, orange fill + white check when checked */
+input[type="checkbox"]{appearance:none;-webkit-appearance:none;width:20px;height:20px;flex-shrink:0;margin:0;border:2px solid #b3b3b3;border-radius:2px;background:#fff;cursor:pointer;position:relative;vertical-align:middle}
+input[type="checkbox"]:checked{background:#F58220;border-color:#F58220}
+input[type="checkbox"]:checked::after{content:'';position:absolute;left:6px;top:1.5px;width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:transparent;border-radius:4px}
@@ -467,7 +471,7 @@ svg.ico{display:block;flex-shrink:0}
 .rec-tbl tbody td.r{text-align:right;font-variant-numeric:tabular-nums}
 .rec-tbl tbody tr.matched{background:#f3faf4}
 .rec-tbl tbody tr:hover{background:#f5f8fa}
-.rec-cb{width:15px;height:15px;cursor:pointer;accent-color:#6eb744}
+.rec-cb{cursor:pointer}
 .rec-loz{display:inline-flex;align-items:center;height:24px;padding:4px 8px;border-radius:4px;font-size:13px;white-space:nowrap}
 .rec-loz.matched{background:#d8f0d8;color:#2e7d32}
 .rec-loz.unmatched{background:#eef2f7;color:#666}
@@ -494,7 +498,7 @@ svg.ico{display:block;flex-shrink:0}
 .dep-tbl tbody tr:hover{background:#f5f8fa}
 .dep-tbl tbody td{padding:0 10px;height:40px;color:#13314c;vertical-align:middle;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .dep-tbl tbody td.r{text-align:right;font-weight:600}
-.dep-cb{width:15px;height:15px;accent-color:#f5a623;cursor:pointer}
+.dep-cb{cursor:pointer}
 .dep-chip{display:inline-flex;align-items:center;gap:2px;border:1px solid #008dd5;border-radius:10px;color:#008dd5;font-size:11px;padding:0 6px;height:18px;cursor:pointer;white-space:nowrap;margin-left:4px}
 .at-hdr{height:48px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid #cedbe7;flex-shrink:0;gap:8px}
 .at-hdr-title{font-size:16px;font-weight:500;color:#13314c;flex:1}
@@ -594,7 +598,7 @@ svg.ico{display:block;flex-shrink:0}
 .fm-tbl tbody td.r{text-align:right;font-weight:600}
 .fm-tbl tbody tr:hover{background:#f5f8fa}
 .fm-tbl tbody tr.sel{background:#eaf5fb}
-.fm-cb{width:15px;height:15px;accent-color:#008dd5;cursor:pointer}
+.fm-cb{cursor:pointer}
 </style>
 </head>
 <body>
@@ -1995,8 +1999,8 @@ function renderAddTxCheck(tx, amt, acct) {
     </div>
     <div class="at-card at-card--accent" style="flex:1">
       <div style="display:flex;align-items:center;gap:32px;margin-bottom:16px">
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#13314c;cursor:pointer"><input type="checkbox" style="width:14px;height:14px"> Check will be printed</label>
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#13314c;cursor:pointer"><input type="checkbox" style="width:14px;height:14px"> Avid Pay</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#13314c;cursor:pointer"><input type="checkbox"> Check will be printed</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#13314c;cursor:pointer"><input type="checkbox"> Avid Pay</label>
       </div>
       <div class="at-field">
         <label>Attachments</label>
@@ -2312,10 +2316,10 @@ function renderDetailTable(tx, amt) {
         <td><input class="at-tbl-input search" type="text"></td>
         <td><input class="at-tbl-input search" type="text"></td>
         <td><input class="at-tbl-input search" type="text"></td>
-        <td style="text-align:center"><input type="checkbox" style="width:14px;height:14px"></td>
+        <td style="text-align:center"><input type="checkbox"></td>
         <td><input class="at-tbl-input search" type="text"></td>
         <td><input class="at-tbl-input" type="text"></td>
-        <td style="text-align:center"><input type="checkbox" style="width:14px;height:14px"></td>
+        <td style="text-align:center"><input type="checkbox"></td>
         <td><input class="at-tbl-input" type="text"></td>
         <td><input class="at-tbl-input" type="text"></td>
         <td class="r"><input class="at-tbl-input" type="text" value="${amt.toFixed(2)}" style="text-align:right"></td>
@@ -3181,7 +3185,7 @@ function renderAddRule() {
 
           <!-- Checkbox -->
           <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:#666">
-            ${OG_CHK} Apply to existing unmatched transactions
+            <input type="checkbox" checked> Apply to existing unmatched transactions
           </label>
   
 
