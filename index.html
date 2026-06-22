@@ -833,6 +833,18 @@ TRANSACTIONS_BY_ACCT.op3487 = TRANSACTIONS;
 function acctTxs() {
   return TRANSACTIONS_BY_ACCT[S.activeId] || [];
 }
+// Live "to review" count for an account = feed items not yet matched or excluded.
+function acctReview(a) {
+  const f = TRANSACTIONS_BY_ACCT[a.id];
+  if (!f || !f.length) return 0;
+  return f.filter(t => !S.matchedIds.has(t.id) && !S.excludedIds.has(t.id)).length;
+}
+function acctReviewAmt(a) {
+  const f = TRANSACTIONS_BY_ACCT[a.id];
+  if (!f || !f.length) return 0;
+  return f.filter(t => !S.matchedIds.has(t.id) && !S.excludedIds.has(t.id))
+          .reduce((s, t) => s + (t.deposit != null ? t.deposit : (t.payment || 0)), 0);
+}
 
 /* ── State ──────────────────────────────────────────────── */
 const S = {
@@ -1007,10 +1019,11 @@ function renderBC() {
     }
     // Transactions cell
     let txCell;
-    if (a.txStatus.type === 'matched') {
+    const aoRc = acctReview(a);
+    if (aoRc === 0) {
       txCell = `<span class="ao-tx"><span class="ao-dot" style="background:#6eb744"></span>All matched</span>`;
     } else {
-      txCell = `<span class="ao-tx"><span class="ao-dot" style="background:#f5a623"></span>${a.txStatus.count} to review</span>`;
+      txCell = `<span class="ao-tx"><span class="ao-dot" style="background:#f5a623"></span>${aoRc} to review</span>`;
     }
     return `<tr onclick="openAcct('${a.id}')" style="cursor:pointer">
       <td style="width:44px;text-align:center">${ico}</td>
@@ -1055,6 +1068,9 @@ function renderBC() {
   const cardRm = cards.reduce((s,a) => s + a.inRm, 0);
   const cardDiff = cardTotal - cardRm;
   const allBanks = ACCOUNTS.filter(a => a.kind === 'bank');
+  const unTotal = visAccts.reduce((s,a) => s + acctReview(a), 0);
+  const unAccts = visAccts.filter(a => acctReview(a) > 0).length;
+  const unAmt = visAccts.reduce((s,a) => s + acctReviewAmt(a), 0);
 
   const TILE_HTML = {
     orionInsights: `<div class="bc-card hi" style="min-height:unset">
@@ -1084,8 +1100,8 @@ function renderBC() {
     </div>`,
     unmatched: `<div class="bc-card">
       <div class="bc-card-hrow"><span class="bc-ico-badge teal">${ic(P.money,15,'#178c7e')}</span><span class="bc-card-h">Unmatched Transactions</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="showScreen('tr')">Review Transactions</button></div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><div class="bc-alert-dot"></div><span class="bc-num">34</span></div>
-      <span class="bc-sub">$47,820.15 across 5 accounts</span>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><div class="bc-alert-dot"></div><span class="bc-num">${unTotal}</span></div>
+      <span class="bc-sub">${fmt(unAmt)} across ${unAccts} account${unAccts===1?'':'s'}</span>
     </div>`,
     connHealth: `<div class="bc-card">
       <div class="bc-card-hrow"><span class="bc-ico-badge pink">${ic(P.refresh,15,'#c93467')}</span><span class="bc-card-h">Connection Health</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="openSettings('institutions')">Manage Connections</button></div>
@@ -1308,7 +1324,7 @@ function renderSidebar() {
     html += `<div class="tr-sb-hdr coll"><button onclick="toggleCollapse()" style="background:none;border:none;display:flex">${ic(P.collapseR,20,'#008dd5')}</button></div>`;
     visAccts.forEach(a => {
       const isLogin = a.connection==='login';
-      const dotColor = isLogin?'#eb343c': a.txStatus.type==='matched'?'#6eb744':'#f5a623';
+      const dotColor = isLogin?'#eb343c': acctReview(a)===0?'#6eb744':'#f5a623';
       html += `<div class="sb-row coll${S.activeId===a.id?' act':''}" onclick="selectAcct('${a.id}')" title="${a.gl}">
         ${ic(a.kind==='card'?P.card:P.bank,16,S.activeId===a.id?'#008dd5':'#13314c')}
         <span class="sb-coll-dot" style="background:${dotColor}"></span>
@@ -1341,8 +1357,9 @@ function renderSidebar() {
 
 function renderSbRow(a) {
   const isLogin = a.connection==='login';
-  const dotColor = isLogin?'#eb343c': a.txStatus.type==='matched'?'#6eb744':'#f5a623';
-  const statusLbl = a.txStatus.type==='matched'?'All matched':`${a.txStatus.count} to review`;
+  const rc = acctReview(a);
+  const dotColor = isLogin?'#eb343c': rc===0?'#6eb744':'#f5a623';
+  const statusLbl = rc===0?'All matched':`${rc} to review`;
   const isAct = S.activeId===a.id;
   return `<div class="sb-row${isAct?' act':''}${isLogin&&!isAct?' login-bg':''}" onclick="selectAcct('${a.id}')">
     ${ic(a.kind==='card'?P.card:P.bank,16,'#13314c')}
