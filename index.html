@@ -2396,11 +2396,126 @@ let _findMatchSel = new Set();
 
 function fmCandidates(tx) {
   const amt = (tx.payment != null ? tx.payment : tx.deposit) || 0;
-  return [
-    { date:'01/01/2026', type:'Bill',  ref:'',     property:'Riverview Apartments', info:'Jane Doe - Rent Charge', comment:'January Rent',          amount:amt },
-    { date:'01/06/2026', type:'Bill',  ref:'1',    property:'Riverview Apartments', info:'Jane Doe',               comment:'Bill #1',              amount:amt },
-    { date:'01/12/2026', type:'Check', ref:'ePay', property:'Riverview Apartments', info:'Jane Doe',               comment:'Security Deposit Refund', amount:amt },
-  ];
+  const isDeposit = tx.deposit != null;
+  const desc = (tx.desc || '').toUpperCase();
+
+  // Parse a date string MM/DD/YYYY → Date object
+  function parseDate(s) {
+    const [m,d,y] = s.split('/');
+    return new Date(+y, +m-1, +d);
+  }
+  // Format Date → MM/DD/YYYY
+  function fmtDate(dt) {
+    const m = String(dt.getMonth()+1).padStart(2,'0');
+    const d = String(dt.getDate()).padStart(2,'0');
+    return `${m}/${d}/${dt.getFullYear()}`;
+  }
+  function offsetDate(base, days) {
+    const dt = parseDate(base);
+    dt.setDate(dt.getDate() + days);
+    return fmtDate(dt);
+  }
+
+  // Infer tenant last name from desc (e.g. "ACH DEPOSIT RIVERA 0616" → "Rivera")
+  function inferTenant() {
+    const tenants = ['Rivera','Okafor','Delgado','Nguyen','Park','Reyes','Flores','Walsh','Chen','Henderson','Steinberg','Johnson','Morrison'];
+    for (const t of tenants) if (desc.includes(t.toUpperCase())) return t;
+    return null;
+  }
+  // Infer vendor from desc
+  function inferVendor() {
+    const vendors = [
+      ['ROSE CITY PLUMBING','Rose City Plumbing'],['CASCADE HVAC','Cascade HVAC'],
+      ['PORTLAND GENERAL','Portland General Electric'],['NW NATURAL','NW Natural'],
+      ['STUMPTOWN','Stumptown Landscaping'],['RECOLOGY','Recology'],
+      ['ROTO-ROOTER','Roto-Rooter'],['SERVPRO','ServPro'],['ABC SUPPLY','ABC Supply'],
+      ['FERGUSON','Ferguson Enterprises'],['STANDARD INSURANCE','Standard Insurance'],
+      ['CENTURYLINK','CenturyLink'],['CITY OF PORTLAND','City of Portland'],
+      ['MULTNOMAH','Multnomah County'],['ZEGO','Zego (Tenant Payments)'],
+    ];
+    for (const [key, label] of vendors) if (desc.includes(key)) return label;
+    return null;
+  }
+
+  const PROPERTIES = ['Hawthorne Court Apartments','Pearl District Lofts','Alberta Commons','Sellwood Row'];
+  // Pick a property based on hash of tx.id so it's stable
+  function pickProperty() {
+    const i = (tx.id || '').split('').reduce((a,c) => a + c.charCodeAt(0), 0) % PROPERTIES.length;
+    return PROPERTIES[i];
+  }
+
+  const base = tx.date || '06/10/2026';
+  const prop = pickProperty();
+
+  if (isDeposit) {
+    const tenant = inferTenant();
+    const lastName = tenant || 'Tenant';
+    const initial = lastName[0];
+    const depNum = 8800 + Math.abs((tx.id||'').split('').reduce((a,c)=>a+c.charCodeAt(0),0) % 60);
+    return [
+      {
+        date: base,
+        type: 'Receipt',
+        ref: `Deposit ${depNum}`,
+        property: prop,
+        info: `${initial}. ${lastName} — Rent Payment`,
+        comment: 'June Rent',
+        amount: amt,
+      },
+      {
+        date: offsetDate(base, -2),
+        type: 'Charge',
+        ref: `Charge ${depNum - 1}`,
+        property: prop,
+        info: `${initial}. ${lastName} — Rent Charge`,
+        comment: 'June Rent (charge)',
+        amount: amt,
+      },
+      {
+        date: offsetDate(base, -5),
+        type: 'Receipt',
+        ref: `Deposit ${depNum - 3}`,
+        property: prop,
+        info: `${initial}. ${lastName} — Partial Payment`,
+        comment: 'Partial — June Rent',
+        amount: +(amt * 0.5).toFixed(2),
+      },
+    ];
+  } else {
+    // Payment — vendor bill/check
+    const vendor = inferVendor() || 'Vendor';
+    const billNum = 1000 + Math.abs((tx.id||'').split('').reduce((a,c)=>a+c.charCodeAt(0),0) % 200);
+    const checkDesc = desc.includes('CHECK') ? 'Check' : 'Bill';
+    return [
+      {
+        date: base,
+        type: checkDesc,
+        ref: `Bill ${billNum}`,
+        property: prop,
+        info: vendor,
+        comment: `${vendor} — Service`,
+        amount: amt,
+      },
+      {
+        date: offsetDate(base, -3),
+        type: 'Bill',
+        ref: `Bill ${billNum - 1}`,
+        property: prop,
+        info: vendor,
+        comment: `${vendor} — Prior Invoice`,
+        amount: +(amt * 0.95).toFixed(2),
+      },
+      {
+        date: offsetDate(base, 2),
+        type: 'Bill',
+        ref: `Bill ${billNum + 1}`,
+        property: prop,
+        info: vendor,
+        comment: `${vendor} — Invoice #${billNum + 1}`,
+        amount: amt,
+      },
+    ];
+  }
 }
 function openFindMatch(txId) {
   _findMatchTxId = txId;
@@ -3577,21 +3692,39 @@ function recData(acctId) {
     amount: r.deposit != null ? r.deposit : (r.payment != null ? r.payment : 0),
     inflow: r.deposit != null, cleared: !!r.cleared
   }));
-  // Bank side mirrors every Rent Manager transaction (same date + amount) so each
-  // left row matches a right row. Matching is by date + amount.
+  // Bank side: settled transactions from the register…
   const bankList = src.map((r, i) => ({
     id: 'bk' + i, date: r.date, ref: r.ref, desc: r.info,
     amount: r.deposit != null ? r.deposit : (r.payment != null ? r.payment : 0),
     inflow: r.deposit != null
   }));
+  // …plus unmatched incoming transactions not yet in Rent Manager
+  const incoming = acctTxs(acctId).filter(t => {
+    const st = S.matchedIds.has(t.id) ? 'matched' : S.excludedIds.has(t.id) ? 'excluded' : t.matchStatus;
+    return st !== 'matched' && st !== 'excluded';
+  });
+  incoming.forEach((t, j) => {
+    const amt = t.deposit != null ? t.deposit : (t.payment != null ? t.payment : 0);
+    bankList.push({
+      id: 'bki' + j, date: t.date, ref: '—', desc: t.desc,
+      amount: amt, inflow: t.deposit != null, pending: true
+    });
+  });
   const key = x => `${x.date}|${x.amount.toFixed(2)}`;
-  const bankSeen = new Set(bankList.map(key));
+  const bankSeen = new Set(bankList.filter(b => !b.pending).map(key));
   const rmSeen = new Set(rmList.map(key));
-  // A row and its mirror counterpart share one matched state (paired by index),
-  // so unchecking a Rent Manager row also unmatches the matching bank row.
   const ov = REC_STATE._overrides || {};
   rmList.forEach((r, i) => { const o = acctId + ':' + i; r.matched = (o in ov) ? ov[o] : bankSeen.has(key(r)); });
-  bankList.forEach((b, i) => { const o = acctId + ':' + i; b.matched = (o in ov) ? ov[o] : rmSeen.has(key(b)); });
+  bankList.forEach((b, i) => {
+    if (b.pending) { b.matched = false; return; }
+    const o = acctId + ':' + i; b.matched = (o in ov) ? ov[o] : rmSeen.has(key(b));
+  });
+  const byDateDesc = (a, b) => {
+    const p = s => { const [m,d,y] = s.split('/'); return +new Date(+y,+m-1,+d); };
+    return p(b.date) - p(a.date);
+  };
+  rmList.sort(byDateDesc);
+  bankList.sort(byDateDesc);
   return { rmList, bankList };
 }
 
