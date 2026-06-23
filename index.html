@@ -1589,11 +1589,33 @@ function expActionRow(tx) {
     </div>`;
 }
 
+// Derive a structured match row from a plain `rmLink` string when the richer
+// `matchRow` object isn't present (secondary accounts only carry `rmLink`).
+// rmLink format: "MM/DD/YYYY <Type Ref>: <Name>"  e.g. "06/13/2026 Deposit 7201: A. Chen"
+function matchRowFromTx(tx) {
+  if (tx.matchRow) return tx.matchRow;
+  const acct = ACCOUNTS.find(a => (TRANSACTIONS_BY_ACCT[a.id] || []).some(t => t.id === tx.id));
+  const link = tx.rmLink || '';
+  const sp = link.indexOf(' ');
+  const date = sp > 0 ? link.slice(0, sp) : (tx.date || '');
+  const rest = sp > 0 ? link.slice(sp + 1) : link;
+  const colon = rest.indexOf(':');
+  const ref = colon > 0 ? rest.slice(0, colon).trim() : rest.trim();
+  const comment = colon > 0 ? rest.slice(colon + 1).trim() : '';
+  return {
+    date, ref, account: acct ? acct.gl : '—', property: '—', comment,
+    amount: tx.deposit != null ? tx.deposit : (tx.payment != null ? tx.payment : 0),
+  };
+}
+
 function renderExpandedMatch(tx) {
   const cols = 'grid-template-columns:120px 1.3fr 1.4fr 1.3fr 1.3fr 110px';
+  const mr = matchRowFromTx(tx);
+  const amt = tx.deposit != null ? tx.deposit : (tx.payment != null ? tx.payment : 0);
+  const orion = tx.orion || `1 ${tx.deposit != null ? 'deposit' : 'payment'} found matching ${fmt(amt)} on ${mr.date}.`;
   return `
     <div class="exp-top">
-      <div class="orion-msg">${orionSpark(16)}<span>${tx.orion}</span></div>
+      <div class="orion-msg">${orionSpark(16)}<span>${orion}</span></div>
       ${renderHelpful(tx.id)}
     </div>
     <div class="sub-tbl">
@@ -1601,12 +1623,12 @@ function renderExpandedMatch(tx) {
         ${['Deposit Date','Reference','Bank Account','Property','Comment','Total Amount'].map((h,i)=>`<div class="sub-tbl-hdr-cell"${i===5?' style="justify-content:flex-end"':''}>${h}</div>`).join('')}
       </div>
       <div class="sub-tbl-row" style="${cols}">
-        <div class="sub-tbl-cell">${tx.matchRow.date}</div>
-        <div class="sub-tbl-cell"><button class="tx-rm-link" onclick="openSlideout('${tx.id}')">${tx.matchRow.ref}</button></div>
-        <div class="sub-tbl-cell">${tx.matchRow.account}</div>
-        <div class="sub-tbl-cell">${tx.matchRow.property||'—'}</div>
-        <div class="sub-tbl-cell">${tx.matchRow.comment}</div>
-        <div class="sub-tbl-cell r">${fmtN(tx.matchRow.amount)}</div>
+        <div class="sub-tbl-cell">${mr.date}</div>
+        <div class="sub-tbl-cell"><button class="tx-rm-link" onclick="openSlideout('${tx.id}')">${mr.ref}</button></div>
+        <div class="sub-tbl-cell">${mr.account}</div>
+        <div class="sub-tbl-cell">${mr.property||'—'}</div>
+        <div class="sub-tbl-cell">${mr.comment}</div>
+        <div class="sub-tbl-cell r">${fmtN(mr.amount)}</div>
       </div>
     </div>
     ${expActionRow(tx)}`;
