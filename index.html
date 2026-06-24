@@ -521,6 +521,18 @@ svg.ico{display:block;flex-shrink:0}
 .at-tx-acct{font-weight:600;color:#13314c}
 .at-tx-bank{font-style:italic;color:#9aa7b3;font-weight:400}
 .at-tx-last4{color:#9aa7b3;font-weight:400}
+.at-prog-row{display:flex;align-items:center;gap:16px;padding:12px 16px;background:#f5f8fa;flex-shrink:0}
+.at-prog-bar{width:240px;height:12px;background:#e5e5e5;border-radius:200px;overflow:hidden;flex-shrink:0}
+.at-prog-fill{height:12px;background:#008dd5;border-radius:200px;transition:width .15s}
+.at-prog-fill.done{background:#6eb744}
+.at-prog-label{font-size:12px;color:#666;white-space:nowrap;font-variant-numeric:tabular-nums}
+.at-addmenu-wrap{position:relative}
+.at-add-link{display:inline-flex;align-items:center;gap:5px;background:none;border:none;color:#008dd5;font-family:'Roboto',sans-serif;font-size:14px;cursor:pointer;padding:4px 2px}
+.at-add-menu{position:absolute;top:30px;right:0;z-index:30;background:#fff;border:1px solid #cedbe7;border-radius:6px;box-shadow:0 4px 16px rgba(19,49,76,.18);padding:4px;min-width:170px}
+.at-add-menu-item{display:block;width:100%;text-align:left;height:36px;padding:0 12px;border:none;background:none;font-family:'Roboto',sans-serif;font-size:14px;color:#13314c;cursor:pointer;border-radius:4px}
+.at-add-menu-item:hover{background:#f1f6fa}
+.at-item-type{font-size:14px;font-weight:600;color:#13314c;flex-shrink:0}
+.at-item-summary{font-size:13px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .at-type-row{padding:12px 16px;flex-shrink:0;background:#f5f8fa;border-bottom:none}
 .at-type-label{font-size:12px;color:#008dd5;font-weight:500;margin-bottom:4px}
 .at-type-select{height:32px;padding:0 28px 0 8px;border:1px solid #008dd5;border-radius:4px;background:#fff;font-size:14px;color:#13314c;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 24 24' fill='%2313314c'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 4px center;cursor:pointer;min-width:160px}
@@ -1749,6 +1761,41 @@ let _addTxOpen = false;
 let _addTxId = null;
 let _addTxItems = [];
 let _addTxSeq = 0;
+let _addTxMenuOpen = false;
+let _addTxMenuBound = false;
+
+// Friendly labels for the "+ Add Transaction" dropdown (Write Check / Add Bill / …).
+function addTxTypeVerb(type) {
+  const m = { 'Check':'Write Check', 'Bill':'Add Bill', 'Journal Entry':'Add Journal',
+    'Deposit':'Add Deposit', 'Receipt':'Add Receipt',
+    'Credit Card Charge':'Add Charge', 'Credit Card Credit':'Add Credit' };
+  return m[type] || ('Add ' + type);
+}
+function toggleAddTxMenu() {
+  _addTxMenuOpen = !_addTxMenuOpen;
+  renderAddTx();
+}
+// Add a new line of a chosen type; collapse all existing lines (per Figma — the
+// prior transactions collapse to a summary while you work on the new one).
+function addAddTxItemType(type) {
+  const remaining = Math.max(0, addTxTotal() - addTxAllocated());
+  _addTxItems.forEach(it => it.collapsed = true);
+  _addTxItems.push({ id: ++_addTxSeq, type, amount: remaining, collapsed: false });
+  _addTxMenuOpen = false;
+  renderAddTx();
+}
+// One-line summary shown when a transaction line is collapsed.
+function addTxSummary(it, tx, acct) {
+  const props = ['Hawthorne Court Apartments','Pearl District Lofts','Alberta Commons','Sellwood Row'];
+  const prop = props[(it.id || 0) % props.length];
+  const desc = tx.desc || '';
+  const isDep = tx.deposit != null;
+  let party = desc.replace(/^(ACH|CHECK|POS|WIRE|ZELLE|ZEGO|EFT|DEBIT|CREDIT|DEPOSIT|PAYMENT|INBOUND|OUTBOUND|BATCH)\b/gi,'')
+    .replace(/\b\d{3,}\b/g,'').replace(/\b\d{4}\b/g,'').replace(/—/g,'').trim();
+  party = party.split(/\s{2,}|\s-\s/)[0].trim() || (isDep ? 'Tenant' : 'Vendor');
+  const label = isDep ? 'Tenant' : 'Vendor';
+  return `Property: ${prop} &nbsp;|&nbsp; ${label}: ${party} &nbsp;|&nbsp; Amount: ${(parseFloat(it.amount)||0).toFixed(2)} &nbsp;|&nbsp; Date: ${tx.date||''}`;
+}
 
 function getTxTypes(acct, tx) {
   const isCard = acct && acct.kind === 'card';
@@ -1802,7 +1849,12 @@ function addAddTxItem() {
   _addTxItems.push({ id: ++_addTxSeq, type: types[0], amount: remaining, collapsed: false });
   renderAddTx();
 }
-function removeAddTxItem(id) { _addTxItems = _addTxItems.filter(i=>i.id!==id); renderAddTx(); }
+function removeAddTxItem(id) {
+  if (_addTxItems.length <= 1) return;   // keep at least one transaction line
+  _addTxItems = _addTxItems.filter(i=>i.id!==id);
+  if (!_addTxItems.some(i=>!i.collapsed) && _addTxItems.length) _addTxItems[_addTxItems.length-1].collapsed = false;
+  renderAddTx();
+}
 function setAddTxItemType(id, type) { const it=_addTxItems.find(i=>i.id===id); if(it) it.type=type; renderAddTx(); }
 function toggleAddTxItem(id) { const it=_addTxItems.find(i=>i.id===id); if(it) it.collapsed=!it.collapsed; renderAddTx(); }
 function setAddTxItemAmount(id, val) {
@@ -1813,15 +1865,15 @@ function setAddTxItemAmount(id, val) {
 // Update the allocation bar + Save state in place (keeps amount inputs focused).
 function recalcAddTxAlloc() {
   const total = addTxTotal();
-  const remaining = total - addTxAllocated();
-  const balanced = Math.abs(remaining) < 0.005;
-  const remEl = document.getElementById('addtx-remaining');
-  if (remEl) {
-    remEl.textContent = `${remaining < 0 ? '-' : ''}${fmt(Math.abs(remaining))} remaining`;
-    remEl.classList.toggle('neg', !balanced);
-  }
+  const allocated = addTxAllocated();
+  const balanced = addTxBalanced();
+  const lbl = document.getElementById('addtx-alloc-label');
+  if (lbl) lbl.textContent = `${fmtN(allocated)}/${fmtN(total)} allocated`;
   const fill = document.getElementById('addtx-bar-fill');
-  if (fill) fill.style.width = (total > 0 ? Math.max(0, Math.min(100, addTxAllocated()/total*100)) : 0) + '%';
+  if (fill) {
+    fill.style.width = (total > 0 ? Math.max(0, Math.min(100, allocated/total*100)) : 0) + '%';
+    fill.classList.toggle('done', balanced && allocated >= total - 0.005);
+  }
   document.querySelectorAll('.addtx-save').forEach(b => { b.disabled = !balanced; });
 }
 function confirmAddTx() {
@@ -1837,15 +1889,19 @@ function confirmAddTx() {
   setTimeout(() => showRulePopup(txId), 400);
 }
 
-function addTxFormBody(type, tx, amt, acct) {
-  if (type === 'Bill') return renderAddTxBill(tx, amt, acct);
-  if (type === 'Check') return renderAddTxCheck(tx, amt, acct);
-  if (type === 'Receipt') return renderAddTxReceipt(tx, amt, acct);
-  if (type === 'Deposit') return renderAddTxDeposit(tx, amt, acct);
-  if (type === 'Journal Entry') return renderAddTxJournal(tx, amt, acct);
-  if (type === 'Credit Card Charge') return renderAddTxCCCharge(tx, amt, acct);
-  if (type === 'Credit Card Credit') return renderAddTxCCCredit(tx, amt, acct);
-  return renderAddTxGeneric(tx, amt, acct);
+function addTxFormBody(type, tx, amt, acct, itemId) {
+  if (type === 'Bill') return renderAddTxBill(tx, amt, acct, itemId);
+  if (type === 'Check') return renderAddTxCheck(tx, amt, acct, itemId);
+  if (type === 'Receipt') return renderAddTxReceipt(tx, amt, acct, itemId);
+  if (type === 'Deposit') return renderAddTxDeposit(tx, amt, acct, itemId);
+  if (type === 'Journal Entry') return renderAddTxJournal(tx, amt, acct, itemId);
+  if (type === 'Credit Card Charge') return renderAddTxCCCharge(tx, amt, acct, itemId);
+  if (type === 'Credit Card Credit') return renderAddTxCCCredit(tx, amt, acct, itemId);
+  return renderAddTxGeneric(tx, amt, acct, itemId);
+}
+// oninput attribute that keeps the progress bar in sync with a line's amount.
+function atAmtBind(itemId) {
+  return itemId != null ? ` oninput="setAddTxItemAmount(${itemId},this.value)"` : '';
 }
 
 function renderAddTx() {
@@ -1855,56 +1911,39 @@ function renderAddTx() {
   const tx = txs.find(t=>t.id===_addTxId);
   if (!tx) { root.innerHTML=''; return; }
 
-  const acct = ACCOUNTS.find(a=>a.id===S.activeId);
+  const acct = ACCOUNTS.find(a=>a.id===txAcctId(_addTxId));
   const availableTypes = getTxTypes(acct, tx);
-  const multi = _addTxItems.length > 1;
   const total = addTxTotal();
-  const remaining = total - addTxAllocated();
+  const allocated = addTxAllocated();
   const balanced = addTxBalanced();
-  const pct = total > 0 ? Math.max(0, Math.min(100, addTxAllocated()/total*100)) : 0;
+  const pct = total > 0 ? Math.max(0, Math.min(100, allocated/total*100)) : 0;
+  const done = balanced && allocated >= total - 0.005;
 
-  const typeSelect = (it, w) => {
-    const opts = availableTypes.map(t=>`<option value="${t}"${t===it.type?' selected':''}>${t}</option>`).join('');
-    return `<select class="at-type-select"${w?` style="min-width:${w}px"`:''} onchange="setAddTxItemType(${it.id},this.value)">${opts}</select>`;
-  };
-
-  let bodyInner;
-  if (multi) {
-    bodyInner = _addTxItems.map((it,i) => `
-      <div class="split-item">
-        <div class="split-item-hdr">
-          <span class="split-item-num">${i+1}.</span>
-          ${typeSelect(it, 200)}
-          <div style="flex:1"></div>
-          <div class="at-amount-wrap" style="width:120px">
-            <input class="at-input" type="text" value="${(parseFloat(it.amount)||0).toFixed(2)}" style="text-align:right" oninput="setAddTxItemAmount(${it.id},this.value)">
-          </div>
-          <button class="split-item-ico" title="Remove" onclick="removeAddTxItem(${it.id})">${TRASH_ICO}</button>
-          <button class="split-item-ico" title="${it.collapsed?'Expand':'Collapse'}" onclick="toggleAddTxItem(${it.id})">${it.collapsed?CHEV_DN_SM:CHEV_UP_SM}</button>
-        </div>
-        ${it.collapsed ? '' : `<div class="split-item-body">${addTxFormBody(it.type, tx, (parseFloat(it.amount)||0), acct)}</div>`}
-      </div>`).join('');
-  } else {
-    const it = _addTxItems[0];
-    bodyInner = `
-      <div class="at-type-row" style="display:flex;align-items:flex-end;justify-content:space-between">
-        <div><div class="at-type-label">Transaction Type</div>${typeSelect(it)}</div>
-        <button class="link-btn" style="font-size:13px;display:flex;align-items:center;gap:4px;padding-bottom:6px" onclick="addAddTxItem()">${ic(P.add,15,'#008dd5')} Add another transaction</button>
+  // Always-on allocation progress bar with the "+ Add Transaction" dropdown.
+  const progRow = `
+    <div class="at-prog-row">
+      <div class="at-prog-bar"><div class="at-prog-fill${done?' done':''}" id="addtx-bar-fill" style="width:${pct}%"></div></div>
+      <span class="at-prog-label" id="addtx-alloc-label">${fmtN(allocated)}/${fmtN(total)} allocated</span>
+      <div style="flex:1"></div>
+      <div class="at-addmenu-wrap">
+        <button class="at-add-link" onclick="event.stopPropagation();toggleAddTxMenu()">${ic(P.add,15,'#008dd5')} Add Transaction</button>
+        ${_addTxMenuOpen ? `<div class="at-add-menu">${availableTypes.map(t=>`<button class="at-add-menu-item" onclick="addAddTxItemType('${t}')">${addTxTypeVerb(t)}</button>`).join('')}</div>` : ''}
       </div>
-      <div class="at-body${it.type==='Deposit'?' at-body--picker':''}" style="padding-top:0">${addTxFormBody(it.type, tx, (parseFloat(it.amount)||0), acct)}</div>`;
-  }
+    </div>`;
 
-  const allocBar = multi ? `
-    <div class="split-alloc">
-      <div class="split-alloc-row">
-        <span>${fmt(total)} to allocate</span>
-        <div class="split-alloc-right">
-          <span id="addtx-remaining" class="split-rem${balanced ? '' : ' neg'}">${remaining < 0 ? '-' : ''}${fmt(Math.abs(remaining))} remaining</span>
-          <button class="btn-primary split-add-btn" onclick="addAddTxItem()">${ic(P.add,16,'#fff')} Add another transaction</button>
-        </div>
-      </div>
-      <div class="split-bar"><div class="split-bar-fill" id="addtx-bar-fill" style="width:${pct}%"></div></div>
-    </div>` : '';
+  const bodyInner = _addTxItems.map((it) => {
+    const amt = parseFloat(it.amount)||0;
+    const hdr = `
+      <div class="split-item-hdr" onclick="toggleAddTxItem(${it.id})" style="cursor:pointer">
+        <button class="split-item-ico" title="${it.collapsed?'Expand':'Collapse'}">${it.collapsed?CHEV_DN_SM:CHEV_UP_SM}</button>
+        ${it.collapsed
+          ? `<span class="at-item-type">${it.type==='Journal Entry'?'Journal':it.type}</span><span class="at-item-summary">${addTxSummary(it, tx, acct)}</span>`
+          : ''}
+        <div style="flex:1"></div>
+        <button class="split-item-ico" title="Remove" onclick="event.stopPropagation();removeAddTxItem(${it.id})">${TRASH_ICO}</button>
+      </div>`;
+    return `<div class="split-item">${hdr}${it.collapsed ? '' : `<div class="split-item-body${it.type==='Deposit'?' at-body--picker':''}">${addTxFormBody(it.type, tx, amt, acct, it.id)}</div>`}</div>`;
+  }).join('');
 
   root.innerHTML = `
   <div class="at-overlay" onclick="if(event.target===this)closeAddTx()">
@@ -1915,8 +1954,8 @@ function renderAddTx() {
         <button class="at-hdr-ico" onclick="closeAddTx()" title="Close">${AT_X_ICO}</button>
       </div>
       ${txBar(tx, acct)}
-      ${allocBar}
-      <div class="at-body"${multi ? ' style="display:flex;flex-direction:column"' : ' style="padding:0"'}>${multi ? bodyInner : `<div style="padding:0 16px 16px">${bodyInner}</div>`}</div>
+      ${progRow}
+      <div class="at-body" style="display:flex;flex-direction:column">${bodyInner}</div>
       <div class="at-footer">
         <button id="save-transaction" class="btn-primary addtx-save" style="height:36px;padding:0 20px" onclick="confirmAddTx()"${balanced?'':' disabled'}>Add</button>
         <button class="btn-primary addtx-save" style="height:36px;padding:0 20px;background:#13314c;border-color:#13314c" onclick="confirmAddTx()"${balanced?'':' disabled'}>Add &amp; Pay</button>
@@ -1924,6 +1963,14 @@ function renderAddTx() {
       </div>
     </div>
   </div>`;
+
+  // Close the type dropdown on any outside click.
+  if (!_addTxMenuBound) {
+    _addTxMenuBound = true;
+    document.addEventListener('click', () => {
+      if (_addTxMenuOpen) { _addTxMenuOpen = false; if (_addTxOpen) renderAddTx(); }
+    });
+  }
 }
 
 const REFRESH_ICO = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#008dd5" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`;
@@ -1946,7 +1993,7 @@ function atAttachCard(title='Attachments') {
     </div>`;
 }
 
-function renderAddTxBill(tx, amt, acct) {
+function renderAddTxBill(tx, amt, acct, itemId) {
   const date = tx.date || '';
   const vendor = tx.desc ? tx.desc.split(' ').slice(2).join(' ') : '';
   const glName = acct ? acct.gl : '1001 Checking Account';
@@ -1965,7 +2012,7 @@ function renderAddTxBill(tx, amt, acct) {
         </div>
         <div class="at-field">
           <label>Amount</label>
-          <div class="at-amount-wrap"><input class="at-input" type="text" value="${amt.toFixed(2)}"><span class="at-amount-refresh">${REFRESH_ICO}</span></div>
+          <div class="at-amount-wrap"><input class="at-input" type="text" value="${amt.toFixed(2)}"${atAmtBind(itemId)}><span class="at-amount-refresh">${REFRESH_ICO}</span></div>
         </div>
         <div class="at-field">
           <label>Terms</label>
@@ -2028,7 +2075,7 @@ function renderAddTxBill(tx, amt, acct) {
   ${renderDetailTable(tx, amt)}`;
 }
 
-function renderAddTxCheck(tx, amt, acct) {
+function renderAddTxCheck(tx, amt, acct, itemId) {
   const date = tx.date || '';
   const payee = tx.desc ? tx.desc.split(' ').slice(2).join(' ') : '';
   const glName = acct ? acct.gl : '1001 Checking Account';
@@ -2061,7 +2108,7 @@ function renderAddTxCheck(tx, amt, acct) {
         </div>
         <div class="at-field">
           <label>Amount</label>
-          <div class="at-amount-wrap"><input class="at-input has2" type="text" value="${amt.toFixed(2)}"><span class="at-amount-icons">${CALC_ICO}${REFRESH_ICO}</span></div>
+          <div class="at-amount-wrap"><input class="at-input has2" type="text" value="${amt.toFixed(2)}"${atAmtBind(itemId)}><span class="at-amount-icons">${CALC_ICO}${REFRESH_ICO}</span></div>
         </div>
       </div>
       <div class="at-field-grid" style="grid-template-columns:1fr 1fr">
@@ -2093,7 +2140,7 @@ function renderAddTxCheck(tx, amt, acct) {
   ${renderDetailTable(tx, amt)}`;
 }
 
-function renderAddTxReceipt(tx, amt, acct) {
+function renderAddTxReceipt(tx, amt, acct, itemId) {
   const date = tx.date || '';
   return `
   <div class="at-cols">
@@ -2110,7 +2157,7 @@ function renderAddTxReceipt(tx, amt, acct) {
         </div>
         <div class="at-field">
           <label>Amount</label>
-          <div class="at-amount-wrap"><input class="at-input" type="text" value="${amt.toFixed(2)}"><span class="at-amount-refresh">${REFRESH_ICO}</span></div>
+          <div class="at-amount-wrap"><input class="at-input" type="text" value="${amt.toFixed(2)}"${atAmtBind(itemId)}><span class="at-amount-refresh">${REFRESH_ICO}</span></div>
         </div>
       </div>
       <div class="at-field-grid" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:10px">
@@ -2137,7 +2184,7 @@ function renderAddTxReceipt(tx, amt, acct) {
   ${renderDetailTable(tx, amt)}`;
 }
 
-function renderAddTxDeposit(tx, amt, acct) {
+function renderAddTxDeposit(tx, amt, acct, itemId) {
   const payments = [
     {tenant:'Aaron Gatewood',   date:'06/01/26', check:'123', property:'Riverview', unit:'101B', comment:'June Rent Check', address:'1492 Loveland-Madeira Road Unit # 1...', amount:1200.00, multiProp:false, multiUnit:false},
     {tenant:'Abigail Thornton', date:'06/03/26', check:'123', property:'Riverview', unit:'201D', comment:'June Rent Check', address:'1492 Loveland-Madeira Road Unit # 2...', amount:1260.00, multiProp:true,  multiUnit:true},
@@ -2208,7 +2255,7 @@ function renderAddTxDeposit(tx, amt, acct) {
     </div>`;
 }
 
-function renderAddTxJournal(tx, amt, acct) {
+function renderAddTxJournal(tx, amt, acct, itemId) {
   const date = tx.date || '';
   return `
   <div class="at-cols">
@@ -2237,7 +2284,7 @@ function renderAddTxJournal(tx, amt, acct) {
   ${renderDetailTable(tx, amt)}`;
 }
 
-function renderAddTxGeneric(tx, amt, acct) {
+function renderAddTxGeneric(tx, amt, acct, itemId) {
   const date = tx.date || '';
   const glName = acct ? acct.gl : '';
   return `
@@ -2255,7 +2302,7 @@ function renderAddTxGeneric(tx, amt, acct) {
         </div>
         <div class="at-field">
           <label>Amount</label>
-          <input class="at-input" type="text" value="${amt.toFixed(2)}">
+          <input class="at-input" type="text" value="${amt.toFixed(2)}"${atAmtBind(itemId)}>
         </div>
       </div>
       <div class="at-field">
@@ -2267,7 +2314,7 @@ function renderAddTxGeneric(tx, amt, acct) {
   ${renderDetailTable(tx, amt)}`;
 }
 
-function renderAddTxCCCharge(tx, amt, acct) {
+function renderAddTxCCCharge(tx, amt, acct, itemId) {
   const date = tx.date || '';
   const glName = acct ? acct.gl : '';
   const vendor = tx.desc ? tx.desc.split(' ').slice(1).join(' ') : '';
@@ -2286,7 +2333,7 @@ function renderAddTxCCCharge(tx, amt, acct) {
         </div>
         <div class="at-field">
           <label>Amount</label>
-          <div class="at-amount-wrap"><input class="at-input" type="text" value="${amt.toFixed(2)}"><span class="at-amount-refresh">${REFRESH_ICO}</span></div>
+          <div class="at-amount-wrap"><input class="at-input" type="text" value="${amt.toFixed(2)}"${atAmtBind(itemId)}><span class="at-amount-refresh">${REFRESH_ICO}</span></div>
         </div>
         <div class="at-field">
           <label>Credit Card</label>
@@ -2317,7 +2364,7 @@ function renderAddTxCCCharge(tx, amt, acct) {
   ${renderDetailTable(tx, amt)}`;
 }
 
-function renderAddTxCCCredit(tx, amt, acct) {
+function renderAddTxCCCredit(tx, amt, acct, itemId) {
   const date = tx.date || '';
   const glName = acct ? acct.gl : '';
   return `
@@ -2335,7 +2382,7 @@ function renderAddTxCCCredit(tx, amt, acct) {
         </div>
         <div class="at-field">
           <label>Amount</label>
-          <div class="at-amount-wrap"><input class="at-input" type="text" value="${amt.toFixed(2)}"><span class="at-amount-refresh">${REFRESH_ICO}</span></div>
+          <div class="at-amount-wrap"><input class="at-input" type="text" value="${amt.toFixed(2)}"${atAmtBind(itemId)}><span class="at-amount-refresh">${REFRESH_ICO}</span></div>
         </div>
         <div class="at-field">
           <label>Credit Card</label>
