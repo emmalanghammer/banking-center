@@ -837,8 +837,21 @@ const TRANSACTIONS_BY_ACCT = {
 // Wire op3487 to shared TRANSACTIONS
 TRANSACTIONS_BY_ACCT.op3487 = TRANSACTIONS;
 
-function acctTxs() {
-  return TRANSACTIONS_BY_ACCT[S.activeId] || [];
+function acctTxs(id) {
+  return TRANSACTIONS_BY_ACCT[id || S.activeId] || [];
+}
+// Find a transaction (and its owning account) across every account feed — needed
+// when acting on a transaction from a screen whose account differs from S.activeId
+// (e.g. the reconcile kebab menu, which operates on REC_STATE.acctId).
+function txAcctId(txId) {
+  for (const id in TRANSACTIONS_BY_ACCT) {
+    const f = TRANSACTIONS_BY_ACCT[id];
+    if (f && f.some(t => t.id === txId)) return id;
+  }
+  return S.activeId;
+}
+function findTxGlobal(txId) {
+  return (TRANSACTIONS_BY_ACCT[txAcctId(txId)] || []).find(t => t.id === txId) || null;
 }
 // Live "to review" count for an account = feed items not yet matched or excluded.
 function acctReview(a) {
@@ -1765,8 +1778,8 @@ function addTxBalanced() {
 function openAddTx(txId) {
   _addTxOpen = true;
   _addTxId = txId;
-  const tx = acctTxs().find(t=>t.id===txId);
-  const acct = ACCOUNTS.find(a=>a.id===S.activeId);
+  const tx = findTxGlobal(txId);
+  const acct = ACCOUNTS.find(a=>a.id===txAcctId(txId));
   const types = getTxTypes(acct, tx||{});
   const amt = tx ? (tx.payment != null ? tx.payment : (tx.deposit != null ? tx.deposit : 0)) : 0;
   _addTxItems = [{ id: ++_addTxSeq, type: types[0], amount: amt, collapsed: false }];
@@ -1812,8 +1825,7 @@ function confirmAddTx() {
   if (!addTxBalanced()) return;
   const txId = _addTxId;
   closeAddTx();
-  const txs = acctTxs();
-  const tx = txs.find(t=>t.id===txId);
+  const tx = findTxGlobal(txId);
   if (!tx) return;
   S.matchedIds.add(txId); S.expandedId=null;
   renderRight(); renderSidebar(); refreshRecIfActive();
@@ -2583,9 +2595,9 @@ function confirmFindMatch() {
 function renderFindMatch() {
   const root = document.getElementById('find-match-root');
   if (!_findMatchOpen) { root.innerHTML=''; return; }
-  const tx = acctTxs().find(t=>t.id===_findMatchTxId);
+  const tx = findTxGlobal(_findMatchTxId);
   if (!tx) { root.innerHTML=''; return; }
-  const acct = ACCOUNTS.find(a=>a.id===S.activeId);
+  const acct = ACCOUNTS.find(a=>a.id===txAcctId(_findMatchTxId));
   const bankAmt = (tx.payment != null ? tx.payment : tx.deposit) || 0;
   const cands = fmCandidates(tx);
   const selected = [..._findMatchSel].reduce((s,i)=> s + (cands[i]?cands[i].amount:0), 0);
