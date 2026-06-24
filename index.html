@@ -1955,7 +1955,7 @@ function renderAddTx() {
       </div>
       ${txBar(tx, acct)}
       ${progRow}
-      <div class="at-body" style="display:flex;flex-direction:column">${bodyInner}</div>
+      <div class="at-body" style="display:flex;flex-direction:column;padding-top:0">${bodyInner}</div>
       <div class="at-footer">
         <button id="save-transaction" class="btn-primary addtx-save" style="height:36px;padding:0 20px" onclick="confirmAddTx()"${balanced?'':' disabled'}>Add</button>
         <button class="btn-primary addtx-save" style="height:36px;padding:0 20px;background:#13314c;border-color:#13314c" onclick="confirmAddTx()"${balanced?'':' disabled'}>Add &amp; Pay</button>
