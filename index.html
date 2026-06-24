@@ -1452,9 +1452,9 @@ function renderRight() {
   <div class="acct-hdr">
     ${ic(P.bank,16,'#13314c')}
     <span class="acct-hdr-name">${acct.gl}</span>
-    <span class="acct-hdr-bank">${acct.bankName}</span>
-    <span class="acct-hdr-bank">••••${acct.last4}</span>
-    <div class="acct-hdr-sync">${ic(P.refresh,14,'#aaa')}<span>${syncLbl}</span></div>
+    ${acct.bankName ? `<span class="acct-hdr-bank">${acct.bankName}</span>` : ''}
+    ${acct.last4 ? `<span class="acct-hdr-bank">••••${acct.last4}</span>` : ''}
+    ${acct.syncedMin != null ? `<div class="acct-hdr-sync">${ic(P.refresh,14,'#aaa')}<span>${syncLbl}</span></div>` : ''}
     <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
       <button style="background:none;border:none;display:flex;align-items:center;gap:5px;color:#008dd5;font-size:13px" onclick="${acct.kind==='card'?`openCR('${acct.id}')`:`openBR('${acct.id}')`}">${acct.kind==='card'?'Credit Card Register':'Bank Register'}</button>
       <button class="btn-primary" style="height:34px;font-size:13px" onclick="openReconcile('${acct.id}')">Reconcile</button>
@@ -3042,6 +3042,7 @@ function acctDrop(targetId) {
   _acctDragKey = null;
   renderSettings();
   renderBC();
+  renderTR();
 }
 
 function filterAcctSearch(val) {
@@ -3073,7 +3074,7 @@ function renderSettingsAccounts() {
         <span style="font-size:14px;color:${subColor};white-space:nowrap">${bankStr}</span>
       </div>
       <button style="background:none;border:none;padding:2px;cursor:pointer;display:flex;align-items:center;flex-shrink:0"
-        onclick="SETTINGS_STATE.accounts['${a.id}'].visible=!SETTINGS_STATE.accounts['${a.id}'].visible;renderSettings();renderBC()"
+        onclick="SETTINGS_STATE.accounts['${a.id}'].visible=!SETTINGS_STATE.accounts['${a.id}'].visible;renderSettings();renderBC();renderTR()"
         title="${visible?'Hide':'Show'} account">
         ${visible ? VIS_ON_ICO : VIS_OFF_ICO}
       </button>
