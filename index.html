@@ -601,7 +601,7 @@ svg.ico{display:block;flex-shrink:0}
 .split-item-ico:hover{background:#f5f8fa}
 .split-item-body{padding:16px}
 /* ── Find Transaction Matches ── */
-.fm-sub{display:flex;align-items:flex-end;justify-content:space-between;padding:12px 16px 0;background:#f5f8fa;flex-shrink:0;gap:16px}
+.fm-sub{display:flex;align-items:flex-end;justify-content:space-between;padding:12px 16px 0;background:#f2f2f2;flex-shrink:0;gap:16px}
 .fm-sub-title{font-size:14px;font-weight:600;color:#13314c;margin-bottom:8px}
 .fm-orion{display:flex;align-items:center;gap:6px;font-size:13px;color:#666}
 .fm-orion a{color:#008dd5;text-decoration:none;margin-left:4px}
@@ -610,10 +610,20 @@ svg.ico{display:block;flex-shrink:0}
 .fm-prog-fill{height:12px;background:#008dd5;border-radius:200px;transition:width .15s}
 .fm-prog-fill.done{background:#6eb744}
 .fm-prog-label{font-size:12px;color:#666;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
-.fm-filters{display:flex;align-items:flex-end;gap:16px;padding:12px 16px;background:#f5f8fa;flex-shrink:0}
+.fm-filters{display:flex;align-items:flex-end;gap:16px;padding:12px 16px;background:#f2f2f2;flex-shrink:0}
+.fm-fld{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
+.fm-fld label{font-size:14px;color:#008dd5}
+.fm-fld .fm-input{height:36px;width:100%;border:1px solid #008dd5;border-radius:4px;background:#fff;padding:0 8px;font-size:14px;color:#13314c;font-family:'Roboto',sans-serif;box-sizing:border-box}
+.fm-fld .fm-input::placeholder{color:#b3b3b3;font-style:italic}
+.fm-fld .fm-select{height:36px;width:100%;border:1px solid #008dd5;border-radius:4px;background:#fff url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 24 24' fill='%2313314c'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 4px center;padding:0 28px 0 8px;font-size:14px;color:#13314c;font-family:'Roboto',sans-serif;appearance:none;box-sizing:border-box}
+.fm-date-wrap{display:flex;height:36px;border:1px solid #008dd5;border-radius:4px;overflow:hidden;width:100%;box-sizing:border-box}
+.fm-date-field{flex:1;border:none;background:#fff;padding:0 8px;font-size:14px;color:#13314c;font-family:'Roboto',sans-serif;min-width:0;outline:none}
+.fm-date-icon{width:28px;background:#f5f8fa;border-left:1px solid #008dd5;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.fm-date-filter{width:28px;background:#f5f8fa;border-left:1px solid #008dd5;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer}
 .fm-fld{display:flex;flex-direction:column;gap:4px}
 .fm-fld label{font-size:12px;color:#008dd5;font-weight:500}
-.fm-tbl-wrap{flex:1;overflow-y:auto;min-height:0;padding:0 16px 12px;background:#f5f8fa}
+.fm-tbl-wrap{flex:1;overflow-y:auto;min-height:0;padding:0 16px 12px;background:#f2f2f2}
+#find-match-root .at-modal{background:#f2f2f2}
 .fm-tbl{width:100%;border-collapse:collapse;font-size:13px;background:#fff}
 .fm-tbl thead th{background:#596775;color:#fff;font-size:12px;font-weight:500;padding:0 10px;height:32px;text-align:left;white-space:nowrap}
 .fm-tbl thead th.r{text-align:right}
@@ -2691,18 +2701,20 @@ function renderFindMatch() {
         <div class="fm-filters">
           <div class="fm-fld">
             <label>Search</label>
-            <input class="flt-input" style="width:280px" placeholder="Find a transaction">
+            <input class="fm-input" placeholder="Find a transaction">
           </div>
           <div class="fm-fld">
             <label>Transaction Type</label>
-            <select class="at-select" style="width:200px;height:32px"><option>2 Selected</option></select>
+            <select class="fm-select"><option>2 Selected</option></select>
           </div>
           <div class="fm-fld">
             <label>Date Range</label>
-            <div style="display:flex;align-items:center;gap:6px">
-              <input class="at-input at-input-date" style="width:130px;height:32px" value="01/01/2026">
-              <input class="at-input at-input-date" style="width:130px;height:32px" value="01/15/2026">
-              <button style="background:none;border:1px solid #cedbe7;border-radius:4px;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0">${ic(P.filter,15,'#666')}</button>
+            <div class="fm-date-wrap">
+              <input class="fm-date-field" value="01/01/2026">
+              <div class="fm-date-icon">${ic(P.cal,16,'#666')}</div>
+              <input class="fm-date-field" value="01/15/2026">
+              <div class="fm-date-icon">${ic(P.cal,16,'#666')}</div>
+              <div class="fm-date-filter">${ic(P.filter,16,'#666')}</div>
             </div>
           </div>
         </div>
