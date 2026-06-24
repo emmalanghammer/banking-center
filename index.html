@@ -592,8 +592,11 @@ svg.ico{display:block;flex-shrink:0}
 .fm-sub-title{font-size:14px;font-weight:600;color:#13314c;margin-bottom:8px}
 .fm-orion{display:flex;align-items:center;gap:6px;font-size:13px;color:#666}
 .fm-orion a{color:#008dd5;text-decoration:none;margin-left:4px}
-.fm-bal{font-size:13px;color:#666;display:grid;grid-template-columns:auto auto;gap:2px 24px;white-space:nowrap}
-.fm-bal .v{text-align:right;font-weight:600;color:#13314c;font-variant-numeric:tabular-nums}
+.fm-prog{display:flex;align-items:center;gap:16px}
+.fm-prog-bar{width:240px;height:12px;background:#e5e5e5;border-radius:200px;overflow:hidden;flex-shrink:0}
+.fm-prog-fill{height:12px;background:#008dd5;border-radius:200px;transition:width .15s}
+.fm-prog-fill.done{background:#6eb744}
+.fm-prog-label{font-size:12px;color:#666;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .fm-filters{display:flex;align-items:flex-end;gap:16px;padding:12px 16px;background:#f5f8fa;flex-shrink:0}
 .fm-fld{display:flex;flex-direction:column;gap:4px}
 .fm-fld label{font-size:12px;color:#008dd5;font-weight:500}
@@ -2629,10 +2632,9 @@ function renderFindMatch() {
             <div class="fm-sub-title">Find and select transaction(s) to match</div>
             <div class="fm-orion">${orionSpark(16)}<span>${cands.length} possible matches containing ${fmt(bankAmt)}</span><a href="#" onclick="_findMatchSel=new Set([0,1]);renderFindMatch();return false">Select Matches</a></div>
           </div>
-          <div class="fm-bal">
-            <span>Bank Transaction Amount:</span><span class="v">${fmt(bankAmt)}</span>
-            <span>Selected Amount:</span><span class="v">${fmt(selected)}</span>
-            <span>Difference:</span><span class="v" style="color:${diff===0?'#426e29':'#13314c'}">${fmt(diff)}</span>
+          <div class="fm-prog">
+            <div class="fm-prog-bar"><div class="fm-prog-fill${diff===0?' done':''}" style="width:${bankAmt>0?Math.min(100,selected/bankAmt*100):0}%"></div></div>
+            <span class="fm-prog-label">${fmtN(selected)}/${fmtN(bankAmt)} allocated</span>
           </div>
         </div>
         <div class="fm-filters">
