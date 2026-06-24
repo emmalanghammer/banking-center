@@ -1699,6 +1699,12 @@ function renderHelpful(id) {
 }
 
 /* ─ Actions ─ */
+// Refresh the reconcile view if it's the active screen (so a match made via its
+// kebab menu immediately shows the new matched row on both sides).
+function refreshRecIfActive() {
+  const s = document.getElementById('screen-rec');
+  if (s && s.classList.contains('active')) renderReconcile();
+}
 function toggleRow(id, tab) {
   if (S.expandedId===id) { S.expandedId=null; }
   else { S.expandedId=id; S.activeTab=tab; }
@@ -1709,7 +1715,7 @@ function setMultiSel(id, i) { S.multiSel[id]=i; renderTxRows(); }
 function doMatch(id) {
   S.matchedIds.add(id); S.expandedId=null;
   showToast('Transaction matched successfully');
-  renderRight(); renderSidebar();
+  renderRight(); renderSidebar(); refreshRecIfActive();
   _ubMatchedSignal(id);
   setTimeout(() => showRulePopup(id), 400);
 }
@@ -1810,7 +1816,7 @@ function confirmAddTx() {
   const tx = txs.find(t=>t.id===txId);
   if (!tx) return;
   S.matchedIds.add(txId); S.expandedId=null;
-  renderRight(); renderSidebar();
+  renderRight(); renderSidebar(); refreshRecIfActive();
   showToast('Transaction recorded');
   _ubMatchedSignal(txId);
   setTimeout(() => showRulePopup(txId), 400);
@@ -2569,7 +2575,7 @@ function confirmFindMatch() {
   closeFindMatch();
   if (!id) return;
   S.matchedIds.add(id); S.expandedId = null;
-  renderRight(); renderSidebar();
+  renderRight(); renderSidebar(); refreshRecIfActive();
   showToast('Transaction matched successfully');
   _ubMatchedSignal(id);
 }
@@ -3664,8 +3670,29 @@ const BR_TX = {
   ],
 };
 
+// Incoming transactions the user has matched/added become settled register
+// entries (and matched rows on both reconcile sides). Derived live from
+// S.matchedIds so matching anywhere flows through to the register + reconcile.
+function matchedIncomingRows(acctId) {
+  return acctTxs(acctId).filter(t => S.matchedIds.has(t.id)).map(t => {
+    const isDep = t.deposit != null;
+    const amt = isDep ? t.deposit : (t.payment || 0);
+    const mr = (typeof matchRowFromTx === 'function' && (t.matchRow || t.rmLink)) ? matchRowFromTx(t) : null;
+    return {
+      date: t.date.replace(/\/\d{2}(\d{2})$/, '/$1'),   // 06/16/2026 -> 06/16/26
+      ref: mr && mr.ref ? mr.ref : 'NEW',
+      type: isDep ? 'Deposit' : 'Withdrawal',
+      info: t.desc,
+      gl: isDep ? '4100 Rental Income' : '5400 Operating Expense',
+      deposit: isDep ? amt : null,
+      payment: isDep ? null : amt,
+      cleared: false, _fromTx: t.id
+    };
+  });
+}
+
 function genBRRows(acctId) {
-  return (BR_TX[acctId] || []).map(r => ({ ...r }));
+  return [...matchedIncomingRows(acctId), ...(BR_TX[acctId] || [])].map(r => ({ ...r }));
 }
 
 function openBR(acctId) {
@@ -3717,7 +3744,9 @@ function openReconcile(acctId) {
 // Bank side mirrors the cleared book entries (plus a bank-only fee); rows that
 // share date + amount + description across the two sides auto-match.
 function recData(acctId) {
-  const src = BR_TX[acctId] || [];
+  // Settled register entries plus any matched/added incoming transactions, which
+  // now appear as matched rows on BOTH the Rent Manager and Bank sides.
+  const src = [...matchedIncomingRows(acctId), ...(BR_TX[acctId] || [])];
   const rmList = src.map((r, i) => ({
     id: 'rm' + i, date: r.date, ref: r.ref, desc: r.info, account: r.gl,
     amount: r.deposit != null ? r.deposit : (r.payment != null ? r.payment : 0),
@@ -3751,7 +3780,7 @@ function recData(acctId) {
     const o = acctId + ':' + i; b.matched = (o in ov) ? ov[o] : rmSeen.has(key(b));
   });
   const byDateDesc = (a, b) => {
-    const p = s => { const [m,d,y] = s.split('/'); return +new Date(+y,+m-1,+d); };
+    const p = s => { let [m,d,y] = s.split('/'); y = +y; if (y < 100) y += 2000; return +new Date(y,+m-1,+d); };
     return p(b.date) - p(a.date);
   };
   rmList.sort(byDateDesc);
