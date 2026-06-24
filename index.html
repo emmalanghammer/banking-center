@@ -3752,6 +3752,16 @@ function openReconcile(acctId) {
   showScreen('rec');
 }
 
+// A bank feed only carries a reference the bank itself knows — i.e. a check
+// number. Internal Rent Manager refs (deposit slips, EFT, journal #s) don't
+// appear on the bank side, so only surface a check number when present.
+function bankRef(row) {
+  const m = (row.desc || row.info || '').match(/CHECK\s+#?0*(\d+)/i);
+  if (m) return m[1];
+  if (row.type === 'Check' && row.ref) return row.ref;
+  return '';
+}
+
 // Build the two reconcile ledgers for an account from its register data.
 // Bank side mirrors the cleared book entries (plus a bank-only fee); rows that
 // share date + amount + description across the two sides auto-match.
@@ -3766,7 +3776,7 @@ function recData(acctId) {
   }));
   // Bank side: settled transactions from the register…
   const bankList = src.map((r, i) => ({
-    id: 'bk' + i, date: r.date, ref: r.ref, desc: r.info,
+    id: 'bk' + i, date: r.date, ref: bankRef(r), desc: r.info,
     amount: r.deposit != null ? r.deposit : (r.payment != null ? r.payment : 0),
     inflow: r.deposit != null
   }));
@@ -3778,7 +3788,7 @@ function recData(acctId) {
   incoming.forEach((t, j) => {
     const amt = t.deposit != null ? t.deposit : (t.payment != null ? t.payment : 0);
     bankList.push({
-      id: 'bki' + j, date: t.date, ref: '—', desc: t.desc,
+      id: 'bki' + j, date: t.date, ref: bankRef(t), desc: t.desc,
       amount: amt, inflow: t.deposit != null, pending: true, txId: t.id
     });
   });
