@@ -2785,10 +2785,12 @@ function renderSlideout() {
         <button onclick="closeSlideout()" style="background:none;border:none;display:flex;padding:4px">${ic(P.close,20,'#666')}</button>
       </div>
       <div class="slideout-body">
-        ${isMatched ? `<div class="matched-banner" style="margin-bottom:14px">${ic(P.check,16,'#6eb744')} This bank transaction is matched to the Rent Manager record below.</div>` : ''}
-        <div><span class="field-lbl">Bank Account</span><div class="field-box">${v.bankAccount}</div></div>
-        <div><span class="field-lbl">Date</span><div class="field-box">${v.date} ${ic(P.cal,15,'#888')}</div></div>
-        <div><span class="field-lbl">Comment</span><div class="field-box">${v.comment}</div></div>
+        ${isMatched ? `<div class="matched-banner" style="margin-bottom:4px">${ic(P.check,16,'#6eb744')} This bank transaction is matched to the Rent Manager record below.</div>` : ''}
+        <div class="at-field-grid" style="grid-template-columns:1fr 1fr">
+          <div class="at-field"><label>Bank Account</label><div class="at-input" style="display:flex;align-items:center">${v.bankAccount}</div></div>
+          <div class="at-field"><label>Date</label><div class="at-input at-input-date" style="display:flex;align-items:center">${v.date}</div></div>
+        </div>
+        <div class="at-field"><label>Comment</label><div class="at-input" style="display:flex;align-items:center">${v.comment}</div></div>
         <div class="attach-row"><button style="background:none;border:none;display:flex;align-items:center;gap:6px;color:#008dd5;font-size:13px">${ic(P.upload,15,'#008dd5')} Attach Files</button></div>
         ${v.payments.length ? `<div>
           <div style="font-size:14px;font-weight:600;color:#13314c;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #e3edf5">Payments</div>
