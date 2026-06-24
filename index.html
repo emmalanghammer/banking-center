@@ -2082,7 +2082,8 @@ function renderAddTxCheck(tx, amt, acct, itemId) {
   const checkNo = tx.desc.match(/\d{4,}/)?.[0] || '564';
   return `
   <div class="at-cols">
-    <div class="at-card at-card--accent" style="flex:2.2">
+    <div class="at-card" style="flex:2.2">
+      <div class="at-card-title">Check Information</div>
       <div class="at-field-grid" style="grid-template-columns:1.6fr 2.6fr 2.6fr 1.7fr;margin-bottom:12px">
         <div class="at-field">
           <label>Property</label>
@@ -2121,7 +2122,8 @@ function renderAddTxCheck(tx, amt, acct, itemId) {
         </div>
       </div>
     </div>
-    <div class="at-card at-card--accent" style="flex:1">
+    <div class="at-card" style="flex:1">
+      <div class="at-card-title">Payments &amp; Attachments</div>
       <div style="display:flex;align-items:center;gap:32px;margin-bottom:16px">
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#13314c;cursor:pointer"><input type="checkbox"> Check will be printed</label>
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#13314c;cursor:pointer"><input type="checkbox"> Avid Pay</label>
@@ -2280,6 +2282,7 @@ function renderAddTxJournal(tx, amt, acct, itemId) {
         <textarea class="at-textarea">${tx.desc}</textarea>
       </div>
     </div>
+    ${atAttachCard()}
   </div>
   ${renderDetailTable(tx, amt)}`;
 }
@@ -2310,6 +2313,7 @@ function renderAddTxGeneric(tx, amt, acct, itemId) {
         <textarea class="at-textarea">${tx.desc}</textarea>
       </div>
     </div>
+    ${atAttachCard()}
   </div>
   ${renderDetailTable(tx, amt)}`;
 }
