@@ -326,6 +326,34 @@ svg.ico{display:block;flex-shrink:0}
 
 /* ── Settings overlay ── */
 .settings-backdrop{position:fixed;inset:0;background:rgba(19,49,76,.35);z-index:400;display:flex;align-items:center;justify-content:center}
+/* ── Orion Chat ── */
+.oc-pane{position:fixed;top:88px;right:0;bottom:0;width:420px;background:#fff;border-left:1px solid #cedbe7;box-shadow:-4px 0 20px rgba(19,49,76,.1);z-index:301;display:flex;flex-direction:column;overflow:hidden}
+.oc-hdr{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid #cedbe7;flex-shrink:0}
+.oc-hdr-title{font-size:14px;font-weight:500;color:#13314c}
+.oc-hdr-sub{font-size:12px;color:#9aa7b3;margin-left:auto}
+.oc-msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding:16px}
+.oc-msg-orion{display:flex;gap:8px;align-items:flex-start}
+.oc-avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#008dd5,#6eb744);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.oc-bubble-orion{background:#f5f8fa;border:1px solid #e3edf5;border-radius:0 10px 10px 10px;padding:10px 13px;font-size:13px;color:#13314c;max-width:310px;line-height:1.55}
+.oc-bubble-orion b{color:#13314c}
+.oc-bubble-orion ul{margin:6px 0 0;padding-left:16px;display:flex;flex-direction:column;gap:3px}
+.oc-bubble-orion .oc-link{color:#008dd5;cursor:pointer;text-decoration:underline;background:none;border:none;font-size:13px;padding:0;font-family:inherit}
+.oc-msg-user{display:flex;justify-content:flex-end}
+.oc-bubble-user{background:#008dd5;border-radius:10px 10px 0 10px;padding:10px 13px;font-size:13px;color:#fff;max-width:310px;line-height:1.55}
+.oc-chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 10px}
+.oc-chip{background:#f5f8fa;border:1px solid #d4e2ec;border-radius:16px;padding:5px 12px;font-size:12px;color:#13314c;cursor:pointer;white-space:nowrap;line-height:1.2}
+.oc-chip:hover{background:#eaf4fb;border-color:#008dd5;color:#008dd5}
+.oc-input-row{display:flex;align-items:center;gap:8px;padding:10px 14px 12px;border-top:1px solid #cedbe7;flex-shrink:0}
+.oc-input{flex:1;height:36px;border:1.5px solid #cedbe7;border-radius:18px;padding:0 14px;font-size:13px;color:#13314c;outline:none;font-family:inherit;background:#fff}
+.oc-input:focus{border-color:#008dd5}
+.oc-send{width:34px;height:34px;background:#008dd5;border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s}
+.oc-send:hover{background:#0079b8}
+.oc-send:disabled{background:#b3cfe8;cursor:default}
+.oc-typing{display:flex;gap:4px;align-items:center;padding:4px 2px}
+.oc-dot{width:6px;height:6px;border-radius:50%;background:#aab9c5;animation:oc-bounce .9s infinite}
+.oc-dot:nth-child(2){animation-delay:.18s}
+.oc-dot:nth-child(3){animation-delay:.36s}
+@keyframes oc-bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
 /* ── Insights overlay ── */
 /* Insights pane */
 .ins-pane{position:fixed;top:88px;right:0;bottom:0;width:500px;background:#fff;border-left:1px solid #cedbe7;box-shadow:-4px 0 20px rgba(19,49,76,.1);z-index:301;display:flex;flex-direction:column;overflow:hidden}
@@ -718,6 +746,7 @@ svg.ico{display:block;flex-shrink:0}
 <div id="add-rule-root"></div>
 <div id="add-tx-root"></div>
 <div id="find-match-root"></div>
+<div id="orion-chat-root"></div>
 
 <script>
 /* ── Data ──────────────────────────────────────────────── */
@@ -1029,7 +1058,7 @@ function renderBC() {
   const visibleQA = QA.quickActionsOrder.filter(k => QA.quickActions[k]);
   const qaBtns = addCircleIco + visibleQA.map((k,i) => {
     const sep = '<div class="qa-sep"></div>';
-    if (k === 'askOrion') return sep + `<button class="qa-orion"><img src="${ORION_ICON_URL}" width="16" height="16" style="display:inline-block;vertical-align:middle;flex-shrink:0" alt="Orion"> Ask Orion</button>`;
+    if (k === 'askOrion') return sep + `<button class="qa-orion" onclick="openOrionChat()"><img src="${ORION_ICON_URL}" width="16" height="16" style="display:inline-block;vertical-align:middle;flex-shrink:0" alt="Orion"> Ask Orion</button>`;
     const onclick = qaActions[k] ? ` onclick="${qaActions[k]}"` : '';
     return sep + `<button class="qa-btn"${onclick}>${qaLabels[k]}</button>`;
   }).join('');
@@ -4213,6 +4242,305 @@ function _ubInit() {
     _ubView = 'banking-center';
     history.replaceState({ view: 'banking-center' }, '', '?view=banking-center');
   }
+}
+
+/* ── Orion Chat ──────────────────────────────────────────── */
+let _ocOpen = false;
+const _ocMessages = [];
+
+const OC_SUGGESTIONS = [
+  'What accounts have differences?',
+  'How many items need review?',
+  'Show me active alerts',
+  'What\'s the operating account balance?',
+  'Any overdraft risk?',
+  'How\'s the June close looking?',
+];
+
+function openOrionChat() {
+  _ocOpen = true;
+  if (_ocMessages.length === 0) {
+    _ocMessages.push({role:'orion', text:'Hi! I\'m Orion. Ask me anything about Cascade Property Group\'s accounts, transactions, or alerts — I\'ll search the data and give you a direct answer.'});
+  }
+  renderOrionChat();
+}
+
+function closeOrionChat() {
+  _ocOpen = false;
+  renderOrionChat();
+}
+
+function renderOrionChat() {
+  const root = document.getElementById('orion-chat-root');
+  if (!root) return;
+  if (!_ocOpen) { root.innerHTML = ''; return; }
+
+  const msgHtml = _ocMessages.map(m => {
+    if (m.role === 'orion') {
+      return `<div class="oc-msg-orion">
+        <div class="oc-avatar">${orionSpark(12)}</div>
+        <div class="oc-bubble-orion">${m.text}</div>
+      </div>`;
+    }
+    if (m.role === 'typing') {
+      return `<div class="oc-msg-orion">
+        <div class="oc-avatar">${orionSpark(12)}</div>
+        <div class="oc-bubble-orion"><div class="oc-typing"><div class="oc-dot"></div><div class="oc-dot"></div><div class="oc-dot"></div></div></div>
+      </div>`;
+    }
+    return `<div class="oc-msg-user"><div class="oc-bubble-user">${_escHtml(m.text)}</div></div>`;
+  }).join('');
+
+  const showChips = _ocMessages.length <= 2;
+  const chipsHtml = showChips ? `<div class="oc-chips">${OC_SUGGESTIONS.map(s =>
+    `<button class="oc-chip" onclick="ocAsk(${JSON.stringify(s)})">${s}</button>`
+  ).join('')}</div>` : '';
+
+  root.innerHTML = `
+    <div class="slideout-bg" onclick="closeOrionChat()"></div>
+    <div class="oc-pane">
+      <div class="oc-hdr">
+        <span class="bc-ico-badge" style="background:#e2f1da">${orionSpark(16)}</span>
+        <span class="oc-hdr-title">Ask Orion</span>
+        <span class="oc-hdr-sub">Cascade Property Group · Jun 2026</span>
+        <button onclick="closeOrionChat()" style="margin-left:12px;background:none;border:none;padding:4px;cursor:pointer;display:flex;align-items:center;color:#666">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </div>
+      <div class="oc-msgs" id="oc-msgs">${msgHtml}</div>
+      ${chipsHtml}
+      <div class="oc-input-row">
+        <input class="oc-input" id="oc-input" placeholder="Ask about accounts, balances, alerts…"
+          onkeydown="if(event.key==='Enter')ocSend()">
+        <button class="oc-send" onclick="ocSend()" title="Send">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
+      </div>
+    </div>`;
+
+  const msgs = document.getElementById('oc-msgs');
+  if (msgs) msgs.scrollTop = msgs.scrollHeight;
+}
+
+function ocSend() {
+  const inp = document.getElementById('oc-input');
+  if (!inp) return;
+  const q = inp.value.trim();
+  if (!q) return;
+  ocAsk(q);
+}
+
+function ocAsk(q) {
+  const inp = document.getElementById('oc-input');
+  if (inp) inp.value = '';
+  _ocMessages.push({role:'user', text:q});
+  _ocMessages.push({role:'typing'});
+  renderOrionChat();
+  setTimeout(() => {
+    _ocMessages.pop();
+    _ocMessages.push({role:'orion', text: orionAnswer(q)});
+    renderOrionChat();
+  }, 700);
+}
+
+function _escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function _fmt(n) {
+  return '$' + Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function orionAnswer(q) {
+  const lq = q.toLowerCase();
+
+  /* ── helpers ── */
+  const has = (...terms) => terms.some(t => lq.includes(t));
+
+  /* ── Greetings ── */
+  if (has('hello','hi ','hey','howdy','what can you')) {
+    return 'I can answer questions about account balances, unmatched transactions, alerts, reconciliation status, vendors, tenants, and more. Try asking something like <i>"What accounts have differences?"</i> or <i>"Any overdraft risk?"</i>';
+  }
+
+  /* ── Active alerts / insights overview ── */
+  if (has('alert','insight','warning','flag','issue','problem','critical')) {
+    const active = INSIGHTS.filter(i => !i._dismissed);
+    if (!active.length) return 'No active alerts right now — everything looks clear.';
+    const lines = active.map(i => `<li><b>${i.tag}:</b> ${i.title}</li>`).join('');
+    return `There are <b>${active.length} active insights</b>:<ul>${lines}</ul>`;
+  }
+
+  /* ── Overdraft ── */
+  if (has('overdraft','overdr')) {
+    const ins = INSIGHTS.find(i => i.id === 'i1' && !i._dismissed);
+    if (ins) return `<b>Overdraft Risk flagged:</b> ${ins.body} Orion projects a low of <b>−$11,200</b> on Jun 19 if no action is taken.`;
+    return 'No active overdraft risk alerts at this time.';
+  }
+
+  /* ── Cash forecast / owner disbursement ── */
+  if (has('owner','disbursement','hawthorne holdings','pearl district partner','alberta commons group')) {
+    const ins = INSIGHTS.find(i => i.id === 'i2' && !i._dismissed);
+    if (ins) return `<b>Cash Forecast – Owners:</b> ${ins.body}<br><br>Hawthorne Holdings −$1,420 · Pearl District −$640 · Alberta Commons −$210. Sellwood Row is positive at +$8,900.`;
+    return 'No owner disbursement alerts are currently active.';
+  }
+
+  /* ── ACH / return risk ── */
+  if (has('ach','return','nsf','zego','batch')) {
+    const ins = INSIGHTS.find(i => i.id === 'i3' && !i._dismissed);
+    const t4 = TRANSACTIONS.find(t => t.id === 't4');
+    let r = '';
+    if (ins) r += `<b>Return Risk:</b> ${ins.body}<br><br>`;
+    if (t4) r += `There's also an unmatched <b>Zego batch deposit of ${_fmt(t4.deposit)}</b> on ${t4.date} that likely covers multiple resident payments. It needs to be split to match.`;
+    return r || 'No ACH return risk alerts are currently active.';
+  }
+
+  /* ── June close / reconciliation forecast ── */
+  if (has('close','reconcil','close forecast','june close','period')) {
+    const ins = INSIGHTS.find(i => i.id === 'i5' && !i._dismissed);
+    if (ins) return `<b>June Close Forecast:</b> ${ins.body} 3 blockers remain: 1 Zego batch and 2 outstanding checks still need to clear.`;
+    return '82% of accounts tie to the bank. You\'re tracking two days ahead of last month\'s pace.';
+  }
+
+  /* ── Cash runway ── */
+  if (has('runway','reserve','floor','late july','cash runway')) {
+    const ins = INSIGHTS.find(i => i.id === 'i6' && !i._dismissed);
+    if (ins) return `<b>Cash Runway:</b> ${ins.body}`;
+    return 'No cash runway alerts are currently active.';
+  }
+
+  /* ── Differences / accounts with discrepancies ── */
+  if (has('difference','discrepan','doesn\'t match','not balanced','off by','mismatch')) {
+    const diffs = ACCOUNTS.filter(a => a.difference !== 0);
+    if (!diffs.length) return 'All accounts are balanced — no differences found.';
+    const lines = diffs.map(a => `<li><b>${a.gl}</b> (${a.bankName||''}${a.last4?'••'+a.last4:''}): ${a.difference < 0 ? '−' : '+'}${_fmt(Math.abs(a.difference))}</li>`).join('');
+    return `<b>${diffs.length} accounts have differences:</b><ul>${lines}</ul>`;
+  }
+
+  /* ── Review items / unmatched ── */
+  if (has('review','unmatched','need review','to review','needs attention')) {
+    const reviews = ACCOUNTS.filter(a => a.txStatus.type === 'review');
+    const total = reviews.reduce((s, a) => s + a.txStatus.count, 0);
+    const lines = reviews.map(a => `<li><b>${a.gl}:</b> ${a.txStatus.count} item${a.txStatus.count!==1?'s':''}</li>`).join('');
+    return `<b>${total} transactions need review</b> across ${reviews.length} accounts:<ul>${lines}</ul>`;
+  }
+
+  /* ── Operating account (hero) ── */
+  if (has('operating','1001','op3487','chase 3847','chase••3847','chase ••3847')) {
+    const a = ACCOUNTS.find(a => a.id === 'op3487');
+    const reviewTx = TRANSACTIONS.filter(t => !t.matchStatus || t.matchStatus === 'none' || t.matchStatus === 'multi');
+    return `<b>1001 Operating Account</b> (Chase ••${a.last4})<br>
+Bank Balance: <b>${_fmt(a.bankBalance)}</b> · In RM: <b>${_fmt(a.inRm)}</b><br>
+Difference: <b>${a.difference < 0 ? '−' : ''}${_fmt(Math.abs(a.difference))}</b><br>
+${a.txStatus.count} transactions need review. <button class="oc-link" onclick="openAcct('op3487');closeOrionChat()">Open in Transaction Review →</button>`;
+  }
+
+  /* ── Specific account lookups by name/bank ── */
+  const acctKeywords = [
+    {keys:['payroll','1002'], id:'pr9204'},
+    {keys:['trust','residential','1003'], id:'tr6612'},
+    {keys:['trust','commercial','1004','comm'], id:'tc6629'},
+    {keys:['security deposit','1005','wells fargo 1193'], id:'sd1193'},
+    {keys:['reserve fund','1006'], id:'rf1208'},
+    {keys:['maintenance escrow','1007','keybank','key bank'], id:'me4471'},
+    {keys:['owner disbursement','1008','disbursement'], id:'od7732'},
+    {keys:['petty cash','1009'], id:'pc0000'},
+    {keys:['mastercard','2001','citi'], id:'cc2247'},
+    {keys:['visa maintenance','2002','visa - maintenance'], id:'cc5581'},
+    {keys:['amex','travel','2003'], id:'cc3390'},
+    {keys:['visa vendor','2004','vendor payments'], id:'cc8804'},
+  ];
+  for (const {keys, id} of acctKeywords) {
+    if (keys.some(k => lq.includes(k))) {
+      const a = ACCOUNTS.find(a => a.id === id);
+      if (a) {
+        const diffStr = a.difference === 0 ? '<b style="color:#6eb744">$0.00 — balanced</b>' : `<b style="color:#eb343c">${a.difference<0?'−':''}${_fmt(Math.abs(a.difference))}</b>`;
+        return `<b>${a.gl}</b>${a.bankName ? ' (' + a.bankName + (a.last4 ? ' ••' + a.last4 : '') + ')' : ''}<br>
+Bank Balance: <b>${_fmt(a.bankBalance)}</b> · In RM: <b>${_fmt(a.inRm)}</b><br>
+Difference: ${diffStr}${a.txStatus.type==='review'?`<br>${a.txStatus.count} item${a.txStatus.count!==1?'s':''} to review`:'<br>Fully matched'}`;
+      }
+    }
+  }
+
+  /* ── Balance overview / all accounts ── */
+  if (has('balance','balances','all account','account balance','how much','total')) {
+    const banks = ACCOUNTS.filter(a => a.kind==='bank');
+    const cards = ACCOUNTS.filter(a => a.kind==='card');
+    const bankTotal = banks.reduce((s,a)=>s+a.bankBalance,0);
+    const cardTotal = cards.reduce((s,a)=>s+a.bankBalance,0);
+    return `<b>Bank accounts total: ${_fmt(bankTotal)}</b> across ${banks.length} accounts.<br>
+<b>Credit cards total: ${_fmt(cardTotal)}</b> across ${cards.length} cards.<br><br>
+Largest account: <b>1001 Operating (${_fmt(ACCOUNTS[0].bankBalance)})</b>.<br>
+${ACCOUNTS.filter(a=>a.difference!==0).length} accounts currently have differences.`;
+  }
+
+  /* ── Specific vendor / transaction lookups ── */
+  const vendorMap = [
+    {keys:['portland general','pge','electricity'], name:'Portland General Electric', note:'recurring monthly utility'},
+    {keys:['nw natural','gas','natural gas'], name:'NW Natural', note:'gas utility across properties'},
+    {keys:['rose city plumbing','plumbing','plumber'], name:'Rose City Plumbing', note:'unmatched check #2209 for $1,240.00 on 6/12'},
+    {keys:['cascade hvac','hvac','heating','cooling'], name:'Cascade HVAC', note:'unmatched ACH debit $2,860.00 on 6/9'},
+    {keys:['stumptown landscaping','landscaping','lawn'], name:'Stumptown Landscaping', note:'vendor on file'},
+    {keys:['recology','waste','garbage','trash'], name:'Recology', note:'waste management vendor'},
+    {keys:['centurylink','internet','telecom'], name:'CenturyLink', note:'telecom vendor'},
+    {keys:['standard insurance','insurance'], name:'Standard Insurance', note:'insurance vendor'},
+    {keys:['city of portland','portland','municipal'], name:'City of Portland', note:'municipal fees/utilities'},
+    {keys:['multnomah','county','property tax'], name:'Multnomah County', note:'property tax'},
+  ];
+  for (const v of vendorMap) {
+    if (v.keys.some(k => lq.includes(k))) {
+      return `<b>${v.name}</b> is a vendor for Cascade Property Group (${v.note}).${v.note.includes('unmatched')?` <button class="oc-link" onclick="openAcct('op3487');closeOrionChat()">Review in Transaction Review →</button>`:''}`;
+    }
+  }
+
+  /* ── Tenant lookups ── */
+  const tenants = ['Rivera','Okafor','Delgado','Nguyen','Park','Reyes','Flores','Walsh','Chen','Henderson','Steinberg','Johnson','Morrison'];
+  const matchedTenant = tenants.find(t => lq.includes(t.toLowerCase()));
+  if (matchedTenant) {
+    const tx = TRANSACTIONS.find(t => t.desc && t.desc.toLowerCase().includes(matchedTenant.toLowerCase()));
+    if (tx) {
+      const status = tx.matchStatus === 'match' ? 'matched to RM' : tx.matchStatus === 'multi' ? 'multiple candidates — needs selection' : 'unmatched';
+      return `<b>${matchedTenant}</b> — found a transaction: <b>${tx.desc}</b> on ${tx.date} for <b>${_fmt(tx.deposit||tx.payment)}</b>. Status: ${status}.`;
+    }
+    return `<b>${matchedTenant}</b> is a tenant at Cascade Property Group. No open transactions found in the current review feed.`;
+  }
+
+  /* ── Properties ── */
+  const propMap = [
+    {keys:['hawthorne court','hawthorne'], name:'Hawthorne Court Apartments', owner:'Hawthorne Holdings LLC'},
+    {keys:['pearl district loft','pearl'], name:'Pearl District Lofts', owner:'Pearl District Partners'},
+    {keys:['alberta commons','alberta'], name:'Alberta Commons', owner:'Alberta Commons Group'},
+    {keys:['sellwood'], name:'Sellwood Row', owner:'Sellwood Row Owner'},
+  ];
+  for (const p of propMap) {
+    if (p.keys.some(k => lq.includes(k))) {
+      return `<b>${p.name}</b> — owned by <b>${p.owner}</b>. Managed under Cascade Property Group's Portland portfolio.`;
+    }
+  }
+
+  /* ── Transaction count / summary ── */
+  if (has('transaction','how many','count','summary','overview','status','what\'s happening','what is happening')) {
+    const reviewAccts = ACCOUNTS.filter(a=>a.txStatus.type==='review');
+    const totalReview = reviewAccts.reduce((s,a)=>s+a.txStatus.count,0);
+    const diffs = ACCOUNTS.filter(a=>a.difference!==0).length;
+    const activeAlerts = INSIGHTS.filter(i=>!i._dismissed).length;
+    return `Here's a quick overview for Cascade Property Group as of mid-June 2026:<ul>
+<li><b>${totalReview} transactions</b> need review across ${reviewAccts.length} accounts</li>
+<li><b>${diffs} accounts</b> have unresolved differences</li>
+<li><b>${activeAlerts} active insights</b> (${INSIGHTS.filter(i=>!i._dismissed&&i.section==='action').length} need action now)</li>
+<li>June close is <b>82% complete</b> — on track for the 5th</li>
+</ul>`;
+  }
+
+  /* ── Aging ── */
+  if (has('aging','old','oldest','11 day','days old','stale')) {
+    const ins = INSIGHTS.find(i => i.id === 'i4' && !i._dismissed);
+    if (ins) return `<b>Aging Alert:</b> ${ins.body} You typically match within 2 days — these are running 6–11 days, the longest unmatched streak in 3 months. <button class="oc-link" onclick="openAcct('op3487');closeOrionChat()">Review now →</button>`;
+    return 'No aging alerts are currently active — all transactions are within your normal matching window.';
+  }
+
+  /* ── Fallback ── */
+  const topics = ['account balances', 'differences', 'unmatched transactions', 'active alerts', 'overdraft risk', 'tenant payments', 'vendor transactions', 'June close forecast', 'cash runway'];
+  return `I didn't find a specific match for that. I can help with: <ul>${topics.map(t=>`<li>${t}</li>`).join('')}</ul>Try rephrasing or pick one of the suggestions above.`;
 }
 
 renderBC();
