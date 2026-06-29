@@ -4278,13 +4278,11 @@ function renderOrionChat() {
   const msgHtml = _ocMessages.map(m => {
     if (m.role === 'orion') {
       return `<div class="oc-msg-orion">
-        <div class="oc-avatar">${orionSpark(12)}</div>
         <div class="oc-bubble-orion">${m.text}</div>
       </div>`;
     }
     if (m.role === 'typing') {
       return `<div class="oc-msg-orion">
-        <div class="oc-avatar">${orionSpark(12)}</div>
         <div class="oc-bubble-orion"><div class="oc-typing"><div class="oc-dot"></div><div class="oc-dot"></div><div class="oc-dot"></div></div></div>
       </div>`;
     }
@@ -4293,7 +4291,7 @@ function renderOrionChat() {
 
   const showChips = _ocMessages.length <= 2;
   const chipsHtml = showChips ? `<div class="oc-chips">${OC_SUGGESTIONS.map(s =>
-    `<button class="oc-chip" onclick="ocAsk(${JSON.stringify(s)})">${s}</button>`
+    `<button class="oc-chip" onclick="ocAsk('${s.replace(/'/g, "\\'")}')">${s}</button>`
   ).join('')}</div>` : '';
 
   root.innerHTML = `
