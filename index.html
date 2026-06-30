@@ -3968,8 +3968,10 @@ function reconcileSummary(acctId) {
 
   // Rows already reconciled in a prior period are baked into Beginning Balance
   // above and don't reappear here — only this period's pending activity does.
+  // Pending rows default to checked (pre-selected, as on a matched bank feed)
+  // so the user reviews and unchecks any exceptions rather than starting blank.
   const ov = REC_STATE._cleared[acctId] || {};
-  const rows = allRows.filter(r => !r.origCleared).map(r => ({ ...r, cleared: r.id in ov ? ov[r.id] : false }));
+  const rows = allRows.filter(r => !r.origCleared).map(r => ({ ...r, cleared: r.id in ov ? ov[r.id] : true }));
   rows.sort((a, b) => _recDateVal(b.date) - _recDateVal(a.date));
   const deposits = rows.filter(r => r.inflow);
   const payments = rows.filter(r => !r.inflow);
