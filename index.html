@@ -1875,12 +1875,41 @@ function addTxTotal() {
   if (!tx) return 0;
   return tx.payment != null ? tx.payment : (tx.deposit != null ? tx.deposit : 0);
 }
+function addTxItemAmount(i) {
+  if (i.type === 'Deposit') {
+    if (!i.depSel) return 0;
+    return [...i.depSel].reduce((s,idx)=> s + (DEP_PAYMENTS[idx]?.amount||0), 0);
+  }
+  return parseFloat(i.amount)||0;
+}
 function addTxAllocated() {
-  return _addTxItems.reduce((s,i)=> s + (parseFloat(i.amount)||0), 0);
+  return _addTxItems.reduce((s,i)=> s + addTxItemAmount(i), 0);
 }
 function addTxBalanced() {
-  if (_addTxItems.length <= 1) return true;
+  const hasDeposit = _addTxItems.some(i=>i.type==='Deposit');
+  if (_addTxItems.length <= 1 && !hasDeposit) return true;
   return Math.abs(addTxTotal() - addTxAllocated()) < 0.005;
+}
+// Deposit payment selection toggles → update allocation in place.
+function toggleDepRow(itemId, idx, checked) {
+  const it = _addTxItems.find(i=>i.id===itemId);
+  if (!it) return;
+  if (!it.depSel) it.depSel = new Set();
+  if (checked) it.depSel.add(idx); else it.depSel.delete(idx);
+  // Sync the header select-all checkbox without a full re-render.
+  const allCb = document.querySelector('.dep-all-cb');
+  if (allCb) {
+    allCb.checked = it.depSel.size === DEP_PAYMENTS.length;
+    allCb.indeterminate = it.depSel.size > 0 && it.depSel.size < DEP_PAYMENTS.length;
+  }
+  recalcAddTxAlloc();
+}
+function toggleDepAll(itemId, checked) {
+  const it = _addTxItems.find(i=>i.id===itemId);
+  if (!it) return;
+  it.depSel = checked ? new Set(DEP_PAYMENTS.map((_,i)=>i)) : new Set();
+  document.querySelectorAll('.dep-row-cb').forEach(cb => { cb.checked = checked; });
+  recalcAddTxAlloc();
 }
 
 function openAddTx(txId) {
@@ -2242,22 +2271,25 @@ function renderAddTxReceipt(tx, amt, acct, itemId) {
   ${renderDetailTable(tx, amt)}`;
 }
 
+const DEP_PAYMENTS = [
+  {tenant:'Aaron Gatewood',   date:'06/01/26', check:'123', property:'Riverview', unit:'101B', comment:'June Rent Check', address:'1492 Loveland-Madeira Road Unit # 1...', amount:1200.00, multiProp:false, multiUnit:false},
+  {tenant:'Abigail Thornton', date:'06/03/26', check:'123', property:'Riverview', unit:'201D', comment:'June Rent Check', address:'1492 Loveland-Madeira Road Unit # 2...', amount:1260.00, multiProp:true,  multiUnit:true},
+  {tenant:'Ai Schraeder',     date:'06/02/26', check:'123', property:'Riverview', unit:'120C', comment:'June Rent Check', address:'1492 Loveland-Madeira Road Unit # 1...', amount:1200.00, multiProp:false, multiUnit:false},
+  {tenant:'Ali Tayfun',       date:'06/02/26', check:'123', property:'Riverview', unit:'308A', comment:'June Rent Check', address:'1492 Loveland-Madeira Road Unit # 3...', amount:1260.00, multiProp:true,  multiUnit:true},
+  {tenant:'Amelia Livingston',date:'06/01/26', check:'123', property:'Riverview', unit:'102A', comment:'June Rent Check', address:'1492 Loveland-Madeira Road Unit # 1...', amount:1260.00, multiProp:true,  multiUnit:true},
+  {tenant:'Amy Webb',         date:'06/01/26', check:'123', property:'Riverview', unit:'110D', comment:'June Rent Check', address:'1492 Loveland-Madeira Road Unit # 1...', amount:1200.00, multiProp:false, multiUnit:false},
+  {tenant:'Andy Huber',       date:'06/01/26', check:'123', property:'Riverview', unit:'212A', comment:'June Rent Check', address:'1492 Loveland-Madeira Road Unit # 2...', amount:1200.00, multiProp:false, multiUnit:false},
+  {tenant:'Andy Thrash',      date:'06/02/26', check:'123', property:'Riverview', unit:'310B', comment:'June Rent Check', address:'1492 Loveland-Madeira Road Unit # 3...', amount:1200.00, multiProp:false, multiUnit:false},
+];
 function renderAddTxDeposit(tx, amt, acct, itemId) {
-  const payments = [
-    {tenant:'Aaron Gatewood',   date:'06/01/26', check:'123', property:'Riverview', unit:'101B', comment:'June Rent Check', address:'1492 Loveland-Madeira Road Unit # 1...', amount:1200.00, multiProp:false, multiUnit:false},
-    {tenant:'Abigail Thornton', date:'06/03/26', check:'123', property:'Riverview', unit:'201D', comment:'June Rent Check', address:'1492 Loveland-Madeira Road Unit # 2...', amount:1260.00, multiProp:true,  multiUnit:true},
-    {tenant:'Ai Schraeder',     date:'06/02/26', check:'123', property:'Riverview', unit:'120C', comment:'June Rent Check', address:'1492 Loveland-Madeira Road Unit # 1...', amount:1200.00, multiProp:false, multiUnit:false},
-    {tenant:'Ali Tayfun',       date:'06/02/26', check:'123', property:'Riverview', unit:'308A', comment:'June Rent Check', address:'1492 Loveland-Madeira Road Unit # 3...', amount:1260.00, multiProp:true,  multiUnit:true},
-    {tenant:'Amelia Livingston',date:'06/01/26', check:'123', property:'Riverview', unit:'102A', comment:'June Rent Check', address:'1492 Loveland-Madeira Road Unit # 1...', amount:1260.00, multiProp:true,  multiUnit:true},
-    {tenant:'Amy Webb',         date:'06/01/26', check:'123', property:'Riverview', unit:'110D', comment:'June Rent Check', address:'1492 Loveland-Madeira Road Unit # 1...', amount:1200.00, multiProp:false, multiUnit:false},
-    {tenant:'Andy Huber',       date:'06/01/26', check:'123', property:'Riverview', unit:'212A', comment:'June Rent Check', address:'1492 Loveland-Madeira Road Unit # 2...', amount:1200.00, multiProp:false, multiUnit:false},
-    {tenant:'Andy Thrash',      date:'06/02/26', check:'123', property:'Riverview', unit:'310B', comment:'June Rent Check', address:'1492 Loveland-Madeira Road Unit # 3...', amount:1200.00, multiProp:false, multiUnit:false},
-  ];
+  const it = _addTxItems.find(i=>i.id===itemId);
+  const sel = (it && it.depSel) || new Set();
+  const allChecked = sel.size === DEP_PAYMENTS.length && DEP_PAYMENTS.length > 0;
   const chip = `<span class="dep-chip">+1 ${ic(P.down,8,'#008dd5')}</span>`;
-  const rows = payments.map(p => `
+  const rows = DEP_PAYMENTS.map((p,i) => `
     <tr>
       <td style="width:32px;padding:0 0 0 12px;color:#9aa7b3;font-size:15px">›</td>
-      <td style="width:36px;padding:0 8px"><input type="checkbox" class="dep-cb"></td>
+      <td style="width:36px;padding:0 8px"><input type="checkbox" class="dep-cb dep-row-cb" data-i="${i}" ${sel.has(i)?'checked':''} onclick="toggleDepRow(${itemId},${i},this.checked)"></td>
       <td>${p.tenant}</td>
       <td style="width:76px">${p.date}</td>
       <td style="width:72px">${p.check}</td>
@@ -2295,7 +2327,7 @@ function renderAddTxDeposit(tx, amt, acct, itemId) {
           <thead>
             <tr>
               <th style="width:32px;padding:0"></th>
-              <th style="width:36px;padding:0 8px"><input type="checkbox" class="dep-cb"></th>
+              <th style="width:36px;padding:0 8px"><input type="checkbox" class="dep-cb dep-all-cb" ${allChecked?'checked':''} onclick="toggleDepAll(${itemId},this.checked)"></th>
               <th>${ic(P.down,12,'rgba(255,255,255,.6)')} Tenant</th>
               <th style="width:76px">Date</th>
               <th style="width:72px">Check #</th>
