@@ -1909,8 +1909,7 @@ function addAddTxItem() {
 }
 function removeAddTxItem(id) {
   _addTxItems = _addTxItems.filter(i=>i.id!==id);
-  if (!_addTxItems.length) { closeAddTx(); return; }
-  if (!_addTxItems.some(i=>!i.collapsed) && _addTxItems.length) _addTxItems[_addTxItems.length-1].collapsed = false;
+  if (_addTxItems.length && !_addTxItems.some(i=>!i.collapsed)) _addTxItems[_addTxItems.length-1].collapsed = false;
   renderAddTx();
 }
 function setAddTxItemType(id, type) { const it=_addTxItems.find(i=>i.id===id); if(it) it.type=type; renderAddTx(); }
