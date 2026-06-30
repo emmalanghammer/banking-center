@@ -274,8 +274,8 @@ svg.ico{display:block;flex-shrink:0}
 .act-btns{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .btn-primary{height:32px;padding:0 16px;background:#008dd5;color:#fff;border:none;border-radius:4px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:5px}
 .btn-primary:hover{background:#0079b8}
-.btn-primary:disabled{opacity:.45;cursor:not-allowed}
-.btn-primary:disabled:hover{background:#008dd5}
+.btn-primary:disabled{background:#8ec8e5;cursor:not-allowed}
+.btn-primary:disabled:hover{background:#8ec8e5}
 .btn-outline{height:32px;padding:0 14px;background:#fff;color:#008dd5;border:1px solid #008dd5;border-radius:4px;font-size:13px;display:flex;align-items:center;gap:5px}
 .btn-outline:hover{background:#f0f8fd}
 .btn-ghost{height:32px;padding:0 12px;background:#fff;color:#13314c;border:1px solid #cedbe7;border-radius:4px;font-size:13px;display:flex;align-items:center;gap:5px}
@@ -1908,8 +1908,8 @@ function addAddTxItem() {
   renderAddTx();
 }
 function removeAddTxItem(id) {
-  if (_addTxItems.length <= 1) return;   // keep at least one transaction line
   _addTxItems = _addTxItems.filter(i=>i.id!==id);
+  if (!_addTxItems.length) { closeAddTx(); return; }
   if (!_addTxItems.some(i=>!i.collapsed) && _addTxItems.length) _addTxItems[_addTxItems.length-1].collapsed = false;
   renderAddTx();
 }
