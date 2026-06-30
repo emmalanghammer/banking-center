@@ -2257,7 +2257,7 @@ function renderAddTxDeposit(tx, amt, acct, itemId) {
   const rows = payments.map(p => `
     <tr>
       <td style="width:32px;padding:0 0 0 12px;color:#9aa7b3;font-size:15px">›</td>
-      <td style="width:36px;padding:0 8px"><input type="checkbox" class="dep-cb" checked></td>
+      <td style="width:36px;padding:0 8px"><input type="checkbox" class="dep-cb"></td>
       <td>${p.tenant}</td>
       <td style="width:76px">${p.date}</td>
       <td style="width:72px">${p.check}</td>
@@ -2295,7 +2295,7 @@ function renderAddTxDeposit(tx, amt, acct, itemId) {
           <thead>
             <tr>
               <th style="width:32px;padding:0"></th>
-              <th style="width:36px;padding:0 8px"><input type="checkbox" class="dep-cb" checked></th>
+              <th style="width:36px;padding:0 8px"><input type="checkbox" class="dep-cb"></th>
               <th>${ic(P.down,12,'rgba(255,255,255,.6)')} Tenant</th>
               <th style="width:76px">Date</th>
               <th style="width:72px">Check #</th>
