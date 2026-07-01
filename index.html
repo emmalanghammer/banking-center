@@ -833,9 +833,9 @@ const ACCOUNTS = [
 
 const TRANSACTIONS = [
   // [MATCH] clean 1:1 tenant ACH — one confident Orion suggestion
-  {id:'t1',date:'06/16/2026',desc:'ACH DEPOSIT RIVERA 0616',deposit:1850.00,matchStatus:'match',rmLink:'06/16/2026 Deposit 8842: J. Rivera',orion:'1 deposit found matching $1,850.00 on 6/16/2026.',matchRow:{date:'06/16/2026',ref:'Deposit 8842',account:'1001 Operating Account',property:'Hawthorne Court Apartments',comment:'Rivera June Rent',amount:1850.00,depositDetails:{bankAccount:'1001 Operating Account',depositDate:'06/16/2026',comment:'Rivera June Rent',payments:[{tenant:'J. Rivera',date:'06/16/26',checkNo:'ACH',property:'Hawthorne Court',unit:'311'}]}}},
+  {id:'t1',date:'06/16/2026',desc:'ACH DEPOSIT RIVERA 0616',deposit:1850.00,matchStatus:'match',rmLink:'06/16/2026 D8842: J. Rivera',orion:'1 deposit found matching $1,850.00 on 6/16/2026.',matchRow:{date:'06/16/2026',ref:'D8842',account:'1001 Operating Account',property:'Hawthorne Court Apartments',comment:'Rivera June Rent',amount:1850.00,depositDetails:{bankAccount:'1001 Operating Account',depositDate:'06/16/2026',comment:'Rivera June Rent',payments:[{tenant:'J. Rivera',date:'06/16/26',checkNo:'ACH',property:'Hawthorne Court',unit:'311'}]}}},
   // [SELECT MATCH] two candidate records for the same deposit
-  {id:'t2',date:'06/15/2026',desc:'ACH DEPOSIT OKAFOR 0615',deposit:2100.00,matchStatus:'multi',orion:'2 deposits found matching $2,100.00 around 6/15/2026.',multiOrion:'2 deposits found matching $2,100.00 on 06/14/2026 and 06/15/2026. Select the correct match.',multiMatches:[{date:'06/14/2026',ref:'Deposit 8838: D. Okafor',account:'1001 Operating Account',property:'Pearl District Lofts',comment:'June rent',amount:2100.00},{date:'06/15/2026',ref:'Deposit 8840: D. Okafor',account:'1001 Operating Account',property:'Pearl District Lofts',comment:'June rent payment',amount:2100.00}]},
+  {id:'t2',date:'06/15/2026',desc:'ACH DEPOSIT OKAFOR 0615',deposit:2100.00,matchStatus:'multi',orion:'2 deposits found matching $2,100.00 around 6/15/2026.',multiOrion:'2 deposits found matching $2,100.00 on 06/14/2026 and 06/15/2026. Select the correct match.',multiMatches:[{date:'06/14/2026',ref:'D8838: D. Okafor',account:'1001 Operating Account',property:'Pearl District Lofts',comment:'June rent',amount:2100.00},{date:'06/15/2026',ref:'D8840: D. Okafor',account:'1001 Operating Account',property:'Pearl District Lofts',comment:'June rent payment',amount:2100.00}]},
   // [ADD] vendor check, no match — Add overlay pre-fills payee/amount/check #
   {id:'t3',date:'06/12/2026',desc:'CHECK 2209 ROSE CITY PLUMBING',payment:1240.00,matchStatus:'none',rmLink:null},
   // [SPLIT] one batch deposit covering multiple residents — split to match
@@ -854,12 +854,12 @@ const TRANSACTIONS_BY_ACCT = {
   // 1004 Trust Account - Comm. (7 to review, diff -4,200.00)
   tc6629: [
     {id:'tc1',date:'06/16/2026',desc:'ACH DEBIT HENDERSON J 0616',payment:4200.00,matchStatus:'none',rmLink:null},
-    {id:'tc2',date:'06/13/2026',desc:'WIRE INBOUND TENANT CHEN',deposit:850.00,matchStatus:'match',rmLink:'06/13/2026 Deposit 7201: A. Chen'},
+    {id:'tc2',date:'06/13/2026',desc:'WIRE INBOUND TENANT CHEN',deposit:850.00,matchStatus:'match',rmLink:'06/13/2026 D7201: A. Chen'},
     {id:'tc3',date:'06/11/2026',desc:'ACH DEPOSIT TENANT FLORES',deposit:1100.00,matchStatus:'none',rmLink:null},
     {id:'tc4',date:'06/09/2026',desc:'CHECK 00412 CITY OF PORTLAND',payment:312.50,matchStatus:'none',rmLink:null},
     {id:'tc5',date:'06/05/2026',desc:'ACH DEPOSIT TENANT PARK',deposit:925.00,matchStatus:'none',rmLink:null},
     {id:'tc6',date:'06/02/2026',desc:'ZELLE PAYMENT NGUYEN 0602',deposit:750.00,matchStatus:'none',rmLink:null},
-    {id:'tc7',date:'05/29/2026',desc:'ACH DEPOSIT TENANT WALSH',deposit:1150.00,matchStatus:'match',rmLink:'05/29/2026 Deposit 7198: M. Walsh'},
+    {id:'tc7',date:'05/29/2026',desc:'ACH DEPOSIT TENANT WALSH',deposit:1150.00,matchStatus:'match',rmLink:'05/29/2026 D7198: M. Walsh'},
     {id:'tc8',date:'05/27/2026',desc:'ACH DEPOSIT TENANT REYES',deposit:975.00,matchStatus:'none',rmLink:null},
     {id:'tc9',date:'05/22/2026',desc:'CHECK 00409 CASCADE HVAC',payment:450.00,matchStatus:'none',rmLink:null},
   ],
@@ -1693,7 +1693,7 @@ function expActionRow(tx) {
 
 // Derive a structured match row from a plain `rmLink` string when the richer
 // `matchRow` object isn't present (secondary accounts only carry `rmLink`).
-// rmLink format: "MM/DD/YYYY <Type Ref>: <Name>"  e.g. "06/13/2026 Deposit 7201: A. Chen"
+// rmLink format: "MM/DD/YYYY <Type Ref>: <Name>"  e.g. "06/13/2026 D7201: A. Chen"
 function matchRowFromTx(tx) {
   if (tx.matchRow) return tx.matchRow;
   const acct = ACCOUNTS.find(a => (TRANSACTIONS_BY_ACCT[a.id] || []).some(t => t.id === tx.id));
@@ -2654,7 +2654,7 @@ function fmCandidates(tx) {
       {
         date: base,
         type: 'Receipt',
-        ref: `Deposit ${depNum}`,
+        ref: `D${depNum}`,
         property: prop,
         info: `${initial}. ${lastName} — Rent Payment`,
         comment: 'June Rent',
@@ -2672,7 +2672,7 @@ function fmCandidates(tx) {
       {
         date: offsetDate(base, -5),
         type: 'Receipt',
-        ref: `Deposit ${depNum - 3}`,
+        ref: `D${depNum - 3}`,
         property: prop,
         info: `${initial}. ${lastName} — Partial Payment`,
         comment: 'Partial — June Rent',
