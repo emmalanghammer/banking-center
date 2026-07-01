@@ -1530,7 +1530,9 @@ function renderRight() {
     ${acct.syncedMin != null ? `<div class="acct-hdr-sync">${ic(P.refresh,14,'#aaa')}<span>${syncLbl}</span></div>` : ''}
     <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
       <button style="background:none;border:none;display:flex;align-items:center;gap:5px;color:#008dd5;font-size:13px" onclick="${acct.kind==='card'?`openCR('${acct.id}')`:`openBR('${acct.id}')`}">${acct.kind==='card'?'Credit Card Register':'Bank Register'}</button>
-      <button class="btn-primary" style="height:34px;font-size:13px" onclick="openReconcile('${acct.id}')">Reconcile</button>
+      <span style="display:inline-flex" title="${unmatchedCount>0?`${unmatchedCount} transaction${unmatchedCount!==1?'s':''} still in review — reconcile once everything is matched or excluded`:''}">
+        <button class="btn-primary" style="height:34px;font-size:13px"${unmatchedCount>0?' disabled':''} onclick="openReconcile('${acct.id}')">Reconcile</button>
+      </span>
     </div>
   </div>
   <!-- Summary -->
@@ -4511,7 +4513,9 @@ function _renderRegister(STATE, opts) {
           `}
         </div>
         <div class="br-top-right">
-          <button class="btn-primary" style="height:32px;padding:0 16px;font-size:13px" onclick="openReconcile('${acct.id}')">${opts.reconcileLabel}</button>
+          <span style="display:inline-flex" title="${unmatchedCount>0?`${unmatchedCount} transaction${unmatchedCount!==1?'s':''} still in review — reconcile once everything is matched or excluded`:''}">
+            <button class="btn-primary" style="height:32px;padding:0 16px;font-size:13px"${unmatchedCount>0?' disabled':''} onclick="openReconcile('${acct.id}')">${opts.reconcileLabel}</button>
+          </span>
         </div>
       </div>
     </div>
