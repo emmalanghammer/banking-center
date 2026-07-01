@@ -315,6 +315,13 @@ svg.ico{display:block;flex-shrink:0}
 .so-input span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .so-att{height:36px;padding:0 8px;border:1px dashed #cedbe7;border-radius:4px;background:#f5f8fa;display:flex;align-items:center;justify-content:space-between}
 .so-att-left{display:flex;align-items:center;gap:4px;color:#008dd5;font-size:14px}
+.so-textarea{min-height:80px;padding:8px;border:1px solid #cedbe7;border-radius:4px;background:#f5f8fa;font-size:14px;color:#13314c;font-family:inherit;resize:vertical}
+.so-att-center{height:72px;border:1px dashed #cedbe7;border-radius:4px;background:#f5f8fa;display:flex;align-items:center;justify-content:center;gap:12px}
+.so-att-center .so-att-left{cursor:pointer}
+.so-att-center-div{width:1px;height:18px;background:#cedbe7}
+.so-pmtmethod{display:flex;flex-direction:column}
+.so-pmtmethod-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eef2f7;font-size:14px;color:#13314c}
+.so-pmtmethod-row.total{border-top:2px solid #008dd5;border-bottom:none;margin-top:2px;padding-top:10px;color:#008dd5;font-weight:600}
 .so-pmt-hdr-row{display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;border-bottom:1px solid #e3edf5}
 .so-pmt-title{font-size:14px;font-weight:600;color:#13314c}
 .so-pmt-filters{display:flex;align-items:center;gap:8px}
@@ -834,7 +841,7 @@ const ACCOUNTS = [
 
 const TRANSACTIONS = [
   // [MATCH] clean 1:1 tenant ACH — one confident Orion suggestion
-  {id:'t1',date:'06/16/2026',desc:'ACH DEPOSIT RIVERA 0616',deposit:1850.00,matchStatus:'match',rmLink:'06/16/2026 Deposit 8842: J. Rivera',orion:'1 deposit found matching $1,850.00 on 6/16/2026.',matchRow:{date:'06/16/2026',ref:'Deposit 8842',account:'1001 Operating Account',property:'Hawthorne Court Apartments',comment:'Rivera June Rent',amount:1850.00,depositDetails:{bankAccount:'1001 Operating Account',depositDate:'06/16/2026',comment:'Rivera June Rent',payments:[{tenant:'J. Rivera',date:'06/16/26',checkNo:'ACH',property:'Hawthorne Court',unit:'311'}]}}},
+  {id:'t1',date:'06/16/2026',desc:'ACH DEPOSIT RIVERA 0616',deposit:1850.00,matchStatus:'match',rmLink:'06/16/2026 Deposit 8842: J. Rivera',orion:'1 deposit found matching $1,850.00 on 6/16/2026.',matchRow:{date:'06/16/2026',ref:'Deposit 8842',account:'1001 Operating Account',property:'Hawthorne Court Apartments',comment:'Rivera June Rent',amount:1850.00,depositDetails:{bankAccount:'1001 Operating Account',depositDate:'06/16/2026',comment:'Rivera June Rent',payments:[{tenant:'J. Rivera',date:'06/16/26',checkNo:'ACH',property:'Hawthorne Court',unit:'311',amount:1850.00}]}}},
   // [SELECT MATCH] two candidate records for the same deposit
   {id:'t2',date:'06/15/2026',desc:'ACH DEPOSIT OKAFOR 0615',deposit:2100.00,matchStatus:'multi',orion:'2 deposits found matching $2,100.00 around 6/15/2026.',multiOrion:'2 deposits found matching $2,100.00 on 06/14/2026 and 06/15/2026. Select the correct match.',multiMatches:[{date:'06/14/2026',ref:'Deposit 8838: D. Okafor',account:'1001 Operating Account',property:'Pearl District Lofts',comment:'June rent',amount:2100.00},{date:'06/15/2026',ref:'Deposit 8840: D. Okafor',account:'1001 Operating Account',property:'Pearl District Lofts',comment:'June rent payment',amount:2100.00}]},
   // [ADD] vendor check, no match — Add overlay pre-fills payee/amount/check #
@@ -2946,6 +2953,26 @@ function setHelpful(id, dir) {
 }
 
 /* ─ Slideout ─ */
+// Groups a deposit's payments into the four standard tender types Rent
+// Manager tracks on a deposit slip: Cash, Check, Money Orders, Other (ACH,
+// wire, card, etc.). `checkNo` is the signal we have to infer tender type.
+function paymentMethodBreakdown(payments) {
+  const buckets = [['Cash', 0, 0], ['Check', 0, 0], ['Money Orders', 0, 0], ['Other', 0, 0]];
+  const idx = { Cash: 0, Check: 1, 'Money Orders': 2, Other: 3 };
+  payments.forEach(p => {
+    const cn = String(p.checkNo || '').trim().toUpperCase();
+    let key = 'Other';
+    if (!cn || cn === 'CASH') key = 'Cash';
+    else if (/^\d+$/.test(cn)) key = 'Check';
+    else if (cn === 'MO' || cn.includes('MONEY ORDER')) key = 'Money Orders';
+    const b = buckets[idx[key]];
+    b[1]++; b[2] += parseFloat(p.amount) || 0;
+  });
+  const totalCount = payments.length;
+  const totalAmt = buckets.reduce((s, b) => s + b[2], 0);
+  return { buckets, totalCount, totalAmt };
+}
+
 function slideoutView(tx) {
   // Derive a uniform view of the Rent Manager record this transaction is matched to,
   // whether it came from a suggested match, a multi-match selection, or a manual Add.
@@ -2995,6 +3022,9 @@ function renderSlideout() {
       <span class="so-muted">${p.unit||''}</span>
       <span style="display:flex;align-items:center;justify-content:center">${ic(P.kebab,16,'#b3b3b3')}</span>
     </div>`).join('');
+  const mb = paymentMethodBreakdown(v.payments);
+  const mbRows = mb.buckets.map(([label,count,total])=>`
+    <div class="so-pmtmethod-row"><span>${label} (${count})</span><span>${fmtN(total)}</span></div>`).join('');
   el.innerHTML = `
     <div class="slideout-bg" onclick="closeSlideout()"></div>
     <div class="slideout">
@@ -3010,19 +3040,24 @@ function renderSlideout() {
             <div class="so-input"><span>${v.bankAccount}</span>${ic(P.down,18,'#9aa7b3')}</div>
           </div>
           <div class="so-field">
+            <label>Comments</label>
+            <textarea class="so-textarea" readonly>${v.comment||''}</textarea>
+          </div>
+          <div class="so-field">
             <label>Deposit Date</label>
             <div class="so-input"><span>${v.date}</span>${ic(P.cal,18,'#9aa7b3')}</div>
           </div>
           <div class="so-field">
-            <label>Comment</label>
-            <div class="so-input"><span>${v.comment||''}</span></div>
-          </div>
-          <div class="so-field">
-            <label>Attach Files</label>
-            <div class="so-att">
-              <div class="so-att-left">${ic(P.upload,15,'#008dd5')} <span>Upload Files</span></div>
-              ${ic(P.cols,17,'#9aa7b3')}
+            <label>Attachments</label>
+            <div class="so-att-center">
+              <div class="so-att-left">${UPLOAD_ICO} <span>Upload</span></div>
+              <div class="so-att-center-div"></div>
+              <div class="so-att-left">${PASTE_ICO} <span>Paste</span></div>
             </div>
+          </div>
+          <div class="so-pmtmethod">
+            ${mbRows}
+            <div class="so-pmtmethod-row total"><span>Total (${mb.totalCount})</span><span>${fmtN(mb.totalAmt)}</span></div>
           </div>
         </div>
         <div class="so-card">
