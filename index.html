@@ -1692,6 +1692,17 @@ function expActionRow(tx) {
     </div>`;
 }
 
+// Register-style short code for a "<Type> <number>[: Name]" reference string,
+// matching the compact Reference column convention used in the Bank Register
+// (e.g. "D1621" for deposits, "1042" for checks, "J1573" for journals).
+function regRefCode(ref) {
+  if (!ref) return ref;
+  const m = ref.match(/^(Deposit|Journal|Check|Bill)\s+(\w+)/);
+  if (!m) return ref.split(':')[0].trim();
+  const prefix = { Deposit: 'D', Journal: 'J', Check: '', Bill: 'B' }[m[1]] ?? '';
+  return prefix + m[2];
+}
+
 // Derive a structured match row from a plain `rmLink` string when the richer
 // `matchRow` object isn't present (secondary accounts only carry `rmLink`).
 // rmLink format: "MM/DD/YYYY <Type Ref>: <Name>"  e.g. "06/13/2026 Deposit 7201: A. Chen"
@@ -1727,7 +1738,7 @@ function renderExpandedMatch(tx) {
       </div>
       <div class="sub-tbl-row" style="${cols}">
         <div class="sub-tbl-cell">${mr.date}</div>
-        <div class="sub-tbl-cell"><button class="tx-rm-link" onclick="openSlideout('${tx.id}')">${mr.ref}</button></div>
+        <div class="sub-tbl-cell" style="cursor:pointer" onclick="openSlideout('${tx.id}')">${regRefCode(mr.ref)}</div>
         <div class="sub-tbl-cell">${mr.account}</div>
         <div class="sub-tbl-cell">${mr.property||'—'}</div>
         <div class="sub-tbl-cell">${mr.comment}</div>
@@ -1744,7 +1755,7 @@ function renderExpandedMulti(tx) {
     <div class="sub-tbl-row${sel===i?' sel':''}" style="${cols};cursor:pointer" onclick="setMultiSel('${tx.id}',${i})">
       <div class="sub-tbl-cell" style="display:flex;align-items:center;justify-content:center"><div class="radio-dot${sel===i?' sel':''}"></div></div>
       <div class="sub-tbl-cell">${r.date}</div>
-      <div class="sub-tbl-cell"><button class="tx-rm-link">${r.ref}</button></div>
+      <div class="sub-tbl-cell">${regRefCode(r.ref)}</div>
       <div class="sub-tbl-cell">${r.account}</div>
       <div class="sub-tbl-cell">${r.property||'—'}</div>
       <div class="sub-tbl-cell">${r.comment}</div>
@@ -2858,7 +2869,7 @@ function renderFindMatch() {
       <td style="width:36px"><input class="fm-cb" type="checkbox" ${_findMatchSel.has(i)?'checked':''} onclick="event.stopPropagation();toggleFmRow(${i})"></td>
       <td>${c.date}</td>
       <td>${c.type}</td>
-      <td>${c.ref}</td>
+      <td>${regRefCode(c.ref)}</td>
       <td>${c.property}</td>
       <td>${c.info}</td>
       <td>${c.comment}</td>
