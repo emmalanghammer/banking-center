@@ -276,6 +276,9 @@ svg.ico{display:block;flex-shrink:0}
 .btn-primary:hover{background:#0079b8}
 .btn-primary:disabled{background:#8ec8e5;cursor:not-allowed}
 .btn-primary:disabled:hover{background:#8ec8e5}
+.tt-wrap{position:relative;display:inline-flex}
+.tt-wrap[data-tip]:hover::after{content:attr(data-tip);position:absolute;top:calc(100% + 8px);right:0;background:#13314c;color:#fff;font-size:12px;line-height:1.4;padding:8px 10px;border-radius:4px;white-space:normal;width:220px;text-align:left;z-index:60;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.tt-wrap[data-tip]:hover::before{content:'';position:absolute;top:100%;right:14px;border:5px solid transparent;border-bottom-color:#13314c;margin-top:2px;z-index:60}
 .btn-outline{height:32px;padding:0 14px;background:#fff;color:#008dd5;border:1px solid #008dd5;border-radius:4px;font-size:13px;display:flex;align-items:center;gap:5px}
 .btn-outline:hover{background:#f0f8fd}
 .btn-ghost{height:32px;padding:0 12px;background:#fff;color:#13314c;border:1px solid #cedbe7;border-radius:4px;font-size:13px;display:flex;align-items:center;gap:5px}
@@ -1530,7 +1533,7 @@ function renderRight() {
     ${acct.syncedMin != null ? `<div class="acct-hdr-sync">${ic(P.refresh,14,'#aaa')}<span>${syncLbl}</span></div>` : ''}
     <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
       <button style="background:none;border:none;display:flex;align-items:center;gap:5px;color:#008dd5;font-size:13px" onclick="${acct.kind==='card'?`openCR('${acct.id}')`:`openBR('${acct.id}')`}">${acct.kind==='card'?'Credit Card Register':'Bank Register'}</button>
-      <span style="display:inline-flex" title="${unmatchedCount>0?`${unmatchedCount} transaction${unmatchedCount!==1?'s':''} still in review — reconcile once everything is matched or excluded`:''}">
+      <span class="tt-wrap"${unmatchedCount>0?` data-tip="${unmatchedCount} bank transaction${unmatchedCount!==1?'s are':' is'} still in review, and this account cannot be reconciled."`:''}>
         <button class="btn-primary" style="height:34px;font-size:13px"${unmatchedCount>0?' disabled':''} onclick="openReconcile('${acct.id}')">Reconcile</button>
       </span>
     </div>
@@ -4513,7 +4516,7 @@ function _renderRegister(STATE, opts) {
           `}
         </div>
         <div class="br-top-right">
-          <span style="display:inline-flex" title="${unmatchedCount>0?`${unmatchedCount} transaction${unmatchedCount!==1?'s':''} still in review — reconcile once everything is matched or excluded`:''}">
+          <span class="tt-wrap"${unmatchedCount>0?` data-tip="${unmatchedCount} bank transaction${unmatchedCount!==1?'s are':' is'} still in review, and this account cannot be reconciled."`:''}>
             <button class="btn-primary" style="height:32px;padding:0 16px;font-size:13px"${unmatchedCount>0?' disabled':''} onclick="openReconcile('${acct.id}')">${opts.reconcileLabel}</button>
           </span>
         </div>
