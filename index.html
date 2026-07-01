@@ -1738,7 +1738,7 @@ function renderExpandedMatch(tx) {
       </div>
       <div class="sub-tbl-row" style="${cols}">
         <div class="sub-tbl-cell">${mr.date}</div>
-        <div class="sub-tbl-cell" style="cursor:pointer" onclick="openSlideout('${tx.id}')">${regRefCode(mr.ref)}</div>
+        <div class="sub-tbl-cell"><button class="tx-rm-link" onclick="openSlideout('${tx.id}')">${regRefCode(mr.ref)}</button></div>
         <div class="sub-tbl-cell">${mr.account}</div>
         <div class="sub-tbl-cell">${mr.property||'—'}</div>
         <div class="sub-tbl-cell">${mr.comment}</div>
@@ -1755,7 +1755,7 @@ function renderExpandedMulti(tx) {
     <div class="sub-tbl-row${sel===i?' sel':''}" style="${cols};cursor:pointer" onclick="setMultiSel('${tx.id}',${i})">
       <div class="sub-tbl-cell" style="display:flex;align-items:center;justify-content:center"><div class="radio-dot${sel===i?' sel':''}"></div></div>
       <div class="sub-tbl-cell">${r.date}</div>
-      <div class="sub-tbl-cell">${regRefCode(r.ref)}</div>
+      <div class="sub-tbl-cell"><button class="tx-rm-link" onclick="event.stopPropagation();setMultiSel('${tx.id}',${i});openSlideout('${tx.id}')">${regRefCode(r.ref)}</button></div>
       <div class="sub-tbl-cell">${r.account}</div>
       <div class="sub-tbl-cell">${r.property||'—'}</div>
       <div class="sub-tbl-cell">${r.comment}</div>
@@ -2970,8 +2970,8 @@ function slideoutView(tx) {
 function openSlideout(txId) {
   const tx = acctTxs().find(t=>t.id===txId);
   if (!tx) return;
-  // Open for matched transactions, or to preview a suggested single match.
-  if (!S.matchedIds.has(txId) && !tx.matchRow && tx.matchStatus !== 'match') return;
+  // Open for matched transactions, or to preview a suggested single/multi match.
+  if (!S.matchedIds.has(txId) && !tx.matchRow && !tx.multiMatches && tx.matchStatus !== 'match') return;
   S.slideoutTx = txId;
   renderSlideout();
   _ubOpenOverlaySignal('match');
