@@ -2973,25 +2973,44 @@ function paymentMethodBreakdown(payments) {
   return { buckets, totalCount, totalAmt };
 }
 
+// Which RM transaction type a matched record represents, inferred from its
+// reference string's leading word (e.g. "Journal 4101" -> Journal Entry).
+// Falls back to Deposit/Check by cash-flow direction when the ref is generic
+// (e.g. a freshly-added record with no descriptive reference yet).
+function matchedRecordType(ref, isInflow) {
+  const m = (ref || '').match(/^(Deposit|Journal|Check|Bill)\b/);
+  if (m) return m[1] === 'Journal' ? 'Journal Entry' : m[1];
+  return isInflow ? 'Deposit' : 'Check';
+}
+
 function slideoutView(tx) {
   // Derive a uniform view of the Rent Manager record this transaction is matched to,
   // whether it came from a suggested match, a multi-match selection, or a manual Add.
   const acct = ACCOUNTS.find(a=>a.id===S.activeId);
   const amount = tx.deposit!=null ? tx.deposit : (tx.payment!=null ? tx.payment : 0);
+  const isInflow = tx.deposit != null;
   if (tx.matchRow) {
     const d = tx.matchRow.depositDetails || {};
     return { ref: tx.matchRow.ref, date: tx.matchRow.date, amount: tx.matchRow.amount,
       bankAccount: d.bankAccount || (acct?acct.gl:''), comment: d.comment || tx.matchRow.comment || tx.desc,
-      payments: d.payments || [] };
+      payments: d.payments || [], type: matchedRecordType(tx.matchRow.ref, isInflow) };
   }
   if (tx.multiMatches) {
     const m = tx.multiMatches[S.multiSel[tx.id]??0] || tx.multiMatches[0];
     return { ref: m.ref, date: m.date, amount: m.amount,
-      bankAccount: m.account || (acct?acct.gl:''), comment: m.comment || tx.desc, payments: [] };
+      bankAccount: m.account || (acct?acct.gl:''), comment: m.comment || tx.desc, payments: [],
+      type: matchedRecordType(m.ref, isInflow) };
   }
-  // Pre-matched (rmLink only) or manually added — synthesize from available data.
-  return { ref: tx.rmLink || 'New Rent Manager record', date: tx.date, amount,
-    bankAccount: acct?acct.gl:'', comment: tx.desc, payments: [] };
+  if (tx.rmLink) {
+    // Pre-matched via a plain rmLink string — parse it instead of using the
+    // raw bank feed text, so the reference and RM comment display correctly.
+    const mr = matchRowFromTx(tx);
+    return { ref: mr.ref, date: mr.date, amount, bankAccount: acct?acct.gl:'', comment: mr.comment || tx.desc,
+      payments: [], type: matchedRecordType(mr.ref, isInflow) };
+  }
+  // Manually added via Add Transaction with no descriptive reference recorded yet.
+  return { ref: 'New Rent Manager record', date: tx.date, amount,
+    bankAccount: acct?acct.gl:'', comment: tx.desc, payments: [], type: isInflow ? 'Deposit' : 'Check' };
 }
 
 function openSlideout(txId) {
@@ -3005,13 +3024,39 @@ function openSlideout(txId) {
 }
 function closeSlideout() { S.slideoutTx=null; renderSlideout(); _ubCloseOverlaySignal(); }
 
-function renderSlideout() {
-  const el = document.getElementById('slideout-root');
-  if (!S.slideoutTx) { el.innerHTML=''; return; }
-  const tx = acctTxs().find(t=>t.id===S.slideoutTx);
-  const v = slideoutView(tx);
-  const isMatched = S.matchedIds.has(tx.id);
-  const title = tx.deposit != null ? 'Deposit Details' : 'Payment Details';
+function depositTopCard(v) {
+  const mb = paymentMethodBreakdown(v.payments);
+  const mbRows = mb.buckets.map(([label,count,total])=>`
+    <div class="so-pmtmethod-row"><span>${label} (${count})</span><span>${fmtN(total)}</span></div>`).join('');
+  return `
+    <div class="so-card">
+      <div class="so-field">
+        <label>Bank Account</label>
+        <div class="so-input"><span>${v.bankAccount}</span>${ic(P.down,18,'#9aa7b3')}</div>
+      </div>
+      <div class="so-field">
+        <label>Comments</label>
+        <textarea class="so-textarea" readonly>${v.comment||''}</textarea>
+      </div>
+      <div class="so-field">
+        <label>Deposit Date</label>
+        <div class="so-input"><span>${v.date}</span>${ic(P.cal,18,'#9aa7b3')}</div>
+      </div>
+      <div class="so-field">
+        <label>Attachments</label>
+        <div class="so-att-center">
+          <div class="so-att-left">${UPLOAD_ICO} <span>Upload</span></div>
+          <div class="so-att-center-div"></div>
+          <div class="so-att-left">${PASTE_ICO} <span>Paste</span></div>
+        </div>
+      </div>
+      <div class="so-pmtmethod">
+        ${mbRows}
+        <div class="so-pmtmethod-row total"><span>Total (${mb.totalCount})</span><span>${fmtN(mb.totalAmt)}</span></div>
+      </div>
+    </div>`;
+}
+function depositPaymentsCard(v) {
   const pmtRows = v.payments.map(p=>`
     <div class="so-reg-row">
       <span style="display:flex;align-items:center;justify-content:center">${ic(P.right,14,'#cedbe7')}</span>
@@ -3022,9 +3067,113 @@ function renderSlideout() {
       <span class="so-muted">${p.unit||''}</span>
       <span style="display:flex;align-items:center;justify-content:center">${ic(P.kebab,16,'#b3b3b3')}</span>
     </div>`).join('');
-  const mb = paymentMethodBreakdown(v.payments);
-  const mbRows = mb.buckets.map(([label,count,total])=>`
-    <div class="so-pmtmethod-row"><span>${label} (${count})</span><span>${fmtN(total)}</span></div>`).join('');
+  return `
+    <div class="so-card">
+      <div class="so-pmt-hdr-row">
+        <div class="so-pmt-title">Payments</div>
+      </div>
+      <div class="so-pmt-filters">
+        <input class="so-search" placeholder="Find a payment..." />
+        <button class="btn-outline" style="height:36px;padding:0 12px;display:inline-flex;align-items:center;gap:6px;flex-shrink:0">${ic(P.add,14,'#008dd5')} Add Other Income</button>
+      </div>
+      ${v.payments.length ? `<div class="so-reg">
+        <div class="so-reg-hdr">
+          <span></span><span>Tenant</span><span>Date</span><span>Check #</span><span>Property</span><span>Unit</span><span></span>
+        </div>
+        ${pmtRows}
+      </div>` : ''}
+      <button class="so-add-link">${ic(P.add,14,'#008dd5')} Add Payments</button>
+    </div>`;
+}
+function journalTopCard(v) {
+  return `
+    <div class="so-card">
+      <div class="so-field">
+        <label>Journal</label>
+        <div class="so-input"><span>${regRefCode(v.ref)}</span></div>
+      </div>
+      <div class="so-field">
+        <label>Date</label>
+        <div class="so-input"><span>${v.date}</span>${ic(P.cal,18,'#9aa7b3')}</div>
+      </div>
+      <div class="so-field">
+        <label>Account</label>
+        <div class="so-input"><span>${v.bankAccount}</span></div>
+      </div>
+      <div class="so-field">
+        <label>Amount</label>
+        <div class="so-input"><span>${fmt(v.amount)}</span></div>
+      </div>
+      <div class="so-field">
+        <label>Memo</label>
+        <textarea class="so-textarea" readonly>${v.comment||''}</textarea>
+      </div>
+    </div>`;
+}
+function checkTopCard(v) {
+  // For a Check record, the "comment" we parsed out of its reference IS the
+  // payee name (e.g. "Check 812: Menards" -> comment "Menards") — there's no
+  // separate memo text in this data, so it belongs in the Vendor field.
+  return `
+    <div class="so-card">
+      <div class="so-field">
+        <label>Bank</label>
+        <div class="so-input"><span>${v.bankAccount}</span></div>
+      </div>
+      <div class="so-field">
+        <label>Date</label>
+        <div class="so-input"><span>${v.date}</span>${ic(P.cal,18,'#9aa7b3')}</div>
+      </div>
+      <div class="so-field">
+        <label>No.</label>
+        <div class="so-input"><span>${regRefCode(v.ref)}</span></div>
+      </div>
+      <div class="so-field">
+        <label>Vendor / Owner / Tenant / Prospect</label>
+        <div class="so-input"><span>${v.comment||''}</span></div>
+      </div>
+      <div class="so-field">
+        <label>Amount</label>
+        <div class="so-input"><span>${fmt(v.amount)}</span></div>
+      </div>
+    </div>`;
+}
+function genericTopCard(v) {
+  return `
+    <div class="so-card">
+      <div class="so-field">
+        <label>Reference</label>
+        <div class="so-input"><span>${v.ref}</span></div>
+      </div>
+      <div class="so-field">
+        <label>Date</label>
+        <div class="so-input"><span>${v.date}</span>${ic(P.cal,18,'#9aa7b3')}</div>
+      </div>
+      <div class="so-field">
+        <label>Account</label>
+        <div class="so-input"><span>${v.bankAccount}</span></div>
+      </div>
+      <div class="so-field">
+        <label>Amount</label>
+        <div class="so-input"><span>${fmt(v.amount)}</span></div>
+      </div>
+      <div class="so-field">
+        <label>Comment</label>
+        <textarea class="so-textarea" readonly>${v.comment||''}</textarea>
+      </div>
+    </div>`;
+}
+
+function renderSlideout() {
+  const el = document.getElementById('slideout-root');
+  if (!S.slideoutTx) { el.innerHTML=''; return; }
+  const tx = acctTxs().find(t=>t.id===S.slideoutTx);
+  const v = slideoutView(tx);
+  const isMatched = S.matchedIds.has(tx.id);
+  const titles = { Deposit: 'Deposit Details', 'Journal Entry': 'Journal Details', Check: 'Check Details', Bill: 'Bill Details' };
+  const title = titles[v.type] || 'Transaction Details';
+  const topCardFns = { Deposit: depositTopCard, 'Journal Entry': journalTopCard, Check: checkTopCard };
+  const topCard = (topCardFns[v.type] || genericTopCard)(v);
   el.innerHTML = `
     <div class="slideout-bg" onclick="closeSlideout()"></div>
     <div class="slideout">
@@ -3034,48 +3183,8 @@ function renderSlideout() {
       </div>
       <div class="slideout-body">
         ${isMatched ? `<div class="matched-banner">${ic(P.check,16,'#6eb744')} This bank transaction is matched to the Rent Manager record below.</div>` : ''}
-        <div class="so-card">
-          <div class="so-field">
-            <label>Bank Account</label>
-            <div class="so-input"><span>${v.bankAccount}</span>${ic(P.down,18,'#9aa7b3')}</div>
-          </div>
-          <div class="so-field">
-            <label>Comments</label>
-            <textarea class="so-textarea" readonly>${v.comment||''}</textarea>
-          </div>
-          <div class="so-field">
-            <label>Deposit Date</label>
-            <div class="so-input"><span>${v.date}</span>${ic(P.cal,18,'#9aa7b3')}</div>
-          </div>
-          <div class="so-field">
-            <label>Attachments</label>
-            <div class="so-att-center">
-              <div class="so-att-left">${UPLOAD_ICO} <span>Upload</span></div>
-              <div class="so-att-center-div"></div>
-              <div class="so-att-left">${PASTE_ICO} <span>Paste</span></div>
-            </div>
-          </div>
-          <div class="so-pmtmethod">
-            ${mbRows}
-            <div class="so-pmtmethod-row total"><span>Total (${mb.totalCount})</span><span>${fmtN(mb.totalAmt)}</span></div>
-          </div>
-        </div>
-        <div class="so-card">
-          <div class="so-pmt-hdr-row">
-            <div class="so-pmt-title">Payments</div>
-          </div>
-          <div class="so-pmt-filters">
-            <input class="so-search" placeholder="Find a payment..." />
-            <button class="btn-outline" style="height:36px;padding:0 12px;display:inline-flex;align-items:center;gap:6px;flex-shrink:0">${ic(P.add,14,'#008dd5')} Add Other Income</button>
-          </div>
-          ${v.payments.length ? `<div class="so-reg">
-            <div class="so-reg-hdr">
-              <span></span><span>Tenant</span><span>Date</span><span>Check #</span><span>Property</span><span>Unit</span><span></span>
-            </div>
-            ${pmtRows}
-          </div>` : ''}
-          <button class="so-add-link">${ic(P.add,14,'#008dd5')} Add Payments</button>
-        </div>
+        ${topCard}
+        ${v.type === 'Deposit' ? depositPaymentsCard(v) : ''}
       </div>
       <div class="slideout-foot">
         <button class="btn-ghost" style="height:34px" onclick="closeSlideout()">Close</button>
