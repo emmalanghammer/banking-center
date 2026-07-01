@@ -599,6 +599,7 @@ svg.ico{display:block;flex-shrink:0}
 .at-amount-wrap .at-input.has2{padding-right:48px}
 .at-amount-icons{position:absolute;right:6px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:6px}
 .at-card-title{font-size:13px;font-weight:600;color:#13314c;margin:0 -16px 12px;padding:0 16px 8px;border-bottom:2px solid #13314c}
+.at-sub-heading{font-size:13px;font-weight:600;color:#13314c;margin-bottom:8px}
 .at-field-grid{display:grid;gap:10px 12px}
 .at-field{display:flex;flex-direction:column;gap:3px}
 .at-field label{font-size:12px;color:#666}
@@ -833,9 +834,9 @@ const ACCOUNTS = [
 
 const TRANSACTIONS = [
   // [MATCH] clean 1:1 tenant ACH — one confident Orion suggestion
-  {id:'t1',date:'06/16/2026',desc:'ACH DEPOSIT RIVERA 0616',deposit:1850.00,matchStatus:'match',rmLink:'06/16/2026 D8842: J. Rivera',orion:'1 deposit found matching $1,850.00 on 6/16/2026.',matchRow:{date:'06/16/2026',ref:'D8842',account:'1001 Operating Account',property:'Hawthorne Court Apartments',comment:'Rivera June Rent',amount:1850.00,depositDetails:{bankAccount:'1001 Operating Account',depositDate:'06/16/2026',comment:'Rivera June Rent',payments:[{tenant:'J. Rivera',date:'06/16/26',checkNo:'ACH',property:'Hawthorne Court',unit:'311'}]}}},
+  {id:'t1',date:'06/16/2026',desc:'ACH DEPOSIT RIVERA 0616',deposit:1850.00,matchStatus:'match',rmLink:'06/16/2026 Deposit 8842: J. Rivera',orion:'1 deposit found matching $1,850.00 on 6/16/2026.',matchRow:{date:'06/16/2026',ref:'Deposit 8842',account:'1001 Operating Account',property:'Hawthorne Court Apartments',comment:'Rivera June Rent',amount:1850.00,depositDetails:{bankAccount:'1001 Operating Account',depositDate:'06/16/2026',comment:'Rivera June Rent',payments:[{tenant:'J. Rivera',date:'06/16/26',checkNo:'ACH',property:'Hawthorne Court',unit:'311'}]}}},
   // [SELECT MATCH] two candidate records for the same deposit
-  {id:'t2',date:'06/15/2026',desc:'ACH DEPOSIT OKAFOR 0615',deposit:2100.00,matchStatus:'multi',orion:'2 deposits found matching $2,100.00 around 6/15/2026.',multiOrion:'2 deposits found matching $2,100.00 on 06/14/2026 and 06/15/2026. Select the correct match.',multiMatches:[{date:'06/14/2026',ref:'D8838: D. Okafor',account:'1001 Operating Account',property:'Pearl District Lofts',comment:'June rent',amount:2100.00},{date:'06/15/2026',ref:'D8840: D. Okafor',account:'1001 Operating Account',property:'Pearl District Lofts',comment:'June rent payment',amount:2100.00}]},
+  {id:'t2',date:'06/15/2026',desc:'ACH DEPOSIT OKAFOR 0615',deposit:2100.00,matchStatus:'multi',orion:'2 deposits found matching $2,100.00 around 6/15/2026.',multiOrion:'2 deposits found matching $2,100.00 on 06/14/2026 and 06/15/2026. Select the correct match.',multiMatches:[{date:'06/14/2026',ref:'Deposit 8838: D. Okafor',account:'1001 Operating Account',property:'Pearl District Lofts',comment:'June rent',amount:2100.00},{date:'06/15/2026',ref:'Deposit 8840: D. Okafor',account:'1001 Operating Account',property:'Pearl District Lofts',comment:'June rent payment',amount:2100.00}]},
   // [ADD] vendor check, no match — Add overlay pre-fills payee/amount/check #
   {id:'t3',date:'06/12/2026',desc:'CHECK 2209 ROSE CITY PLUMBING',payment:1240.00,matchStatus:'none',rmLink:null},
   // [SPLIT] one batch deposit covering multiple residents — split to match
@@ -854,12 +855,12 @@ const TRANSACTIONS_BY_ACCT = {
   // 1004 Trust Account - Comm. (7 to review, diff -4,200.00)
   tc6629: [
     {id:'tc1',date:'06/16/2026',desc:'ACH DEBIT HENDERSON J 0616',payment:4200.00,matchStatus:'none',rmLink:null},
-    {id:'tc2',date:'06/13/2026',desc:'WIRE INBOUND TENANT CHEN',deposit:850.00,matchStatus:'match',rmLink:'06/13/2026 D7201: A. Chen'},
+    {id:'tc2',date:'06/13/2026',desc:'WIRE INBOUND TENANT CHEN',deposit:850.00,matchStatus:'match',rmLink:'06/13/2026 Deposit 7201: A. Chen'},
     {id:'tc3',date:'06/11/2026',desc:'ACH DEPOSIT TENANT FLORES',deposit:1100.00,matchStatus:'none',rmLink:null},
     {id:'tc4',date:'06/09/2026',desc:'CHECK 00412 CITY OF PORTLAND',payment:312.50,matchStatus:'none',rmLink:null},
     {id:'tc5',date:'06/05/2026',desc:'ACH DEPOSIT TENANT PARK',deposit:925.00,matchStatus:'none',rmLink:null},
     {id:'tc6',date:'06/02/2026',desc:'ZELLE PAYMENT NGUYEN 0602',deposit:750.00,matchStatus:'none',rmLink:null},
-    {id:'tc7',date:'05/29/2026',desc:'ACH DEPOSIT TENANT WALSH',deposit:1150.00,matchStatus:'match',rmLink:'05/29/2026 D7198: M. Walsh'},
+    {id:'tc7',date:'05/29/2026',desc:'ACH DEPOSIT TENANT WALSH',deposit:1150.00,matchStatus:'match',rmLink:'05/29/2026 Deposit 7198: M. Walsh'},
     {id:'tc8',date:'05/27/2026',desc:'ACH DEPOSIT TENANT REYES',deposit:975.00,matchStatus:'none',rmLink:null},
     {id:'tc9',date:'05/22/2026',desc:'CHECK 00409 CASCADE HVAC',payment:450.00,matchStatus:'none',rmLink:null},
   ],
@@ -869,7 +870,7 @@ const TRANSACTIONS_BY_ACCT = {
     {id:'me1',date:'06/15/2026',desc:'WIRE OUTBOUND CASCADE HVAC',payment:1200.00,matchStatus:'none',rmLink:null},
     {id:'me2',date:'06/11/2026',desc:'CHECK 00198 ROSE CITY PLUMBING',payment:450.00,matchStatus:'none',rmLink:null},
     {id:'me3',date:'06/08/2026',desc:'ACH DEBIT PORTLAND GENERAL ELECTRIC',payment:350.00,matchStatus:'none',rmLink:null},
-    {id:'me4',date:'06/04/2026',desc:'WIRE INBOUND ESCROW TRANSFER',deposit:2000.00,matchStatus:'match',rmLink:'06/04/2026 Journal 4101: Escrow Funding'},
+    {id:'me4',date:'06/04/2026',desc:'WIRE INBOUND ESCROW TRANSFER',deposit:2000.00,matchStatus:'match',rmLink:'06/04/2026 Journal 4101'},
     {id:'me5',date:'05/28/2026',desc:'ACH DEBIT ABC SUPPLY ROOFING',payment:300.00,matchStatus:'none',rmLink:null},
   ],
 
@@ -1693,7 +1694,7 @@ function expActionRow(tx) {
 
 // Derive a structured match row from a plain `rmLink` string when the richer
 // `matchRow` object isn't present (secondary accounts only carry `rmLink`).
-// rmLink format: "MM/DD/YYYY <Type Ref>: <Name>"  e.g. "06/13/2026 D7201: A. Chen"
+// rmLink format: "MM/DD/YYYY <Type Ref>: <Name>"  e.g. "06/13/2026 Deposit 7201: A. Chen"
 function matchRowFromTx(tx) {
   if (tx.matchRow) return tx.matchRow;
   const acct = ACCOUNTS.find(a => (TRANSACTIONS_BY_ACCT[a.id] || []).some(t => t.id === tx.id));
@@ -1831,9 +1832,9 @@ let _addTxMenuBound = false;
 
 // Friendly labels for the "+ Add Transaction" dropdown (Write Check / Add Bill / …).
 function addTxTypeVerb(type) {
-  const m = { 'Check':'Write Check', 'Bill':'Add Bill', 'Journal Entry':'Add Journal',
-    'Deposit':'Add Deposit', 'Receipt':'Add Receipt',
-    'Credit Card Charge':'Add Charge', 'Credit Card Credit':'Add Credit' };
+  const m = { 'Check':'Write Check', 'Bill':'Add Bill', 'Journal Entry':'Add Journal Entry',
+    'Deposit':'Make Deposit', 'Receipt':'Add Receipt',
+    'Credit Card Charge':'Add Credit Card Transaction', 'Credit Card Credit':'Add Credit Card Transaction' };
   return m[type] || ('Add ' + type);
 }
 function toggleAddTxMenu() {
@@ -1884,8 +1885,9 @@ function addTxTotal() {
 }
 function addTxItemAmount(i) {
   if (i.type === 'Deposit') {
-    if (!i.depSel) return 0;
-    return [...i.depSel].reduce((s,idx)=> s + (DEP_PAYMENTS[idx]?.amount||0), 0);
+    const selTotal = i.depSel ? [...i.depSel].reduce((s,idx)=> s + (DEP_PAYMENTS[idx]?.amount||0), 0) : 0;
+    const oiTotal = (i.otherIncome||[]).reduce((s,r)=> s + (parseFloat(r.amount)||0), 0);
+    return selTotal + oiTotal;
   }
   return parseFloat(i.amount)||0;
 }
@@ -1917,6 +1919,27 @@ function toggleDepAll(itemId, checked) {
   it.depSel = checked ? new Set(DEP_PAYMENTS.map((_,i)=>i)) : new Set();
   document.querySelectorAll('.dep-row-cb').forEach(cb => { cb.checked = checked; });
   recalcAddTxAlloc();
+}
+// Other Income lines on a Deposit — ad-hoc non-tenant income (vendor refunds,
+// laundry income, etc.) added alongside the tenant payments being deposited.
+function addOtherIncomeRow(itemId) {
+  const it = _addTxItems.find(i=>i.id===itemId);
+  if (!it) return;
+  if (!it.otherIncome) it.otherIncome = [];
+  it.otherIncome.push({ property:'', unit:'', account:'', reference:'', memo:'', party:'', amount:'0.00' });
+  renderAddTx();
+}
+function removeOtherIncomeRow(itemId, idx) {
+  const it = _addTxItems.find(i=>i.id===itemId);
+  if (!it || !it.otherIncome) return;
+  it.otherIncome.splice(idx, 1);
+  renderAddTx();
+}
+function setOtherIncomeField(itemId, idx, field, val) {
+  const it = _addTxItems.find(i=>i.id===itemId);
+  if (!it || !it.otherIncome || !it.otherIncome[idx]) return;
+  it.otherIncome[idx][field] = val;
+  if (field === 'amount') recalcAddTxAlloc();
 }
 
 function openAddTx(txId) {
@@ -2099,7 +2122,7 @@ function renderAddTxBill(tx, amt, acct, itemId) {
           <input class="at-input at-input-search" type="text">
         </div>
         <div class="at-field">
-          <label style="display:flex;align-items:center;gap:4px;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:2px">Vendor <span style="color:#9aa7b3;font-size:11px">▾</span></span> <a class="at-fill-link" href="#" onclick="return false" style="margin-left:auto;font-size:11px">Fill from bill history</a></label>
+          <label style="display:flex;align-items:center;gap:4px;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:2px">Vendor / Owner / Tenant / Prospect <span style="color:#9aa7b3;font-size:11px">▾</span></span> <a class="at-fill-link" href="#" onclick="return false" style="margin-left:auto;font-size:11px">Fill from bill history</a></label>
           <input class="at-input at-input-search" type="text" value="${vendor}">
         </div>
         <div class="at-field">
@@ -2136,6 +2159,7 @@ function renderAddTxBill(tx, amt, acct, itemId) {
     </div>
     <div class="at-card" style="flex:1">
       <div class="at-card-title">Payments &amp; Attachments</div>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#13314c;margin-bottom:12px"><input type="checkbox"> Approve</label>
       <div class="at-field-grid" style="grid-template-columns:1fr 1fr;margin-bottom:12px">
         <div class="at-field">
           <label>Default Bank</label>
@@ -2164,6 +2188,7 @@ function renderAddTxBill(tx, amt, acct, itemId) {
       </div>
     </div>
   </div>
+  <div class="at-sub-heading">Expenses</div>
   ${renderDetailTable(tx, amt)}`;
 }
 
@@ -2176,11 +2201,7 @@ function renderAddTxCheck(tx, amt, acct, itemId) {
   <div class="at-cols">
     <div class="at-card" style="flex:2.2">
       <div class="at-card-title">Check Information</div>
-      <div class="at-field-grid" style="grid-template-columns:1.6fr 2.6fr 2.6fr 1.7fr;margin-bottom:12px">
-        <div class="at-field">
-          <label>Property</label>
-          <input class="at-input at-input-search" type="text">
-        </div>
+      <div class="at-field-grid" style="grid-template-columns:2.6fr 2.6fr 1.7fr;margin-bottom:12px">
         <div class="at-field">
           <label style="display:flex;align-items:center"><span>Bank</span><span style="margin-left:auto;color:#9aa7b3">Balance:</span></label>
           <select class="at-select"><option>${glName}</option></select>
@@ -2196,7 +2217,7 @@ function renderAddTxCheck(tx, amt, acct, itemId) {
       </div>
       <div class="at-field-grid" style="grid-template-columns:2.54fr 1fr;margin-bottom:12px">
         <div class="at-field">
-          <label style="display:flex;align-items:center"><span style="display:inline-flex;align-items:center;gap:2px">Vendor <span style="color:#9aa7b3;font-size:11px">▾</span></span><a class="at-fill-link" href="#" onclick="return false" style="margin-left:auto">Fill from history</a></label>
+          <label style="display:flex;align-items:center"><span style="display:inline-flex;align-items:center;gap:2px">Vendor / Owner / Tenant / Prospect <span style="color:#9aa7b3;font-size:11px">▾</span></span><a class="at-fill-link" href="#" onclick="return false" style="margin-left:auto">Fill from history</a></label>
           <div class="at-amount-wrap"><input class="at-input" type="text" value="${payee}" style="padding-right:30px"><span class="at-amount-refresh">${PERSON_ICO}</span></div>
         </div>
         <div class="at-field">
@@ -2206,7 +2227,8 @@ function renderAddTxCheck(tx, amt, acct, itemId) {
       </div>
       <div class="at-field-grid" style="grid-template-columns:1fr 1fr">
         <div class="at-field">
-          <label style="display:flex;align-items:center;gap:6px">Payee Information ${ic(P.edit,13,'#008dd5')}</label>
+          <label>Address</label>
+          <input class="at-input" type="text">
         </div>
         <div class="at-field">
           <label>Memo</label>
@@ -2216,7 +2238,9 @@ function renderAddTxCheck(tx, amt, acct, itemId) {
     </div>
     <div class="at-card" style="flex:1">
       <div class="at-card-title">Payments &amp; Attachments</div>
-      <div style="display:flex;align-items:center;gap:32px;margin-bottom:16px">
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;margin-bottom:16px">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#13314c;cursor:pointer"><input type="checkbox"> Process through ePay</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#13314c;cursor:pointer"><input type="checkbox"> eChecks</label>
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#13314c;cursor:pointer"><input type="checkbox"> Check will be printed</label>
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#13314c;cursor:pointer"><input type="checkbox"> Avid Pay</label>
       </div>
@@ -2231,6 +2255,7 @@ function renderAddTxCheck(tx, amt, acct, itemId) {
       </div>
     </div>
   </div>
+  <div class="at-sub-heading">Expenses</div>
   ${renderDetailTable(tx, amt)}`;
 }
 
@@ -2291,24 +2316,74 @@ const DEP_PAYMENTS = [
 function renderAddTxDeposit(tx, amt, acct, itemId) {
   const it = _addTxItems.find(i=>i.id===itemId);
   const sel = (it && it.depSel) || new Set();
+  const oi = (it && it.otherIncome) || [];
   const allChecked = sel.size === DEP_PAYMENTS.length && DEP_PAYMENTS.length > 0;
   const chip = `<span class="dep-chip">+1 ${ic(P.down,8,'#008dd5')}</span>`;
+  const date = tx.date || '';
+  const glName = acct ? acct.gl : '1001 Checking Account';
   const rows = DEP_PAYMENTS.map((p,i) => `
     <tr>
       <td style="width:32px;padding:0 0 0 12px;color:#9aa7b3;font-size:15px">›</td>
       <td style="width:36px;padding:0 8px"><input type="checkbox" class="dep-cb dep-row-cb" data-i="${i}" ${sel.has(i)?'checked':''} onclick="toggleDepRow(${itemId},${i},this.checked)"></td>
       <td>${p.tenant}</td>
-      <td style="width:76px">${p.date}</td>
-      <td style="width:72px">${p.check}</td>
+      <td style="color:#9aa7b3">${p.address}</td>
       <td style="width:148px">${p.property}${p.multiProp?chip:''}</td>
       <td style="width:100px">${p.unit}${p.multiUnit?chip:''}</td>
-      <td style="width:130px">${p.comment}</td>
-      <td style="color:#9aa7b3">${p.address}</td>
+      <td style="width:76px">${p.date}</td>
       <td class="r" style="width:100px">${fmtN(p.amount)}</td>
+      <td style="width:72px">${p.check}</td>
+      <td style="width:130px">${p.comment}</td>
       <td style="width:32px"></td>
     </tr>`).join('');
+  const oiRows = oi.map((r,i) => `
+    <tr>
+      <td><input class="at-tbl-input search" type="text" value="${r.property||''}" oninput="setOtherIncomeField(${itemId},${i},'property',this.value)"></td>
+      <td><input class="at-tbl-input search" type="text" value="${r.unit||''}" oninput="setOtherIncomeField(${itemId},${i},'unit',this.value)"></td>
+      <td><input class="at-tbl-input search" type="text" value="${r.account||''}" oninput="setOtherIncomeField(${itemId},${i},'account',this.value)"></td>
+      <td><input class="at-tbl-input" type="text" value="${r.reference||''}" oninput="setOtherIncomeField(${itemId},${i},'reference',this.value)"></td>
+      <td><input class="at-tbl-input" type="text" value="${r.memo||''}" oninput="setOtherIncomeField(${itemId},${i},'memo',this.value)"></td>
+      <td><input class="at-tbl-input search" type="text" value="${r.party||''}" oninput="setOtherIncomeField(${itemId},${i},'party',this.value)"></td>
+      <td class="r"><input class="at-tbl-input" type="text" value="${(parseFloat(r.amount)||0).toFixed(2)}" style="text-align:right" oninput="setOtherIncomeField(${itemId},${i},'amount',this.value)"></td>
+      <td style="color:#9aa7b3;text-align:center;cursor:pointer" onclick="removeOtherIncomeRow(${itemId},${i})">${ic(P.trash,15,'#9aa7b3')}</td>
+    </tr>`).join('');
   return `
+    <div class="at-card">
+      <div class="at-card-title">Deposit Information</div>
+      <div class="at-field-grid" style="grid-template-columns:1.4fr 1fr 1.2fr;margin-bottom:0">
+        <div class="at-field">
+          <label>Bank Account</label>
+          <select class="at-select">
+            <option>${glName}</option>
+            <option>&lt;Use Charge Type Banks&gt;</option>
+            <option>&lt;Use Property Default&gt;</option>
+          </select>
+        </div>
+        <div class="at-field">
+          <label>Deposit Date</label>
+          <input class="at-input at-input-date" type="text" value="${date}">
+        </div>
+        <div class="at-field" style="justify-content:flex-end">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;height:36px"><input type="checkbox"> Print Deposit Ticket</label>
+        </div>
+      </div>
+      <div class="at-field-grid" style="grid-template-columns:2fr 1fr;margin-top:10px">
+        <div class="at-field">
+          <label>Comments</label>
+          <textarea class="at-textarea" style="min-height:36px"></textarea>
+        </div>
+        <div class="at-field">
+          <label>Attachments</label>
+          <div class="at-attachments" style="min-height:36px;flex-direction:row;gap:12px">
+            <div class="at-attach-actions" style="margin:0">
+              <button class="at-attach-btn">${UPLOAD_ICO} Upload</button>
+              <button class="at-attach-btn">${PASTE_ICO} Paste</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="at-card dep-card">
+      <div class="at-card-title">Payments</div>
       <div class="dep-picker-hdr">
         <div class="dep-picker-hdr-left">
           <div class="at-field" style="width:180px;flex-shrink:0">
@@ -2326,7 +2401,6 @@ function renderAddTxDeposit(tx, amt, acct, itemId) {
         </div>
         <div class="dep-picker-hdr-right">
           <button class="btn-outline" style="height:34px;padding:0 14px;display:inline-flex;align-items:center;gap:6px">${ic(P.print,14,'#008dd5')} Print</button>
-          <button class="btn-outline" style="height:34px;padding:0 14px;display:inline-flex;align-items:center;gap:6px">${ic(P.add,14,'#008dd5')} Add Other Income</button>
         </div>
       </div>
       <div style="flex:1;overflow:auto;min-height:0">
@@ -2336,19 +2410,33 @@ function renderAddTxDeposit(tx, amt, acct, itemId) {
               <th style="width:32px;padding:0"></th>
               <th style="width:36px;padding:0 8px"><input type="checkbox" class="dep-cb dep-all-cb" ${allChecked?'checked':''} onclick="toggleDepAll(${itemId},this.checked)"></th>
               <th>${ic(P.down,12,'rgba(255,255,255,.6)')} Tenant</th>
-              <th style="width:76px">Date</th>
-              <th style="width:72px">Check #</th>
+              <th>Address</th>
               <th style="width:148px">Property</th>
               <th style="width:100px">Unit</th>
-              <th style="width:130px">Comment</th>
-              <th>Address</th>
+              <th style="width:76px">Date</th>
               <th class="r" style="width:100px">Amount</th>
+              <th style="width:72px">Check #</th>
+              <th style="width:130px">Comment</th>
               <th style="width:32px;padding:0 8px">${ic(P.cols,14,'rgba(255,255,255,.6)')}</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
         </table>
       </div>
+    </div>
+    <div class="at-card">
+      <div class="at-card-title" style="display:flex;align-items:center;justify-content:space-between">
+        <span>Other Income</span>
+        <button class="at-add-link" style="border:none;background:none;cursor:pointer" onclick="addOtherIncomeRow(${itemId})">${ic(P.add,15,'#008dd5')} Add Other Income</button>
+      </div>
+      ${oi.length ? `<table class="at-detail-tbl">
+        <thead>
+          <tr>
+            <th>Property</th><th style="width:100px">Unit</th><th>Income Account</th><th style="width:120px">Reference</th><th>Memo</th><th style="width:140px">Vendor/Owner</th><th class="r" style="width:100px">Amount</th><th style="width:24px"></th>
+          </tr>
+        </thead>
+        <tbody>${oiRows}</tbody>
+      </table>` : `<div style="font-size:13px;color:#9aa7b3;padding:8px 0">No other income lines added.</div>`}
     </div>`;
 }
 
@@ -2358,28 +2446,83 @@ function renderAddTxJournal(tx, amt, acct, itemId) {
   <div class="at-cols">
     <div class="at-card">
       <div class="at-card-title">Journal Entry Information</div>
-      <div class="at-field-grid" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:10px">
+      <div class="at-field-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;margin-bottom:10px">
         <div class="at-field">
-          <label>Entry Date</label>
-          <input class="at-input at-input-date" type="text" value="${date}">
+          <label>Journal</label>
+          <input class="at-input" type="text" value="&lt;NEW&gt;" disabled style="color:#9aa7b3">
         </div>
         <div class="at-field">
-          <label>Post Date</label>
-          <input class="at-input at-input-date" type="text" value="${date}">
-        </div>
-        <div class="at-field">
-          <label>Reference #</label>
+          <label>Reference</label>
           <input class="at-input" type="text">
         </div>
+        <div class="at-field">
+          <label>Date</label>
+          <input class="at-input at-input-date" type="text" value="${date}">
+        </div>
+        <div class="at-field">
+          <label>Basis</label>
+          <select class="at-select"><option>Accrual</option><option>Cash</option><option>Both</option></select>
+        </div>
       </div>
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#13314c;margin-bottom:12px"><input type="checkbox"> Period Adjustment</label>
       <div class="at-field">
-        <label>Description</label>
+        <label>Memo</label>
         <textarea class="at-textarea">${tx.desc}</textarea>
       </div>
     </div>
     ${atAttachCard()}
   </div>
-  ${renderDetailTable(tx, amt)}`;
+  <div class="at-sub-heading">Journal Details</div>
+  ${renderJournalDetailTable(amt)}`;
+}
+function renderJournalDetailTable(amt) {
+  return `
+  <div class="at-detail-wrap">
+  <table class="at-detail-tbl">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Account</th>
+        <th>Property</th>
+        <th style="width:120px">Unit</th>
+        <th class="r" style="width:100px">Debit</th>
+        <th class="r" style="width:100px">Credit</th>
+        <th>Job</th>
+        <th>Memo</th>
+        <th style="width:24px"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding:0 4px;color:#9aa7b3">›</td>
+        <td><input class="at-tbl-input search" type="text"></td>
+        <td><input class="at-tbl-input search" type="text"></td>
+        <td><input class="at-tbl-input search" type="text"></td>
+        <td class="r"><input class="at-tbl-input" type="text" value="${amt.toFixed(2)}" style="text-align:right"></td>
+        <td class="r"><input class="at-tbl-input" type="text" style="text-align:right"></td>
+        <td><input class="at-tbl-input search" type="text"></td>
+        <td><input class="at-tbl-input" type="text"></td>
+        <td style="color:#9aa7b3;text-align:center;cursor:pointer">⋮</td>
+      </tr>
+      <tr>
+        <td style="padding:0 4px;color:#9aa7b3">›</td>
+        <td><input class="at-tbl-input search" type="text"></td>
+        <td><input class="at-tbl-input search" type="text"></td>
+        <td><input class="at-tbl-input search" type="text"></td>
+        <td class="r"><input class="at-tbl-input" type="text" style="text-align:right"></td>
+        <td class="r"><input class="at-tbl-input" type="text" value="${amt.toFixed(2)}" style="text-align:right"></td>
+        <td><input class="at-tbl-input search" type="text"></td>
+        <td><input class="at-tbl-input" type="text"></td>
+        <td style="color:#9aa7b3;text-align:center;cursor:pointer">⋮</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="at-tbl-foot">
+    <button class="at-tbl-foot-btn">+ Add Detail</button>
+    <button class="at-tbl-foot-btn">≡ Load Memorized</button>
+    <span class="at-tbl-total">Debits: &nbsp;${amt.toFixed(2)} &nbsp;&nbsp; Credits: &nbsp;${amt.toFixed(2)}</span>
+  </div>
+  </div>`;
 }
 
 function renderAddTxGeneric(tx, amt, acct, itemId) {
@@ -2413,18 +2556,36 @@ function renderAddTxGeneric(tx, amt, acct, itemId) {
   ${renderDetailTable(tx, amt)}`;
 }
 
-function renderAddTxCCCharge(tx, amt, acct, itemId) {
+// CCCharge and CCCredit are the exact same "Add Credit Card Transaction"
+// pop-up in real Rent Manager — only the Charge/Credit select differs.
+function renderAddTxCCCharge(tx, amt, acct, itemId) { return renderAddTxCCTransaction(tx, amt, acct, itemId, 'Charge'); }
+function renderAddTxCCCredit(tx, amt, acct, itemId) { return renderAddTxCCTransaction(tx, amt, acct, itemId, 'Credit'); }
+function renderAddTxCCTransaction(tx, amt, acct, itemId, mode) {
   const date = tx.date || '';
   const glName = acct ? acct.gl : '';
   const vendor = tx.desc ? tx.desc.split(' ').slice(1).join(' ') : '';
   return `
   <div class="at-cols">
     <div class="at-card" style="flex:1.4">
-      <div class="at-card-title">Charge Information</div>
-      <div class="at-field-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;margin-bottom:10px">
+      <div class="at-card-title">Add Credit Card Transaction</div>
+      <div class="at-field-grid" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:10px">
         <div class="at-field">
           <label>Property</label>
           <input class="at-input at-input-search" type="text">
+        </div>
+        <div class="at-field">
+          <label>Credit Card</label>
+          <select class="at-select"><option>${glName}</option></select>
+        </div>
+        <div class="at-field">
+          <label>Date</label>
+          <input class="at-input at-input-date" type="text" value="${date}">
+        </div>
+      </div>
+      <div class="at-field-grid" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:10px">
+        <div class="at-field">
+          <label>Reference</label>
+          <input class="at-input" type="text">
         </div>
         <div class="at-field">
           <label>Vendor</label>
@@ -2434,81 +2595,21 @@ function renderAddTxCCCharge(tx, amt, acct, itemId) {
           <label>Amount</label>
           <div class="at-amount-wrap"><input class="at-input" type="text" value="${amt.toFixed(2)}"${atAmtBind(itemId)}><span class="at-amount-refresh">${REFRESH_ICO}</span></div>
         </div>
-        <div class="at-field">
-          <label>Credit Card</label>
-          <select class="at-select"><option>${glName}</option></select>
-        </div>
       </div>
-      <div class="at-field-grid" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:10px">
+      <div class="at-field-grid" style="grid-template-columns:1fr 2fr;margin-bottom:10px">
         <div class="at-field">
-          <label>Charge Date</label>
-          <input class="at-input at-input-date" type="text" value="${date}">
+          <label>Charge/Credit</label>
+          <select class="at-select"><option${mode==='Charge'?' selected':''}>Charge</option><option${mode==='Credit'?' selected':''}>Credit</option></select>
         </div>
         <div class="at-field">
-          <label>Post Date</label>
-          <input class="at-input at-input-date" type="text" value="${date}">
+          <label>Comment</label>
+          <input class="at-input" type="text" value="${tx.desc}">
         </div>
-        <div class="at-field">
-          <label>Reference #</label>
-          <input class="at-input" type="text">
-        </div>
-      </div>
-      <div class="at-field">
-        <label>Memo</label>
-        <textarea class="at-textarea">${tx.desc}</textarea>
       </div>
     </div>
     ${atAttachCard()}
   </div>
-  ${renderDetailTable(tx, amt)}`;
-}
-
-function renderAddTxCCCredit(tx, amt, acct, itemId) {
-  const date = tx.date || '';
-  const glName = acct ? acct.gl : '';
-  return `
-  <div class="at-cols">
-    <div class="at-card" style="flex:1.4">
-      <div class="at-card-title">Credit Information</div>
-      <div class="at-field-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;margin-bottom:10px">
-        <div class="at-field">
-          <label>Property</label>
-          <input class="at-input at-input-search" type="text">
-        </div>
-        <div class="at-field">
-          <label>Vendor</label>
-          <input class="at-input at-input-search" type="text">
-        </div>
-        <div class="at-field">
-          <label>Amount</label>
-          <div class="at-amount-wrap"><input class="at-input" type="text" value="${amt.toFixed(2)}"${atAmtBind(itemId)}><span class="at-amount-refresh">${REFRESH_ICO}</span></div>
-        </div>
-        <div class="at-field">
-          <label>Credit Card</label>
-          <select class="at-select"><option>${glName}</option></select>
-        </div>
-      </div>
-      <div class="at-field-grid" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:10px">
-        <div class="at-field">
-          <label>Credit Date</label>
-          <input class="at-input at-input-date" type="text" value="${date}">
-        </div>
-        <div class="at-field">
-          <label>Post Date</label>
-          <input class="at-input at-input-date" type="text" value="${date}">
-        </div>
-        <div class="at-field">
-          <label>Reference #</label>
-          <input class="at-input" type="text">
-        </div>
-      </div>
-      <div class="at-field">
-        <label>Memo</label>
-        <textarea class="at-textarea">${tx.desc}</textarea>
-      </div>
-    </div>
-    ${atAttachCard()}
-  </div>
+  <div class="at-sub-heading">Expenses</div>
   ${renderDetailTable(tx, amt)}`;
 }
 
@@ -2654,7 +2755,7 @@ function fmCandidates(tx) {
       {
         date: base,
         type: 'Receipt',
-        ref: `D${depNum}`,
+        ref: `Deposit ${depNum}`,
         property: prop,
         info: `${initial}. ${lastName} — Rent Payment`,
         comment: 'June Rent',
@@ -2672,7 +2773,7 @@ function fmCandidates(tx) {
       {
         date: offsetDate(base, -5),
         type: 'Receipt',
-        ref: `D${depNum - 3}`,
+        ref: `Deposit ${depNum - 3}`,
         property: prop,
         info: `${initial}. ${lastName} — Partial Payment`,
         comment: 'Partial — June Rent',
@@ -3930,7 +4031,7 @@ function renderCR() {
 }
 
 /* ── Electronic Bank Reconcile ── */
-const REC_STATE = { acctId: null, recFilter: 'all', _cleared: {}, endingBalance: {} };
+const REC_STATE = { acctId: null, recFilter: 'all', _cleared: {}, endingBalance: {}, _serviceCharges: {}, _interestIncome: {} };
 
 function openReconcile(acctId) {
   if (acctId) REC_STATE.acctId = acctId;
@@ -3980,12 +4081,22 @@ function reconcileSummary(acctId) {
   const clearedPayments = payments.filter(r => r.cleared);
   const depositTotal = clearedDeposits.reduce((s, r) => s + r.amount, 0);
   const paymentTotal = clearedPayments.reduce((s, r) => s + r.amount, 0);
-  const clearedBalance = beginningBalance + depositTotal - paymentTotal;
+
+  // Service Charges (debit the bank, like a payment) and Interest Income
+  // (credit the bank, like a deposit) are added inline during reconciliation
+  // itself — each posts as a journal entry once the reconciliation finalizes.
+  const serviceCharges = REC_STATE._serviceCharges[acctId] || [];
+  const interestIncome = REC_STATE._interestIncome[acctId] || [];
+  const serviceChargeTotal = serviceCharges.reduce((s, r) => s + (parseFloat(r.amount)||0), 0);
+  const interestIncomeTotal = interestIncome.reduce((s, r) => s + (parseFloat(r.amount)||0), 0);
+
+  const clearedBalance = beginningBalance + depositTotal - paymentTotal - serviceChargeTotal + interestIncomeTotal;
   const endingBalance = REC_STATE.endingBalance[acctId] ?? acct.bankBalance;
   const difference = +(endingBalance - clearedBalance).toFixed(2);
 
   return { acct, deposits, payments, beginningBalance, depositTotal, paymentTotal, clearedBalance, endingBalance, difference,
-    clearedDepositCount: clearedDeposits.length, clearedPaymentCount: clearedPayments.length, statementDate };
+    clearedDepositCount: clearedDeposits.length, clearedPaymentCount: clearedPayments.length, statementDate,
+    serviceCharges, interestIncome, serviceChargeTotal, interestIncomeTotal };
 }
 
 function toggleReconcileRow(acctId, id, checked) {
@@ -4011,7 +4122,14 @@ function recalcReconcileSummary(acctId) {
   const s = reconcileSummary(acctId);
   const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
   set('rec-sum-ending', fmt(s.endingBalance));
+  set('rec-sum-cleared', fmt(s.clearedBalance));
   set('rec-sum-diff', fmt(Math.abs(s.difference)));
+  set('rec-sum-sc', '− ' + fmt(s.serviceChargeTotal));
+  set('rec-sum-ii', '+ ' + fmt(s.interestIncomeTotal));
+  set('rec-sc-label', `Service Charges (${s.serviceCharges.length})`);
+  set('rec-ii-label', `Interest Income (${s.interestIncome.length})`);
+  const scTotalEl = document.getElementById('rec-sc-total'); if (scTotalEl) scTotalEl.innerHTML = `Total: <b>${fmt(s.serviceChargeTotal)}</b>`;
+  const iiTotalEl = document.getElementById('rec-ii-total'); if (iiTotalEl) iiTotalEl.innerHTML = `Total: <b>${fmt(s.interestIncomeTotal)}</b>`;
   const balanced = Math.abs(s.difference) < 0.005;
   const banner = document.getElementById('rec-diff-banner');
   if (banner) {
@@ -4024,12 +4142,63 @@ function recalcReconcileSummary(acctId) {
   const finishBtn = document.getElementById('rec-finish-btn');
   if (finishBtn) finishBtn.disabled = !balanced;
 }
+// Service Charge / Interest Income lines, added inline during reconciliation
+// (Bank Reconcile steps 2–3 / Electronic Bank Reconcile steps 3–4 in real RM).
+function addRecLine(acctId, kind) {
+  const bucket = kind === 'sc' ? REC_STATE._serviceCharges : REC_STATE._interestIncome;
+  bucket[acctId] = bucket[acctId] || [];
+  bucket[acctId].push({ property:'', unit:'', account:'', memo:'', date:'', amount:'0.00' });
+  renderReconcile();
+}
+function removeRecLine(acctId, kind, idx) {
+  const bucket = kind === 'sc' ? REC_STATE._serviceCharges : REC_STATE._interestIncome;
+  if (!bucket[acctId]) return;
+  bucket[acctId].splice(idx, 1);
+  renderReconcile();
+}
+function setRecLineField(acctId, kind, idx, field, val) {
+  const bucket = kind === 'sc' ? REC_STATE._serviceCharges : REC_STATE._interestIncome;
+  if (!bucket[acctId] || !bucket[acctId][idx]) return;
+  bucket[acctId][idx][field] = val;
+  if (field === 'amount') recalcReconcileSummary(acctId);
+}
+
+// Shared row-add table for the Service Charges / Interest Income sections —
+// same shape, differing only in the account column's label and which side of
+// the ledger (debit vs credit) the lines land on.
+function recLinesPanel(acctId, kind, title, acctLabel, lines) {
+  const total = lines.reduce((s, r) => s + (parseFloat(r.amount)||0), 0);
+  const rows = lines.map((r, i) => `
+    <tr>
+      <td><input class="at-tbl-input search" type="text" value="${r.property}" oninput="setRecLineField('${acctId}','${kind}',${i},'property',this.value)"></td>
+      <td><input class="at-tbl-input search" type="text" value="${r.unit}" oninput="setRecLineField('${acctId}','${kind}',${i},'unit',this.value)"></td>
+      <td><input class="at-tbl-input search" type="text" value="${r.account}" oninput="setRecLineField('${acctId}','${kind}',${i},'account',this.value)"></td>
+      <td><input class="at-tbl-input" type="text" value="${r.memo}" oninput="setRecLineField('${acctId}','${kind}',${i},'memo',this.value)"></td>
+      <td><input class="at-tbl-input" type="text" value="${r.date}" oninput="setRecLineField('${acctId}','${kind}',${i},'date',this.value)"></td>
+      <td class="r"><input class="at-tbl-input" type="text" value="${(parseFloat(r.amount)||0).toFixed(2)}" style="text-align:right" oninput="setRecLineField('${acctId}','${kind}',${i},'amount',this.value)"></td>
+      <td style="color:#9aa7b3;text-align:center;cursor:pointer" onclick="removeRecLine('${acctId}','${kind}',${i})">${ic(P.trash,15,'#9aa7b3')}</td>
+    </tr>`).join('');
+  return `
+    <div class="rec-panel" style="flex:1">
+      <div class="rec-panel-hdr">
+        <span class="rec-panel-title">${title}</span>
+        <span class="rec-panel-bal" id="rec-${kind}-total">Total: <b>${fmt(total)}</b></span>
+      </div>
+      <div style="padding:10px 12px;overflow-y:auto;flex:1;min-height:0">
+        ${lines.length ? `<table class="at-detail-tbl">
+          <thead><tr><th>Property</th><th style="width:90px">Unit</th><th>${acctLabel}</th><th>Memo</th><th style="width:90px">Date</th><th class="r" style="width:100px">Amount</th><th style="width:24px"></th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>` : `<div style="font-size:13px;color:#9aa7b3;padding:4px 0">No ${title.toLowerCase()} added.</div>`}
+        <button class="at-add-link" style="border:none;background:none;cursor:pointer;margin-top:8px" onclick="addRecLine('${acctId}','${kind}')">${ic(P.add,14,'#008dd5')} Add ${title.replace(/s$/,'')}</button>
+      </div>
+    </div>`;
+}
 
 function renderReconcile() {
   const s = reconcileSummary(REC_STATE.acctId);
   if (!s.acct) return;
   const { acct, deposits, payments, beginningBalance, depositTotal, paymentTotal, clearedBalance, endingBalance, difference,
-    clearedDepositCount, clearedPaymentCount, statementDate } = s;
+    clearedDepositCount, clearedPaymentCount, statementDate, serviceCharges, interestIncome, serviceChargeTotal, interestIncomeTotal } = s;
 
   const panel = (title, list, kind, label) => {
     const clearedCount = list.filter(r => r.cleared).length;
@@ -4091,11 +4260,17 @@ function renderReconcile() {
       ${panel('Deposits &amp; Other Credits', deposits, 'dep', 'Total')}
       ${panel('Checks &amp; Payments', payments, 'pay', 'Total')}
     </div>
+    <div class="rec-cols" style="padding-top:0;flex:0 0 auto;max-height:220px">
+      ${recLinesPanel(acct.id, 'sc', 'Service Charges', 'Expense Account', serviceCharges)}
+      ${recLinesPanel(acct.id, 'ii', 'Interest Income', 'Income Account', interestIncome)}
+    </div>
     <div class="rec-summary-wrap">
-      <div class="rec-summary">
+      <div class="rec-summary" style="grid-template-columns:repeat(4,1fr)">
         <div class="rec-sum-row"><span>Beginning Balance</span><span id="rec-sum-begin">${fmt(beginningBalance)}</span></div>
         <div class="rec-sum-row"><span>Cleared Deposits (${clearedDepositCount})</span><span id="rec-sum-dep" class="pos">+ ${fmt(depositTotal)}</span></div>
         <div class="rec-sum-row"><span>Cleared Payments (${clearedPaymentCount})</span><span id="rec-sum-pay" class="neg">− ${fmt(paymentTotal)}</span></div>
+        <div class="rec-sum-row"><span id="rec-sc-label">Service Charges (${serviceCharges.length})</span><span id="rec-sum-sc" class="neg">− ${fmt(serviceChargeTotal)}</span></div>
+        <div class="rec-sum-row"><span id="rec-ii-label">Interest Income (${interestIncome.length})</span><span id="rec-sum-ii" class="pos">+ ${fmt(interestIncomeTotal)}</span></div>
         <div class="rec-sum-row rec-sum-total"><span>Cleared Balance</span><span id="rec-sum-cleared">${fmt(clearedBalance)}</span></div>
         <div class="rec-sum-row"><span>Statement Ending Balance</span><span id="rec-sum-ending">${fmt(endingBalance)}</span></div>
         <div class="rec-sum-row rec-sum-diff"><span>Difference</span><span id="rec-sum-diff">${fmt(Math.abs(difference))}</span></div>
