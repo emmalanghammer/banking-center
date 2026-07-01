@@ -46,7 +46,7 @@ Portland, OR residential + light-commercial property manager. Demo "today" = mid
 | `TRANSACTIONS_BY_ACCT` | 767 |
 | `INSIGHTS` | 690 |
 | `BR_TX` (Bank Register rows) | 3347 |
-| `recData` (Reconcile, derived from BR_TX) | 3548 |
+| `recData` (Reconcile — flags bank-feed items still open in Transaction Review) | ~4193 |
 
 ## Key render functions
 

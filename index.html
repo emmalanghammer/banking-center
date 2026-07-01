@@ -513,46 +513,31 @@ svg.ico{display:block;flex-shrink:0}
 
 /* ── Electronic Bank Reconcile ── */
 .rec-layout{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;background:#f5f8fa}
-.rec-cols{flex:1;display:flex;gap:16px;min-height:0;padding:16px 20px;overflow:hidden}
-.rec-panel{flex:1;display:flex;flex-direction:column;min-width:0;background:#fff;border:1px solid #cedbe7;border-radius:4px;overflow:hidden}
-.rec-panel-hdr{display:flex;align-items:center;gap:16px;padding:12px 16px;flex-shrink:0;font-size:13px;flex-wrap:wrap}
-.rec-panel-title{font-size:14px;font-weight:600;color:#13314c}
-.rec-panel-count{font-size:13px;color:#9aa7b3}
-.rec-panel-bal{margin-left:auto;font-size:13px;color:#666;display:flex;gap:20px;white-space:nowrap}
-.rec-panel-bal b{color:#13314c;font-weight:600;font-variant-numeric:tabular-nums;margin-left:4px}
-.rec-tbl-wrap{flex:1;overflow-y:auto;min-height:0}
-.rec-tbl{width:100%;border-collapse:collapse;font-size:13px}
-.rec-tbl thead th{position:sticky;top:0;background:#596775;color:#fff;font-size:12px;font-weight:500;padding:0 8px;height:28px;text-align:left;white-space:nowrap;z-index:1}
-.rec-tbl thead th.r{text-align:right}
-.rec-tbl tbody td{padding:0 8px;height:36px;border-bottom:1px solid #eef2f7;color:#13314c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rec-tbl tbody td.r{text-align:right;font-variant-numeric:tabular-nums}
-.rec-tbl tbody tr.matched{background:#f3faf4}
-.rec-tbl tbody tr:hover{background:#f5f8fa}
-.rec-cb{cursor:pointer}
+.rec-body-wrap{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:16px}
+.rec-card{background:#fff;border:1px solid #cedbe7;border-radius:4px;padding:16px}
+.rec-card-label{font-size:13px;color:#666;margin-bottom:12px}
+.rec-stmt-fields{display:flex;gap:16px}
+.rec-hint{font-size:13px;color:#666;margin-top:-8px}
+.rec-section-hdr{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;color:#13314c}
+.rec-badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:10px;font-size:12px;font-weight:600}
+.rec-badge.warn{background:#fef0d9;color:#8a5a00}
+.rec-badge.ok{background:#e3f3e3;color:#2e7d32}
+.rec-note{font-size:13px;color:#666}
+.rec-pending-tbl{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid #cedbe7;border-radius:4px;overflow:hidden}
+.rec-pending-tbl thead th{background:#596775;color:#fff;font-size:12px;font-weight:500;padding:0 12px;height:32px;text-align:left;white-space:nowrap}
+.rec-pending-tbl thead th.r{text-align:right}
+.rec-pending-tbl tbody td{padding:0 12px;height:40px;border-bottom:1px solid #eef2f7;color:#13314c}
+.rec-pending-tbl tbody td.r{text-align:right;font-variant-numeric:tabular-nums}
+.rec-pending-tbl tbody tr:last-child td{border-bottom:none}
+.rec-pending-actions{display:flex;gap:14px;justify-content:flex-end}
+.rec-all-clear{display:flex;align-items:center;gap:8px;background:#eef8ee;border:1px solid #cfe9cf;color:#2e7d32;font-size:13px;font-weight:600;padding:12px 16px;border-radius:4px}
 .rec-foot{display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:10px 20px;background:#f5f8fa;border-top:1px solid #cedbe7;flex-shrink:0}
-.rec-seg{display:inline-flex}
-.rec-seg-btn{height:36px;min-width:58px;padding:0 16px;font-size:14px;color:#666;background:#fff;border:1px solid #cedbe7;cursor:pointer;font-family:'Roboto',sans-serif;display:flex;align-items:center;justify-content:center}
-.rec-seg-btn+.rec-seg-btn{margin-left:-1px}
-.rec-seg-btn:first-child{border-radius:4px 0 0 4px}
-.rec-seg-btn:last-child{border-radius:0 4px 4px 0}
-.rec-seg-btn.on{background:#ebf1f5;border-color:#008dd5;font-weight:600;position:relative;z-index:1}
-.rec-end-input{width:110px;height:26px;border:1.5px solid #cedbe7;border-radius:4px;padding:0 8px;font-size:13px;font-weight:600;color:#13314c;font-variant-numeric:tabular-nums;outline:none;font-family:inherit;margin-left:4px}
-.rec-end-input:focus{border-color:#008dd5}
-.rec-summary-wrap{display:flex;align-items:center;gap:16px;padding:0 20px 16px;flex-shrink:0}
-.rec-summary{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:4px 24px;background:#fff;border:1px solid #cedbe7;border-radius:4px;padding:12px 16px}
-.rec-sum-row{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;color:#666;padding:3px 0}
-.rec-sum-row span:last-child{font-weight:600;color:#13314c;font-variant-numeric:tabular-nums}
-.rec-sum-row.pos span:last-child,.rec-sum-row span.pos{color:#2e7d32}
-.rec-sum-row.neg span:last-child,.rec-sum-row span.neg{color:#b3261e}
-.rec-sum-row.rec-sum-total{border-top:1px solid #e3edf5;margin-top:2px;padding-top:7px}
-.rec-sum-row.rec-sum-total span:last-child{font-size:14px}
-.rec-sum-row.rec-sum-diff span:last-child{color:#13314c}
-.rec-diff-banner{flex:0 0 auto;width:320px;display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:4px;font-size:13px;line-height:1.4}
-.rec-diff-banner.balanced{background:#eef8ee;border:1px solid #cfe9cf;color:#2e7d32}
-.rec-diff-banner.unbalanced{background:#fef6e9;border:1px solid #f3ddae;color:#8a5a00}
-.rec-diff-msg{flex:1;font-weight:600}
-.rec-diff-link{display:block;font-weight:400;color:#008dd5;text-decoration:none;font-size:12px;margin-top:2px}
-.rec-diff-link:hover{text-decoration:underline}
+.rec-done-wrap{flex:1;display:flex;align-items:center;justify-content:center;overflow-y:auto}
+.rec-done-panel{display:flex;flex-direction:column;align-items:center;gap:16px;padding:40px 20px}
+.rec-done-title{font-size:20px;font-weight:600;color:#13314c}
+.rec-done-card{width:320px;background:#fff;border:1px solid #cedbe7;border-radius:4px;padding:16px 20px;display:flex;flex-direction:column;gap:10px}
+.rec-done-row{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#666}
+.rec-done-row span:last-child{font-weight:600;color:#13314c;font-variant-numeric:tabular-nums}
 
 /* ── Add Transaction overlay ── */
 .at-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9000;display:flex;align-items:center;justify-content:center}
@@ -4191,262 +4176,160 @@ function renderCR() {
 }
 
 /* ── Electronic Bank Reconcile ── */
-const REC_STATE = { acctId: null, recFilter: 'all', _cleared: {}, endingBalance: {}, _serviceCharges: {}, _interestIncome: {} };
+const REC_STATE = { acctId: null, statementDate: '', statementBalance: null };
 
 function openReconcile(acctId) {
+  if (acctId && acctId !== REC_STATE.acctId) {
+    REC_STATE.statementDate = '';
+    REC_STATE.statementBalance = null;
+  }
   if (acctId) REC_STATE.acctId = acctId;
   showScreen('rec');
 }
 
-const _recDateVal = s => { let [m,d,y] = s.split('/'); y = +y; if (y < 100) y += 2000; return +new Date(y,+m-1,+d); };
-
-// The pool of register entries available to clear against the bank statement.
-// `origCleared` reflects whether the row was already reconciled in a prior
-// statement period (and so contributes to this period's Beginning Balance).
-function reconcileRows(acctId) {
-  return (BR_TX[acctId] || []).map((r, i) => ({
-    id: 'br' + i, date: r.date, ref: r.ref, desc: r.info, account: r.gl,
-    amount: r.deposit != null ? r.deposit : (r.payment || 0),
-    inflow: r.deposit != null, origCleared: !!r.cleared,
-  }));
+// Bank-feed transactions for an account, flagging which are still open in
+// Transaction Review (not yet matched or excluded there) — these are the
+// only things standing between the account and a clean reconciliation.
+function recData(acctId) {
+  const bankList = acctTxs(acctId).map(t => {
+    const resolved = S.matchedIds.has(t.id) || S.excludedIds.has(t.id);
+    return {
+      date: t.date, desc: t.desc,
+      amount: t.deposit != null ? t.deposit : (t.payment != null ? t.payment : 0),
+      pending: !resolved, txId: t.id,
+    };
+  });
+  return { bankList };
 }
 
-// Full reconciliation summary for an account: deposit/payment lists (each
-// carrying its current cleared state) plus the balances that drive the
-// Difference banner — Beginning + Cleared Deposits − Cleared Payments should
-// equal the Statement Ending Balance once everything on the statement is checked.
-function reconcileSummary(acctId) {
+// Live book balance for an account: the static `inRm` figure plus the net
+// effect of every bank-feed item resolved so far (matched or excluded) —
+// same computation renderRight() uses for its own "In Rent Manager" figure.
+function liveBookBalance(acctId) {
   const acct = ACCOUNTS.find(a => a.id === acctId);
-  if (!acct) return { acct: null };
-  const allRows = reconcileRows(acctId);
-
-  // Beginning balance = current book balance minus the net effect of rows not
-  // yet cleared as of the last reconciliation — the balance as it stood right
-  // before those rows were added.
-  const netUnclearedOrig = allRows.reduce((s, r) => s + (r.origCleared ? 0 : (r.inflow ? r.amount : -r.amount)), 0);
-  const beginningBalance = acct.inRm - netUnclearedOrig;
-  const statementDate = allRows.length ? allRows.reduce((max, r) => _recDateVal(r.date) > _recDateVal(max) ? r.date : max, allRows[0].date) : '—';
-
-  // Rows already reconciled in a prior period are baked into Beginning Balance
-  // above and don't reappear here — only this period's pending activity does.
-  // Pending rows default to checked (pre-selected, as on a matched bank feed)
-  // so the user reviews and unchecks any exceptions rather than starting blank.
-  const ov = REC_STATE._cleared[acctId] || {};
-  const rows = allRows.filter(r => !r.origCleared).map(r => ({ ...r, cleared: r.id in ov ? ov[r.id] : true }));
-  rows.sort((a, b) => _recDateVal(b.date) - _recDateVal(a.date));
-  const deposits = rows.filter(r => r.inflow);
-  const payments = rows.filter(r => !r.inflow);
-
-  const clearedDeposits = deposits.filter(r => r.cleared);
-  const clearedPayments = payments.filter(r => r.cleared);
-  const depositTotal = clearedDeposits.reduce((s, r) => s + r.amount, 0);
-  const paymentTotal = clearedPayments.reduce((s, r) => s + r.amount, 0);
-
-  // Service Charges (debit the bank, like a payment) and Interest Income
-  // (credit the bank, like a deposit) are added inline during reconciliation
-  // itself — each posts as a journal entry once the reconciliation finalizes.
-  const serviceCharges = REC_STATE._serviceCharges[acctId] || [];
-  const interestIncome = REC_STATE._interestIncome[acctId] || [];
-  const serviceChargeTotal = serviceCharges.reduce((s, r) => s + (parseFloat(r.amount)||0), 0);
-  const interestIncomeTotal = interestIncome.reduce((s, r) => s + (parseFloat(r.amount)||0), 0);
-
-  const clearedBalance = beginningBalance + depositTotal - paymentTotal - serviceChargeTotal + interestIncomeTotal;
-  const endingBalance = REC_STATE.endingBalance[acctId] ?? acct.bankBalance;
-  const difference = +(endingBalance - clearedBalance).toFixed(2);
-
-  return { acct, deposits, payments, beginningBalance, depositTotal, paymentTotal, clearedBalance, endingBalance, difference,
-    clearedDepositCount: clearedDeposits.length, clearedPaymentCount: clearedPayments.length, statementDate,
-    serviceCharges, interestIncome, serviceChargeTotal, interestIncomeTotal };
+  const allTxs = acctTxs(acctId);
+  const resolvedNet = allTxs.reduce((s, t) => (S.matchedIds.has(t.id) || S.excludedIds.has(t.id))
+    ? s + (t.deposit != null ? t.deposit : (t.payment != null ? -t.payment : 0)) : s, 0);
+  return acct.inRm + resolvedNet;
 }
 
-function toggleReconcileRow(acctId, id, checked) {
-  REC_STATE._cleared[acctId] = REC_STATE._cleared[acctId] || {};
-  REC_STATE._cleared[acctId][id] = checked;
-  renderReconcile();
-}
-function toggleReconcileAll(acctId, kind, checked) {
-  const s = reconcileSummary(acctId);
-  const rows = kind === 'dep' ? s.deposits : s.payments;
-  REC_STATE._cleared[acctId] = REC_STATE._cleared[acctId] || {};
-  rows.forEach(r => { REC_STATE._cleared[acctId][r.id] = checked; });
-  renderReconcile();
-}
-// Typing in the Ending Balance field updates the summary numbers in place
-// (rather than a full re-render) so the input never loses focus mid-keystroke.
-function setReconcileEnding(acctId, val) {
-  const n = parseFloat(String(val).replace(/[^0-9.-]/g, ''));
-  REC_STATE.endingBalance[acctId] = isNaN(n) ? 0 : n;
-  recalcReconcileSummary(acctId);
-}
-function recalcReconcileSummary(acctId) {
-  const s = reconcileSummary(acctId);
-  const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
-  set('rec-sum-ending', fmt(s.endingBalance));
-  set('rec-sum-cleared', fmt(s.clearedBalance));
-  set('rec-sum-diff', fmt(Math.abs(s.difference)));
-  set('rec-sum-sc', '− ' + fmt(s.serviceChargeTotal));
-  set('rec-sum-ii', '+ ' + fmt(s.interestIncomeTotal));
-  set('rec-sc-label', `Service Charges (${s.serviceCharges.length})`);
-  set('rec-ii-label', `Interest Income (${s.interestIncome.length})`);
-  const scTotalEl = document.getElementById('rec-sc-total'); if (scTotalEl) scTotalEl.innerHTML = `Total: <b>${fmt(s.serviceChargeTotal)}</b>`;
-  const iiTotalEl = document.getElementById('rec-ii-total'); if (iiTotalEl) iiTotalEl.innerHTML = `Total: <b>${fmt(s.interestIncomeTotal)}</b>`;
-  const balanced = Math.abs(s.difference) < 0.005;
-  const banner = document.getElementById('rec-diff-banner');
-  if (banner) {
-    banner.className = 'rec-diff-banner ' + (balanced ? 'balanced' : 'unbalanced');
-    banner.innerHTML = `
-      ${ic(balanced ? P.check : P.alert, 18, balanced ? '#6eb744' : '#f5a623')}
-      <span class="rec-diff-msg">${balanced ? 'Reconciled — balances match' : `Out of balance by ${fmt(Math.abs(s.difference))}`}</span>
-      ${!balanced ? `<a href="#" class="rec-diff-link" onclick="openAcct('${acctId}');return false">Review unmatched transactions</a>` : ''}`;
+function setStatementField(field, val) {
+  if (field === 'date') {
+    REC_STATE.statementDate = val;
+  } else {
+    const n = parseFloat(String(val).replace(/[^0-9.-]/g, ''));
+    REC_STATE.statementBalance = isNaN(n) ? null : n;
   }
-  const finishBtn = document.getElementById('rec-finish-btn');
-  if (finishBtn) finishBtn.disabled = !balanced;
-}
-// Service Charge / Interest Income lines, added inline during reconciliation
-// (Bank Reconcile steps 2–3 / Electronic Bank Reconcile steps 3–4 in real RM).
-function addRecLine(acctId, kind) {
-  const bucket = kind === 'sc' ? REC_STATE._serviceCharges : REC_STATE._interestIncome;
-  bucket[acctId] = bucket[acctId] || [];
-  bucket[acctId].push({ property:'', unit:'', account:'', memo:'', date:'', amount:'0.00' });
   renderReconcile();
-}
-function removeRecLine(acctId, kind, idx) {
-  const bucket = kind === 'sc' ? REC_STATE._serviceCharges : REC_STATE._interestIncome;
-  if (!bucket[acctId]) return;
-  bucket[acctId].splice(idx, 1);
-  renderReconcile();
-}
-function setRecLineField(acctId, kind, idx, field, val) {
-  const bucket = kind === 'sc' ? REC_STATE._serviceCharges : REC_STATE._interestIncome;
-  if (!bucket[acctId] || !bucket[acctId][idx]) return;
-  bucket[acctId][idx][field] = val;
-  if (field === 'amount') recalcReconcileSummary(acctId);
 }
 
-// Shared row-add table for the Service Charges / Interest Income sections —
-// same shape, differing only in the account column's label and which side of
-// the ledger (debit vs credit) the lines land on.
-function recLinesPanel(acctId, kind, title, acctLabel, lines) {
-  const total = lines.reduce((s, r) => s + (parseFloat(r.amount)||0), 0);
-  const rows = lines.map((r, i) => `
-    <tr>
-      <td><input class="at-tbl-input search" type="text" value="${r.property}" oninput="setRecLineField('${acctId}','${kind}',${i},'property',this.value)"></td>
-      <td><input class="at-tbl-input search" type="text" value="${r.unit}" oninput="setRecLineField('${acctId}','${kind}',${i},'unit',this.value)"></td>
-      <td><input class="at-tbl-input search" type="text" value="${r.account}" oninput="setRecLineField('${acctId}','${kind}',${i},'account',this.value)"></td>
-      <td><input class="at-tbl-input" type="text" value="${r.memo}" oninput="setRecLineField('${acctId}','${kind}',${i},'memo',this.value)"></td>
-      <td><input class="at-tbl-input" type="text" value="${r.date}" oninput="setRecLineField('${acctId}','${kind}',${i},'date',this.value)"></td>
-      <td class="r"><input class="at-tbl-input" type="text" value="${(parseFloat(r.amount)||0).toFixed(2)}" style="text-align:right" oninput="setRecLineField('${acctId}','${kind}',${i},'amount',this.value)"></td>
-      <td style="color:#9aa7b3;text-align:center;cursor:pointer" onclick="removeRecLine('${acctId}','${kind}',${i})">${ic(P.trash,15,'#9aa7b3')}</td>
-    </tr>`).join('');
-  return `
-    <div class="rec-panel" style="flex:1">
-      <div class="rec-panel-hdr">
-        <span class="rec-panel-title">${title}</span>
-        <span class="rec-panel-bal" id="rec-${kind}-total">Total: <b>${fmt(total)}</b></span>
-      </div>
-      <div style="padding:10px 12px;overflow-y:auto;flex:1;min-height:0">
-        ${lines.length ? `<table class="at-detail-tbl">
-          <thead><tr><th>Property</th><th style="width:90px">Unit</th><th>${acctLabel}</th><th>Memo</th><th style="width:90px">Date</th><th class="r" style="width:100px">Amount</th><th style="width:24px"></th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table>` : `<div style="font-size:13px;color:#9aa7b3;padding:4px 0">No ${title.toLowerCase()} added.</div>`}
-        <button class="at-add-link" style="border:none;background:none;cursor:pointer;margin-top:8px" onclick="addRecLine('${acctId}','${kind}')">${ic(P.add,14,'#008dd5')} Add ${title.replace(/s$/,'')}</button>
+function finishReconciliation() {
+  const acct = ACCOUNTS.find(a => a.id === REC_STATE.acctId);
+  if (!acct) return;
+  const matchedCount = acctTxs(acct.id).filter(t => S.matchedIds.has(t.id)).length;
+  // Native date inputs give ISO (YYYY-MM-DD); display it in the app's MM/DD/YYYY convention.
+  const periodEnd = REC_STATE.statementDate
+    ? (([y,m,d]) => `${m}/${d}/${y}`)(REC_STATE.statementDate.split('-'))
+    : '—';
+  document.getElementById('rec-inner').innerHTML = `
+    <div class="rec-done-wrap">
+      <div class="rec-done-panel">
+        ${ic(P.check, 48, '#6eb744')}
+        <div class="rec-done-title">Reconciliation complete.</div>
+        <div class="rec-done-card">
+          <div class="rec-done-row"><span>Closing balance</span><span>${fmt(REC_STATE.statementBalance)}</span></div>
+          <div class="rec-done-row"><span>Book balance in RM</span><span>${fmt(liveBookBalance(acct.id))}</span></div>
+          <div class="rec-done-row"><span>Period end date</span><span>${periodEnd}</span></div>
+          <div class="rec-done-row"><span>Transactions matched</span><span>${matchedCount}</span></div>
+        </div>
+        <button class="btn-primary" style="height:36px;padding:0 24px" onclick="showScreen('bc')">Done</button>
       </div>
     </div>`;
 }
 
 function renderReconcile() {
-  const s = reconcileSummary(REC_STATE.acctId);
-  if (!s.acct) return;
-  const { acct, deposits, payments, beginningBalance, depositTotal, paymentTotal, clearedBalance, endingBalance, difference,
-    clearedDepositCount, clearedPaymentCount, statementDate, serviceCharges, interestIncome, serviceChargeTotal, interestIncomeTotal } = s;
+  const acct = ACCOUNTS.find(a => a.id === REC_STATE.acctId);
+  if (!acct) return;
 
-  const panel = (title, list, kind, label) => {
-    const clearedCount = list.filter(r => r.cleared).length;
-    const shown = REC_STATE.recFilter === 'uncleared' ? list.filter(r => !r.cleared) : list;
-    const allChecked = list.length > 0 && clearedCount === list.length;
-    const rows = shown.map(r => `
-      <tr class="${r.cleared ? 'matched' : ''}">
-        <td style="text-align:center;width:32px"><input type="checkbox" class="rec-cb" ${r.cleared ? 'checked' : ''} onclick="toggleReconcileRow('${acct.id}','${r.id}',this.checked)"></td>
-        <td>${r.date}</td>
-        <td>${r.ref}</td>
-        <td style="max-width:0">${r.desc}</td>
-        <td class="muted" style="max-width:0;color:#666">${r.account}</td>
-        <td class="r">${fmtN(r.amount)}</td>
-      </tr>`).join('');
-    return `
-      <div class="rec-panel">
-        <div class="rec-panel-hdr">
-          <span class="rec-panel-title">${title}</span>
-          <span class="rec-panel-count" id="rec-${kind}-count">${clearedCount}/${list.length} cleared</span>
-          <span class="rec-panel-bal">${label}: <b>${fmt(list.reduce((s, r) => s + r.amount, 0))}</b></span>
+  const liveInRm = liveBookBalance(acct.id);
+  const hasStatement = REC_STATE.statementBalance != null;
+  const diff = hasStatement ? +(REC_STATE.statementBalance - liveInRm).toFixed(2) : null;
+  const diffZero = diff !== null && Math.abs(diff) < 0.005;
+  const diffColor = diff === null ? '#13314c' : (diffZero ? '#2e7d32' : '#eb343c');
+  const diffDisplay = diff === null ? '—' : (diffZero ? '$0.00' : `${diff < 0 ? '-' : '+'}${fmt(Math.abs(diff))}`);
+
+  const pending = recData(acct.id).bankList.filter(b => b.pending);
+
+  const pendingRows = pending.map(t => `
+    <tr>
+      <td>${t.date}</td>
+      <td>${t.desc}</td>
+      <td class="r">${fmtN(t.amount)}</td>
+      <td>
+        <div class="rec-pending-actions">
+          <button class="link-btn" style="font-size:13px" onclick="openAcct('${acct.id}')">Go to Transaction Review</button>
+          <button class="link-btn" style="font-size:13px" onclick="doExclude('${t.txId}');renderReconcile()">Exclude</button>
         </div>
-        <div class="rec-tbl-wrap">
-          <table class="rec-tbl">
-            <thead><tr>
-              <th style="width:32px"><input type="checkbox" class="rec-cb" ${allChecked ? 'checked' : ''} onclick="toggleReconcileAll('${acct.id}','${kind}',this.checked)"></th>
-              <th style="width:96px">Date</th><th style="width:100px">Reference</th><th>Description</th><th style="width:170px">Account</th><th class="r" style="width:110px">Amount</th>
-            </tr></thead>
-            <tbody>${rows || `<tr><td colspan="6" style="text-align:center;color:#9aa7b3;padding:24px 0">No transactions</td></tr>`}</tbody>
-          </table>
-        </div>
-      </div>`;
-  };
+      </td>
+    </tr>`).join('');
 
   const acctOpts = ACCOUNTS.filter(a => a.kind === 'bank').map(a => ({ value: a.id, label: a.gl }));
-  const selHtml = cSel('rec-acct', REC_STATE.acctId, acctOpts, 'REC_STATE.acctId=value;renderReconcile()', 'min-width:180px')
+  const selHtml = cSel('rec-acct', REC_STATE.acctId, acctOpts, 'openReconcile(value)', 'min-width:180px')
     .replace('class="csel-btn"', 'class="csel-btn csel-btn--acct"');
 
-  const balanced = Math.abs(difference) < 0.005;
+  const finishDisabled = !hasStatement || !diffZero || pending.length > 0;
 
   document.getElementById('rec-inner').innerHTML = `
     <div class="br-top-wrap">
       <div class="br-top">
         ${selHtml}
         <span class="br-bank-info">${acct.bankName ? acct.bankName + ' ••••' + acct.last4 : 'No bank account linked'}</span>
-        <div class="br-balances">
-          <span class="br-bal-item">Statement Date: <span class="br-bal-val">${statementDate}</span></span>
-          <span class="br-bal-item">Beginning Balance: <span class="br-bal-val">${fmt(beginningBalance)}</span></span>
-          <span class="br-bal-item">Ending Balance: <input class="rec-end-input" value="${fmtN(endingBalance)}" oninput="setReconcileEnding('${acct.id}',this.value)"></span>
-        </div>
-        <div class="br-top-right">
-          <div class="rec-seg">
-            <button class="rec-seg-btn${REC_STATE.recFilter==='uncleared'?' on':''}" onclick="REC_STATE.recFilter='uncleared';renderReconcile()">Uncleared</button>
-            <button class="rec-seg-btn${REC_STATE.recFilter==='all'?' on':''}" onclick="REC_STATE.recFilter='all';renderReconcile()">All</button>
+      </div>
+    </div>
+    <div class="rec-body-wrap">
+      <div class="rec-card">
+        <div class="rec-card-label">Enter your bank statement details to begin.</div>
+        <div class="rec-stmt-fields">
+          <div class="at-field" style="flex:1">
+            <label>Statement Ending Date</label>
+            <input class="at-input" type="date" value="${REC_STATE.statementDate}" onchange="setStatementField('date',this.value)">
+          </div>
+          <div class="at-field" style="flex:1">
+            <label>Statement Ending Balance</label>
+            <input class="at-input" type="text" inputmode="decimal" placeholder="0.00" value="${REC_STATE.statementBalance != null ? fmtN(REC_STATE.statementBalance) : ''}" onchange="setStatementField('balance',this.value)">
           </div>
         </div>
       </div>
-    </div>
-    <div class="rec-cols">
-      ${panel('Deposits &amp; Other Credits', deposits, 'dep', 'Total')}
-      ${panel('Checks &amp; Payments', payments, 'pay', 'Total')}
-    </div>
-    <div class="rec-cols" style="padding-top:0;flex:0 0 auto;max-height:220px">
-      ${recLinesPanel(acct.id, 'sc', 'Service Charges', 'Expense Account', serviceCharges)}
-      ${recLinesPanel(acct.id, 'ii', 'Interest Income', 'Income Account', interestIncome)}
-    </div>
-    <div class="rec-summary-wrap">
-      <div class="rec-summary" style="grid-template-columns:repeat(4,1fr)">
-        <div class="rec-sum-row"><span>Beginning Balance</span><span id="rec-sum-begin">${fmt(beginningBalance)}</span></div>
-        <div class="rec-sum-row"><span>Cleared Deposits (${clearedDepositCount})</span><span id="rec-sum-dep" class="pos">+ ${fmt(depositTotal)}</span></div>
-        <div class="rec-sum-row"><span>Cleared Payments (${clearedPaymentCount})</span><span id="rec-sum-pay" class="neg">− ${fmt(paymentTotal)}</span></div>
-        <div class="rec-sum-row"><span id="rec-sc-label">Service Charges (${serviceCharges.length})</span><span id="rec-sum-sc" class="neg">− ${fmt(serviceChargeTotal)}</span></div>
-        <div class="rec-sum-row"><span id="rec-ii-label">Interest Income (${interestIncome.length})</span><span id="rec-sum-ii" class="pos">+ ${fmt(interestIncomeTotal)}</span></div>
-        <div class="rec-sum-row rec-sum-total"><span>Cleared Balance</span><span id="rec-sum-cleared">${fmt(clearedBalance)}</span></div>
-        <div class="rec-sum-row"><span>Statement Ending Balance</span><span id="rec-sum-ending">${fmt(endingBalance)}</span></div>
-        <div class="rec-sum-row rec-sum-diff"><span>Difference</span><span id="rec-sum-diff">${fmt(Math.abs(difference))}</span></div>
+
+      <div class="sum-strip">
+        <div class="sum-cell"><span class="sum-lbl">Quiltt Bank Balance:</span><span class="sum-val">${fmt(acct.bankBalance)}</span></div>
+        <div class="sum-cell"><span class="sum-lbl">Book Balance (In RM):</span><span class="sum-val">${fmt(liveInRm)}</span></div>
+        <div class="sum-cell"><span class="sum-lbl">Statement Ending Balance:</span><span class="sum-val">${hasStatement ? fmt(REC_STATE.statementBalance) : '—'}</span></div>
+        <div class="sum-cell"><span class="sum-lbl">Difference to resolve:</span><span class="sum-val" style="color:${diffColor}">${diffDisplay}</span></div>
       </div>
-      <div class="rec-diff-banner ${balanced ? 'balanced' : 'unbalanced'}" id="rec-diff-banner">
-        ${ic(balanced ? P.check : P.alert, 18, balanced ? '#6eb744' : '#f5a623')}
-        <span class="rec-diff-msg">${balanced ? 'Reconciled — balances match' : `Out of balance by ${fmt(Math.abs(difference))}`}</span>
-        ${!balanced ? `<a href="#" class="rec-diff-link" onclick="openAcct('${acct.id}');return false">Review unmatched transactions</a>` : ''}
+      ${!diffZero ? `<div class="rec-hint">When the difference reaches $0.00, you're ready to finish.</div>` : ''}
+
+      <div>
+        <div class="rec-section-hdr">
+          <span>Unresolved transactions</span>
+          <span class="rec-badge ${pending.length > 0 ? 'warn' : 'ok'}">${pending.length}</span>
+        </div>
+        ${pending.length > 0 ? `
+          <div class="rec-note" style="margin:6px 0 10px">These items are still open in Transaction Review. Resolve them there, or exclude them here if they don't belong in RM.</div>
+          <table class="rec-pending-tbl">
+            <thead><tr><th style="width:96px">Date</th><th>Description</th><th class="r" style="width:110px">Amount</th><th style="width:260px"></th></tr></thead>
+            <tbody>${pendingRows}</tbody>
+          </table>
+        ` : `<div class="rec-all-clear" style="margin-top:10px">${ic(P.check,16,'#2e7d32')} All transactions reviewed</div>`}
       </div>
     </div>
     <div class="rec-foot">
-      <button id="rec-finish-btn" class="btn-primary" style="height:36px;padding:0 16px" ${balanced ? '' : 'disabled'} onclick="showToast('Reconciliation saved');showScreen('br')">Finish Now</button>
+      <button id="rec-finish-btn" class="btn-primary" style="height:36px;padding:0 16px"${finishDisabled ? ' disabled' : ''} onclick="finishReconciliation()">Finish Reconciliation</button>
       <button class="at-cancel" onclick="showToast('Progress saved');showScreen('br')">Save For Later</button>
       <button class="link-btn" style="font-size:14px" onclick="showScreen('br')">Cancel</button>
     </div>`;
 }
+
 
 function _renderRegister(STATE, opts) {
   const acct = ACCOUNTS.find(a=>a.id===STATE.acctId);
