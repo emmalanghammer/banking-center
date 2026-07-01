@@ -1738,14 +1738,14 @@ function renderExpandedMatch(tx) {
 
 function renderExpandedMulti(tx) {
   const sel = S.multiSel[tx.id]??0;
-  const cols = 'grid-template-columns:40px 110px 1.5fr 1.3fr 1.2fr 1.2fr 110px';
+  const cols = 'grid-template-columns:40px 110px 1.3fr 1.4fr 1.3fr 1.3fr 110px';
   const rows = tx.multiMatches.map((r,i) => `
     <div class="sub-tbl-row${sel===i?' sel':''}" style="${cols};cursor:pointer" onclick="setMultiSel('${tx.id}',${i})">
       <div class="sub-tbl-cell" style="display:flex;align-items:center;justify-content:center"><div class="radio-dot${sel===i?' sel':''}"></div></div>
       <div class="sub-tbl-cell">${r.date}</div>
       <div class="sub-tbl-cell"><button class="tx-rm-link">${r.ref}</button></div>
-      <div class="sub-tbl-cell">${r.property||'—'}</div>
       <div class="sub-tbl-cell">${r.account}</div>
+      <div class="sub-tbl-cell">${r.property||'—'}</div>
       <div class="sub-tbl-cell">${r.comment}</div>
       <div class="sub-tbl-cell r">${fmtN(r.amount)}</div>
     </div>`).join('');
@@ -1757,7 +1757,7 @@ function renderExpandedMulti(tx) {
     <div class="sub-tbl">
       <div style="font-size:13px;color:#666;padding:10px 12px;border-bottom:1px solid #eef2f7;background:#fff">Select the matching transaction or create a new Rent Manager record.</div>
       <div class="sub-tbl-hdr" style="${cols}">
-        ${['','Bill Date','Transaction','Property','Vendor','Memo','Amount'].map((h,i)=>`<div class="sub-tbl-hdr-cell"${i===6?' style="justify-content:flex-end"':''}>${h}</div>`).join('')}
+        ${['','Deposit Date','Reference','Bank Account','Property','Comment','Total Amount'].map((h,i)=>`<div class="sub-tbl-hdr-cell"${i===6?' style="justify-content:flex-end"':''}>${h}</div>`).join('')}
       </div>
       ${rows}
     </div>
