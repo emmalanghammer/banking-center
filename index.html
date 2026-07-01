@@ -4199,7 +4199,15 @@ function recData(acctId) {
       pending: !resolved, txId: t.id,
     };
   });
-  return { bankList };
+  // Rent Manager records that haven't shown up on the bank feed yet — e.g. a
+  // check that's been written and recorded but the vendor hasn't cashed it.
+  // These are expected and don't block finishing; they clear on their own
+  // once the bank feed catches up.
+  const outstandingList = (BR_TX[acctId] || []).filter(r => !r.cleared).map(r => ({
+    date: r.date, ref: r.ref, desc: r.info,
+    amount: r.deposit != null ? r.deposit : (r.payment || 0),
+  }));
+  return { bankList, outstandingList };
 }
 
 // Live book balance for an account: the static `inRm` figure plus the net
@@ -4258,7 +4266,8 @@ function renderReconcile() {
   const diffColor = diff === null ? '#13314c' : (diffZero ? '#2e7d32' : '#eb343c');
   const diffDisplay = diff === null ? '—' : (diffZero ? '$0.00' : `${diff < 0 ? '-' : '+'}${fmt(Math.abs(diff))}`);
 
-  const pending = recData(acct.id).bankList.filter(b => b.pending);
+  const { bankList, outstandingList } = recData(acct.id);
+  const pending = bankList.filter(b => b.pending);
 
   const pendingRows = pending.map(t => `
     <tr>
@@ -4271,6 +4280,14 @@ function renderReconcile() {
           <button class="link-btn" style="font-size:13px" onclick="doExclude('${t.txId}');renderReconcile()">Exclude</button>
         </div>
       </td>
+    </tr>`).join('');
+
+  const outstandingRows = outstandingList.map(r => `
+    <tr>
+      <td>${r.date}</td>
+      <td>${r.ref}</td>
+      <td>${r.desc}</td>
+      <td class="r">${fmtN(r.amount)}</td>
     </tr>`).join('');
 
   const acctOpts = ACCOUNTS.filter(a => a.kind === 'bank').map(a => ({ value: a.id, label: a.gl }));
@@ -4302,7 +4319,7 @@ function renderReconcile() {
       </div>
 
       <div class="sum-strip">
-        <div class="sum-cell"><span class="sum-lbl">Quiltt Bank Balance:</span><span class="sum-val">${fmt(acct.bankBalance)}</span></div>
+        <div class="sum-cell"><span class="sum-lbl">Bank Balance:</span><span class="sum-val">${fmt(acct.bankBalance)}</span></div>
         <div class="sum-cell"><span class="sum-lbl">Book Balance (In RM):</span><span class="sum-val">${fmt(liveInRm)}</span></div>
         <div class="sum-cell"><span class="sum-lbl">Statement Ending Balance:</span><span class="sum-val">${hasStatement ? fmt(REC_STATE.statementBalance) : '—'}</span></div>
         <div class="sum-cell"><span class="sum-lbl">Difference to resolve:</span><span class="sum-val" style="color:${diffColor}">${diffDisplay}</span></div>
@@ -4321,6 +4338,20 @@ function renderReconcile() {
             <tbody>${pendingRows}</tbody>
           </table>
         ` : `<div class="rec-all-clear" style="margin-top:10px">${ic(P.check,16,'#2e7d32')} All transactions reviewed</div>`}
+      </div>
+
+      <div>
+        <div class="rec-section-hdr">
+          <span>Outstanding Rent Manager transactions</span>
+          <span class="rec-badge ${outstandingList.length > 0 ? 'warn' : 'ok'}">${outstandingList.length}</span>
+        </div>
+        ${outstandingList.length > 0 ? `
+          <div class="rec-note" style="margin:6px 0 10px">These are recorded in Rent Manager but haven't shown up on the bank feed yet — e.g. a check that hasn't been cashed. They'll clear on their own once the bank catches up and don't block finishing.</div>
+          <table class="rec-pending-tbl">
+            <thead><tr><th style="width:96px">Date</th><th style="width:100px">Reference</th><th>Description</th><th class="r" style="width:110px">Amount</th></tr></thead>
+            <tbody>${outstandingRows}</tbody>
+          </table>
+        ` : `<div class="rec-all-clear" style="margin-top:10px">${ic(P.check,16,'#2e7d32')} No outstanding transactions</div>`}
       </div>
     </div>
     <div class="rec-foot">
