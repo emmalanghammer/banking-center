@@ -356,7 +356,11 @@ svg.ico{display:block;flex-shrink:0}
 /* ── Settings overlay ── */
 .settings-backdrop{position:fixed;inset:0;background:rgba(19,49,76,.35);z-index:400;display:flex;align-items:center;justify-content:center}
 /* ── Orion Chat ── */
-.oc-pane{position:fixed;top:88px;right:0;bottom:0;width:420px;background:#fff;border-left:1px solid #cedbe7;box-shadow:-4px 0 20px rgba(19,49,76,.1);z-index:301;display:flex;flex-direction:column;overflow:hidden}
+.oc-pane{position:fixed;background:#fff;border:1px solid #cedbe7;border-radius:12px;box-shadow:0 12px 40px rgba(19,49,76,.22);z-index:301;display:flex;flex-direction:column;overflow:hidden;resize:both;min-width:340px;min-height:380px;max-width:94vw;max-height:calc(100vh - 70px)}
+.oc-pane .oc-hdr{cursor:grab;user-select:none}
+.oc-pane.oc-dragging{cursor:grabbing}
+.oc-pane.oc-dragging .oc-hdr{cursor:grabbing}
+.oc-resize-grip{position:absolute;right:2px;bottom:2px;width:14px;height:14px;pointer-events:none;opacity:.55}
 .oc-hdr{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid #cedbe7;flex-shrink:0}
 .oc-hdr-title{font-size:14px;font-weight:500;color:#13314c}
 .oc-hdr-sub{font-size:12px;color:#9aa7b3;margin-left:auto}
@@ -5132,6 +5136,33 @@ function _ubInit() {
 /* ── Orion Chat ──────────────────────────────────────────── */
 let _ocOpen = false;
 const _ocMessages = [];
+// Floating-window geometry — survives re-renders (each new message repaints
+// the pane) and reopens where the user left it.
+const _ocWin = { x: null, y: null, w: 440, h: 620 };
+let _ocRO = null;
+
+function ocDragStart(e) {
+  if (e.target.closest('button')) return;
+  const pane = document.getElementById('oc-pane');
+  if (!pane) return;
+  const startX = e.clientX, startY = e.clientY;
+  const origX = _ocWin.x, origY = _ocWin.y;
+  const move = ev => {
+    _ocWin.x = Math.min(Math.max(8, origX + ev.clientX - startX), window.innerWidth - 90);
+    _ocWin.y = Math.min(Math.max(52, origY + ev.clientY - startY), window.innerHeight - 60);
+    pane.style.left = _ocWin.x + 'px';
+    pane.style.top = _ocWin.y + 'px';
+  };
+  const up = () => {
+    document.removeEventListener('mousemove', move);
+    document.removeEventListener('mouseup', up);
+    pane.classList.remove('oc-dragging');
+  };
+  document.addEventListener('mousemove', move);
+  document.addEventListener('mouseup', up);
+  pane.classList.add('oc-dragging');
+  e.preventDefault();
+}
 
 const OC_SUGGESTIONS = [
   'What accounts have differences?',
@@ -5144,6 +5175,11 @@ const OC_SUGGESTIONS = [
 
 function openOrionChat() {
   _ocOpen = true;
+  if (_ocWin.x == null) {
+    _ocWin.x = Math.max(8, window.innerWidth - _ocWin.w - 24);
+    _ocWin.y = 96;
+    _ocWin.h = Math.min(_ocWin.h, window.innerHeight - 130);
+  }
   if (_ocMessages.length === 0) {
     _ocMessages.push({role:'orion', text:'Hi! I\'m Orion. Ask me anything about Cascade Property Group\'s accounts, transactions, or alerts — I\'ll search the data and give you a direct answer.'});
   }
@@ -5180,9 +5216,8 @@ function renderOrionChat() {
   ).join('')}</div>` : '';
 
   root.innerHTML = `
-    <div class="slideout-bg" onclick="closeOrionChat()"></div>
-    <div class="oc-pane">
-      <div class="oc-hdr">
+    <div class="oc-pane" id="oc-pane" style="left:${_ocWin.x}px;top:${_ocWin.y}px;width:${_ocWin.w}px;height:${_ocWin.h}px">
+      <div class="oc-hdr" onmousedown="ocDragStart(event)">
         <span class="bc-ico-badge" style="background:#e2f1da">${orionSpark(16)}</span>
         <span class="oc-hdr-title">Ask Orion</span>
         <span class="oc-hdr-sub">Cascade Property Group · Jun 2026</span>
@@ -5199,10 +5234,24 @@ function renderOrionChat() {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
         </button>
       </div>
+      <svg class="oc-resize-grip" viewBox="0 0 14 14"><path d="M13 5v2l-6 6H5zM13 10v2l-1 1h-2z" fill="#9aa7b3"/></svg>
     </div>`;
 
   const msgs = document.getElementById('oc-msgs');
   if (msgs) msgs.scrollTop = msgs.scrollHeight;
+
+  // Persist user resizes (native CSS resize fires no events) so the next
+  // repaint doesn't snap the window back.
+  if (_ocRO) _ocRO.disconnect();
+  const pane = document.getElementById('oc-pane');
+  if (pane && window.ResizeObserver) {
+    _ocRO = new ResizeObserver(() => {
+      if (!pane.isConnected) return;
+      _ocWin.w = pane.offsetWidth;
+      _ocWin.h = pane.offsetHeight;
+    });
+    _ocRO.observe(pane);
+  }
 }
 
 function ocSend() {
