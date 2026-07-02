@@ -2829,7 +2829,7 @@ function fmCandidates(tx) {
     return [
       {
         date: base,
-        type: 'Receipt',
+        type: 'Deposit',
         ref: `Deposit ${depNum}`,
         property: prop,
         info: `${initial}. ${lastName} — Rent Payment`,
@@ -2847,7 +2847,7 @@ function fmCandidates(tx) {
       },
       {
         date: offsetDate(base, -5),
-        type: 'Receipt',
+        type: 'Deposit',
         ref: `Deposit ${depNum - 3}`,
         property: prop,
         info: `${initial}. ${lastName} — Partial Payment`,
@@ -2909,8 +2909,8 @@ function fmRows(tx) {
       property: '\u2014', info: r.info, comment: '', amount: r.deposit != null ? r.deposit : (r.payment || 0),
     });
   });
-  const inflowTypes = ['Receipt', 'Deposit'];
-  const outflowTypes = ['Bill', 'Check', 'Withdrawal', 'ePay', 'Journal'];
+  const inflowTypes = ['Deposit', 'Credit'];
+  const outflowTypes = ['Check', 'Bill', 'Charge'];
   rows.forEach((r, i) => {
     r._i = i;
     const dirOk = (inflow ? inflowTypes : outflowTypes).includes(r.type);
@@ -4087,12 +4087,12 @@ const BR_TX = {
   op3487: [
     { date:'06/01/26', ref:'D1621', type:'Deposit',    info:'ePay Batch Auto Deposit',                gl:'4100 Rental Income',         deposit:18250.00, payment:null,     cleared:false },
     { date:'05/28/26', ref:'1042',  type:'Check',      info:'Rose City Plumbing — Roof repair',       gl:'5402 Repairs & Maintenance', deposit:null,     payment:8400.00,  cleared:false },
-    { date:'05/26/26', ref:'EFT',   type:'Withdrawal', info:'Owner Distribution — Hawthorne Holdings LLC',   gl:'2100 Owner Liability',       deposit:null,     payment:25000.00, cleared:false },
+    { date:'05/26/26', ref:'EFT',   type:'Check',      info:'Owner Distribution — Hawthorne Holdings LLC',   gl:'2100 Owner Liability',       deposit:null,     payment:25000.00, cleared:false },
     { date:'05/22/26', ref:'D1614', type:'Deposit',    info:'Management fee sweep',                    gl:'4000 Management Fee Income', deposit:9654.01,  payment:null,     cleared:true },
     { date:'05/20/26', ref:'1041',  type:'Check',      info:'City of Portland — Water/Sewer',           gl:'5403 Utilities',             deposit:null,     payment:1245.18,  cleared:true },
     { date:'05/15/26', ref:'D1609', type:'Deposit',    info:'ePay Batch Auto Deposit',                gl:'4100 Rental Income',         deposit:12450.50, payment:null,     cleared:true },
     { date:'05/10/26', ref:'J1573', type:'Journal',    info:'Payroll transfer to 1002 Payroll',       gl:'1002 Payroll Account',       deposit:null,     payment:42860.00, cleared:true },
-    { date:'05/05/26', ref:'ePay',  type:'ePay',       info:'Standard Insurance — Property Policy',         gl:'5404 Insurance',             deposit:null,     payment:4850.00,  cleared:true },
+    { date:'05/05/26', ref:'ePay',  type:'Check',       info:'Standard Insurance — Property Policy',         gl:'5404 Insurance',             deposit:null,     payment:4850.00,  cleared:true },
     { date:'05/01/26', ref:'D1591', type:'Deposit',    info:'ePay Batch Auto Deposit',                gl:'4100 Rental Income',         deposit:18200.00, payment:null,     cleared:true },
     { date:'04/28/26', ref:'1040',  type:'Check',      info:'Portland General Electric',                             gl:'5403 Utilities',             deposit:null,     payment:2310.45,  cleared:true },
     { date:'04/22/26', ref:'D1580', type:'Deposit',    info:'Application fees batch',                  gl:'4200 Application Fee Income',deposit:650.00,   payment:null,     cleared:true },
@@ -4101,15 +4101,15 @@ const BR_TX = {
   // 1002 Payroll Account — payroll runs, payroll taxes, transfers in
   pr9204: [
     { date:'05/30/26', ref:'J1700', type:'Journal',    info:'Transfer from 1001 Operating',           gl:'1001 Operating Account',     deposit:42860.00, payment:null,     cleared:true },
-    { date:'05/30/26', ref:'DD8842',type:'Withdrawal', info:'Direct Deposit — Payroll 11/30',         gl:'5701 Salaries & Wages',      deposit:null,     payment:28450.12, cleared:true },
-    { date:'05/30/26', ref:'EFT',   type:'Withdrawal', info:'Federal Payroll Tax — EFTPS',            gl:'5702 Payroll Taxes',         deposit:null,     payment:8920.45,  cleared:true },
-    { date:'05/30/26', ref:'EFT',   type:'Withdrawal', info:'OR Employment Dept — SUTA',         gl:'5702 Payroll Taxes',         deposit:null,     payment:1245.00,  cleared:true },
+    { date:'05/30/26', ref:'DD8842',type:'Check',      info:'Direct Deposit — Payroll 11/30',         gl:'5701 Salaries & Wages',      deposit:null,     payment:28450.12, cleared:true },
+    { date:'05/30/26', ref:'EFT',   type:'Check',      info:'Federal Payroll Tax — EFTPS',            gl:'5702 Payroll Taxes',         deposit:null,     payment:8920.45,  cleared:true },
+    { date:'05/30/26', ref:'EFT',   type:'Check',      info:'OR Employment Dept — SUTA',         gl:'5702 Payroll Taxes',         deposit:null,     payment:1245.00,  cleared:true },
     { date:'05/15/26', ref:'J1690', type:'Journal',    info:'Transfer from 1001 Operating',           gl:'1001 Operating Account',     deposit:38000.00, payment:null,     cleared:true },
-    { date:'05/15/26', ref:'DD8830',type:'Withdrawal', info:'Direct Deposit — Payroll 11/15',         gl:'5701 Salaries & Wages',      deposit:null,     payment:28450.12, cleared:true },
-    { date:'05/15/26', ref:'EFT',   type:'Withdrawal', info:'Federal Payroll Tax — EFTPS',            gl:'5702 Payroll Taxes',         deposit:null,     payment:8920.45,  cleared:true },
-    { date:'04/31/26', ref:'DD8815',type:'Withdrawal', info:'Direct Deposit — Payroll 10/31',         gl:'5701 Salaries & Wages',      deposit:null,     payment:27980.00, cleared:true },
-    { date:'04/31/26', ref:'EFT',   type:'Withdrawal', info:'Federal Payroll Tax — EFTPS',            gl:'5702 Payroll Taxes',         deposit:null,     payment:8710.20,  cleared:true },
-    { date:'04/15/26', ref:'DD8800',type:'Withdrawal', info:'Direct Deposit — Payroll 10/15',         gl:'5701 Salaries & Wages',      deposit:null,     payment:27980.00, cleared:true },
+    { date:'05/15/26', ref:'DD8830',type:'Check',      info:'Direct Deposit — Payroll 11/15',         gl:'5701 Salaries & Wages',      deposit:null,     payment:28450.12, cleared:true },
+    { date:'05/15/26', ref:'EFT',   type:'Check',      info:'Federal Payroll Tax — EFTPS',            gl:'5702 Payroll Taxes',         deposit:null,     payment:8920.45,  cleared:true },
+    { date:'04/31/26', ref:'DD8815',type:'Check',      info:'Direct Deposit — Payroll 10/31',         gl:'5701 Salaries & Wages',      deposit:null,     payment:27980.00, cleared:true },
+    { date:'04/31/26', ref:'EFT',   type:'Check',      info:'Federal Payroll Tax — EFTPS',            gl:'5702 Payroll Taxes',         deposit:null,     payment:8710.20,  cleared:true },
+    { date:'04/15/26', ref:'DD8800',type:'Check',      info:'Direct Deposit — Payroll 10/15',         gl:'5701 Salaries & Wages',      deposit:null,     payment:27980.00, cleared:true },
   ],
   // 1003 Trust Account - Res. — resident rent in, owner disbursements out
   tr6612: [
@@ -4173,26 +4173,26 @@ const BR_TX = {
     { date:'05/30/26', ref:'1805',  type:'Check',      info:'Owner Distribution — Hawthorne Holdings LLC',   gl:'2100 Owner Liability',       deposit:null,     payment:25000.00, cleared:true },
     { date:'05/30/26', ref:'1806',  type:'Check',      info:'Owner Distribution — Alberta Commons Group',gl:'2100 Owner Liability',       deposit:null,     payment:18500.00, cleared:true },
     { date:'05/15/26', ref:'J1698', type:'Journal',    info:'Transfer from 1001 Operating',           gl:'1001 Operating Account',     deposit:60000.00, payment:null,     cleared:true },
-    { date:'05/15/26', ref:'EFT',   type:'Withdrawal', info:'Owner Distribution ACH — Pearl District Partners',gl:'2100 Owner Liability',     deposit:null,     payment:22000.00, cleared:true },
+    { date:'05/15/26', ref:'EFT',   type:'Check',      info:'Owner Distribution ACH — Pearl District Partners',gl:'2100 Owner Liability',     deposit:null,     payment:22000.00, cleared:true },
     { date:'04/31/26', ref:'1804',  type:'Check',      info:'Owner Distribution — Sellwood Owner LLC', gl:'2100 Owner Liability',       deposit:null,     payment:15000.00, cleared:true },
     { date:'04/31/26', ref:'1803',  type:'Check',      info:'Owner Distribution — Hawthorne Holdings LLC',   gl:'2100 Owner Liability',       deposit:null,     payment:25000.00, cleared:true },
   ],
   // 1009 Petty Cash - Admin — small office expenses (no bank feed)
   pc0000: [
-    { date:'05/28/26', ref:'PC112', type:'Withdrawal', info:'Office supplies — Staples',              gl:'5500 Office Expense',        deposit:null,     payment:45.20,    cleared:true },
-    { date:'05/22/26', ref:'PC111', type:'Withdrawal', info:'Postage — USPS',                         gl:'5500 Office Expense',        deposit:null,     payment:28.00,    cleared:true },
-    { date:'05/15/26', ref:'PC110', type:'Withdrawal', info:'Break room supplies',                    gl:'5500 Office Expense',        deposit:null,     payment:62.45,    cleared:true },
+    { date:'05/28/26', ref:'PC112', type:'Check',      info:'Office supplies — Staples',              gl:'5500 Office Expense',        deposit:null,     payment:45.20,    cleared:true },
+    { date:'05/22/26', ref:'PC111', type:'Check',      info:'Postage — USPS',                         gl:'5500 Office Expense',        deposit:null,     payment:28.00,    cleared:true },
+    { date:'05/15/26', ref:'PC110', type:'Check',      info:'Break room supplies',                    gl:'5500 Office Expense',        deposit:null,     payment:62.45,    cleared:true },
     { date:'05/08/26', ref:'J1693', type:'Journal',    info:'Petty cash replenishment',               gl:'1001 Operating Account',     deposit:250.00,   payment:null,     cleared:true },
-    { date:'05/01/26', ref:'PC109', type:'Withdrawal', info:'Parking — county office',                gl:'5500 Office Expense',        deposit:null,     payment:18.00,    cleared:true },
-    { date:'04/25/26', ref:'PC108', type:'Withdrawal', info:'Locksmith — office keys',                gl:'5500 Office Expense',        deposit:null,     payment:35.00,    cleared:true },
-    { date:'04/15/26', ref:'PC107', type:'Withdrawal', info:'Cleaning supplies',                      gl:'5500 Office Expense',        deposit:null,     payment:41.30,    cleared:true },
+    { date:'05/01/26', ref:'PC109', type:'Check',      info:'Parking — county office',                gl:'5500 Office Expense',        deposit:null,     payment:18.00,    cleared:true },
+    { date:'04/25/26', ref:'PC108', type:'Check',      info:'Locksmith — office keys',                gl:'5500 Office Expense',        deposit:null,     payment:35.00,    cleared:true },
+    { date:'04/15/26', ref:'PC107', type:'Check',      info:'Cleaning supplies',                      gl:'5500 Office Expense',        deposit:null,     payment:41.30,    cleared:true },
   ],
   // 2001 Mastercard — general business charges + card payments
   cc2247: [
     { date:'05/30/26', ref:'—',     type:'Charge',     info:'Amazon Business — Office Supplies',      gl:'5500 Office Expense',        deposit:null,     payment:245.80,   cleared:false },
     { date:'05/28/26', ref:'—',     type:'Charge',     info:'Zoom — Monthly Subscription',            gl:'5510 Software & Subscriptions',deposit:null,   payment:79.99,    cleared:false },
     { date:'05/25/26', ref:'—',     type:'Charge',     info:'Home Depot — Property #4',               gl:'5402 Repairs & Maintenance', deposit:null,     payment:412.33,   cleared:false },
-    { date:'05/20/26', ref:'PMT',   type:'Payment',    info:'Online Payment — Thank You',             gl:'1001 Operating Account',     deposit:2500.00,  payment:null,     cleared:true },
+    { date:'05/20/26', ref:'PMT',   type:'Credit',     info:'Online Payment — Thank You',             gl:'1001 Operating Account',     deposit:2500.00,  payment:null,     cleared:true },
     { date:'05/18/26', ref:'—',     type:'Charge',     info:'Costco Business',                        gl:'5500 Office Expense',        deposit:null,     payment:318.45,   cleared:true },
     { date:'05/15/26', ref:'—',     type:'Charge',     info:'Adobe Creative Cloud',                   gl:'5510 Software & Subscriptions',deposit:null,   payment:54.99,    cleared:true },
     { date:'05/10/26', ref:'—',     type:'Charge',     info:'Shell — Fuel',                           gl:'5520 Vehicle Expense',       deposit:null,     payment:88.20,    cleared:true },
@@ -4206,7 +4206,7 @@ const BR_TX = {
     { date:'05/22/26', ref:'—',     type:'Charge',     info:"Lowe's — Paint & drywall",               gl:'5402 Repairs & Maintenance', deposit:null,     payment:284.50,   cleared:false },
     { date:'05/18/26', ref:'—',     type:'Charge',     info:'Grainger — HVAC filters',                gl:'5402 Repairs & Maintenance', deposit:null,     payment:198.74,   cleared:false },
     { date:'05/14/26', ref:'—',     type:'Charge',     info:'Ace Hardware — Locks & keys',            gl:'5402 Repairs & Maintenance', deposit:null,     payment:96.20,    cleared:false },
-    { date:'05/08/26', ref:'PMT',   type:'Payment',    info:'Online Payment — Thank You',             gl:'1001 Operating Account',     deposit:1500.00,  payment:null,     cleared:true },
+    { date:'05/08/26', ref:'PMT',   type:'Credit',     info:'Online Payment — Thank You',             gl:'1001 Operating Account',     deposit:1500.00,  payment:null,     cleared:true },
     { date:'05/02/26', ref:'—',     type:'Charge',     info:'Sherwin-Williams — Exterior paint',      gl:'5402 Repairs & Maintenance', deposit:null,     payment:421.36,   cleared:true },
     { date:'04/26/26', ref:'—',     type:'Charge',     info:'Home Depot — Appliance, Unit 210',       gl:'5402 Repairs & Maintenance', deposit:null,     payment:689.00,   cleared:true },
   ],
@@ -4215,7 +4215,7 @@ const BR_TX = {
     { date:'05/27/26', ref:'—',     type:'Charge',     info:'United Airlines — Conference travel',    gl:'5530 Travel & Lodging',      deposit:null,     payment:412.40,   cleared:false },
     { date:'05/24/26', ref:'—',     type:'Charge',     info:'Marriott — Owner visit, Seattle',      gl:'5530 Travel & Lodging',      deposit:null,     payment:328.16,   cleared:false },
     { date:'05/21/26', ref:'—',     type:'Charge',     info:'Hertz — Rental car',                     gl:'5530 Travel & Lodging',      deposit:null,     payment:184.55,   cleared:false },
-    { date:'05/16/26', ref:'PMT',   type:'Payment',    info:'Online Payment — Thank You',             gl:'1001 Operating Account',     deposit:1200.00,  payment:null,     cleared:true },
+    { date:'05/16/26', ref:'PMT',   type:'Credit',     info:'Online Payment — Thank You',             gl:'1001 Operating Account',     deposit:1200.00,  payment:null,     cleared:true },
     { date:'05/12/26', ref:'—',     type:'Charge',     info:'Uber — Airport transfers',               gl:'5530 Travel & Lodging',      deposit:null,     payment:62.30,    cleared:true },
     { date:'05/06/26', ref:'—',     type:'Charge',     info:'Conference registration — IREM',         gl:'5540 Professional Development',deposit:null,   payment:595.00,   cleared:true },
     { date:'04/29/26', ref:'—',     type:'Charge',     info:'Business meals — Owner meeting',          gl:'5550 Meals & Entertainment', deposit:null,     payment:148.72,   cleared:true },
@@ -4224,7 +4224,7 @@ const BR_TX = {
   cc8804: [
     { date:'05/28/26', ref:'—',     type:'Charge',     info:'Recology — Trash service',       gl:'5403 Utilities',             deposit:null,     payment:845.00,   cleared:true },
     { date:'05/22/26', ref:'—',     type:'Charge',     info:'Stumptown Landscaping — Contract',        gl:'5402 Repairs & Maintenance', deposit:null,     payment:620.00,   cleared:true },
-    { date:'05/15/26', ref:'PMT',   type:'Payment',    info:'Online Payment — Thank You',             gl:'1001 Operating Account',     deposit:2000.00,  payment:null,     cleared:true },
+    { date:'05/15/26', ref:'PMT',   type:'Credit',     info:'Online Payment — Thank You',             gl:'1001 Operating Account',     deposit:2000.00,  payment:null,     cleared:true },
     { date:'05/10/26', ref:'—',     type:'Charge',     info:'Orkin — Pest control',                   gl:'5402 Repairs & Maintenance', deposit:null,     payment:285.00,   cleared:true },
     { date:'05/04/26', ref:'—',     type:'Charge',     info:'ADT — Security monitoring',              gl:'5403 Utilities',             deposit:null,     payment:189.00,   cleared:true },
     { date:'04/27/26', ref:'—',     type:'Charge',     info:'CenturyLink — Internet, office',                gl:'5403 Utilities',             deposit:null,     payment:142.50,   cleared:true },
@@ -4235,6 +4235,7 @@ const BR_TX = {
 // entries (and matched rows on both reconcile sides). Derived live from
 // S.matchedIds so matching anywhere flows through to the register + reconcile.
 function matchedIncomingRows(acctId) {
+  const isCard = (ACCOUNTS.find(a => a.id === acctId) || {}).kind === 'card';
   return acctTxs(acctId).filter(t => S.matchedIds.has(t.id)).map(t => {
     const isDep = t.deposit != null;
     const amt = isDep ? t.deposit : (t.payment || 0);
@@ -4242,7 +4243,7 @@ function matchedIncomingRows(acctId) {
     return {
       date: t.date.replace(/\/\d{2}(\d{2})$/, '/$1'),   // 06/16/2026 -> 06/16/26
       ref: mr && mr.ref ? mr.ref : 'NEW',
-      type: isDep ? 'Deposit' : 'Withdrawal',
+      type: isCard ? (isDep ? 'Credit' : 'Charge') : (isDep ? 'Deposit' : 'Check'),
       info: t.desc,
       gl: isDep ? '4100 Rental Income' : '5400 Operating Expense',
       deposit: isDep ? amt : null,
@@ -4394,7 +4395,7 @@ function recData(acctId) {
   rows.filter(r => r.status === 'Review').forEach(r => {
     const dup = rows.find(o => o !== r && o.inflow === r.inflow && Math.abs(o.rmAmt - r.rmAmt) < 0.005);
     if (dup) r.insight = `Possible duplicate \u2014 ${dup.ref} for this exact amount was already recorded on ${dup.date}.`;
-    else if (r.recType === 'Check') r.insight = `Check likely hasn't been cashed yet \u2014 vendor checks typically clear within 5\u201310 days of being sent.`;
+    else if (r.recType === 'Check' && /^\d+$/.test(String(r.ref))) r.insight = `Check likely hasn't been cashed yet \u2014 vendor checks typically clear within 5\u201310 days of being sent.`;
     else if (r.inflow) r.insight = `No matching bank deposit yet \u2014 batches recorded ${r.date} usually settle within 1\u20132 business days. Likely still pending.`;
     else r.insight = `Transfer initiated ${r.date} \u2014 likely still pending with the bank. Larger transfers can take 2\u20133 business days to post.`;
   });
