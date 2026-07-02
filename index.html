@@ -743,6 +743,11 @@ svg.ico{display:block;flex-shrink:0}
 .fm-fld{display:flex;flex-direction:column;gap:4px}
 .fm-fld label{font-size:12px;color:#008dd5;font-weight:500}
 .fm-tbl-wrap{flex:1;overflow-y:auto;min-height:0;padding:0 16px 12px;background:#f2f2f2}
+.ar-fld{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
+.ar-fld label{font-size:14px;color:#666}
+.ar-select{height:36px;width:100%;background:#f5f8fa url("data:image/svg+xml,%3Csvg width='18' height='18' viewBox='0 0 24 24' fill='%23666'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 6px center;border:1px solid #cedbe7;border-radius:4px;padding:0 28px 0 8px;font-size:14px;color:#13314c;font-family:Roboto,sans-serif;appearance:none;outline:none;box-sizing:border-box;cursor:pointer}
+.ar-input{height:36px;width:100%;background:#f5f8fa;border:1px solid #cedbe7;border-radius:4px;padding:0 8px;font-size:14px;color:#13314c;font-family:Roboto,sans-serif;outline:none;box-sizing:border-box}
+.ar-input::placeholder{color:#b3b3b3;font-style:italic}
 #find-match-root .at-modal{background:#f2f2f2}
 #find-match-root .at-hdr{background:#fff;border-radius:4px 4px 0 0}
 #find-match-root .at-tx-bar-wrap{background:#f2f2f2}
@@ -2902,6 +2907,32 @@ let _findMatchFiltered = false;
 let _fmTypeSel = new Set();
 let _fmTypeOpen = false;
 let _fmTypeBound = false;
+let _fmPropSel = new Set();
+let _fmPropOpen = false;
+let _fmSearch = '';
+let _fmDateFrom = '04/01/2026';
+let _fmDateTo = '06/30/2026';
+
+const FM_PROPERTIES = ['Hawthorne Court Apartments', 'Pearl District Lofts', 'Alberta Commons', 'Sellwood Row'];
+
+// Everyday Rent Manager activity that pads the pick list out to a realistic
+// register — none of it is one of Orion's likely matches for the bank amount.
+const FM_POOL_PAYMENTS = [
+  { date: '05/02/2026', type: 'Check',   ref: '1036',  property: 'Hawthorne Court Apartments', info: 'NW Natural',             comment: 'Gas \u2014 common areas',        amount: 412.77 },
+  { date: '05/06/2026', type: 'Bill',    ref: 'B1152', property: 'Pearl District Lofts',       info: 'Recology',               comment: 'Waste service \u2014 May',       amount: 389.00 },
+  { date: '05/18/2026', type: 'Bill',    ref: 'B1158', property: 'Alberta Commons',            info: 'CenturyLink',            comment: 'Internet \u2014 leasing office', amount: 129.99 },
+  { date: '05/25/2026', type: 'Journal', ref: 'J1580', property: 'Sellwood Row',               info: 'Owner contribution reclass', comment: 'Q2 reserve funding',        amount: 2000.00 },
+  { date: '06/02/2026', type: 'Bill',    ref: 'B1162', property: 'Hawthorne Court Apartments', info: 'Cascade HVAC',           comment: 'Quarterly maintenance plan',   amount: 675.00 },
+  { date: '06/08/2026', type: 'Check',   ref: '1044',  property: 'Pearl District Lofts',       info: 'Stumptown Landscaping',  comment: 'June grounds service',         amount: 1450.00 },
+];
+const FM_POOL_DEPOSITS = [
+  { date: '05/05/2026', type: 'Deposit', ref: 'D1596', property: 'Hawthorne Court Apartments', info: 'Rent \u2014 money orders',    comment: 'Walk-in payments',          amount: 2340.00 },
+  { date: '05/12/2026', type: 'Deposit', ref: 'D1603', property: 'Pearl District Lofts',       info: 'Application fees',        comment: 'Two applications',            amount: 250.00 },
+  { date: '05/19/2026', type: 'Journal', ref: 'J1577', property: 'Alberta Commons',            info: 'NSF reversal \u2014 Reyes',   comment: 'Returned payment repost',   amount: 1150.00 },
+  { date: '06/03/2026', type: 'Deposit', ref: 'D1624', property: 'Sellwood Row',               info: 'Pet fee \u2014 unit 12',      comment: 'New lease addendum',        amount: 300.00 },
+  { date: '06/09/2026', type: 'Deposit', ref: 'D1627', property: 'Hawthorne Court Apartments', info: 'Laundry income \u2014 May',   comment: 'Coin-op collection',        amount: 618.50 },
+  { date: '06/13/2026', type: 'Deposit', ref: 'D1630', property: 'Pearl District Lofts',       info: 'Parking \u2014 June',         comment: 'Monthly permits',           amount: 825.00 },
+];
 
 // Record types this bank transaction could match: payments clear as checks,
 // bills, or journals; deposits clear as deposits or journals.
@@ -2916,6 +2947,24 @@ function fmToggleType(t) {
   if (_fmTypeSel.has(t)) _fmTypeSel.delete(t); else _fmTypeSel.add(t);
   renderFindMatch();
 }
+function fmTogglePropMenu() {
+  _fmPropOpen = !_fmPropOpen; _fmTypeOpen = false;
+  renderFindMatch();
+}
+function fmToggleProp(p) {
+  if (_fmPropSel.has(p)) _fmPropSel.delete(p); else _fmPropSel.add(p);
+  renderFindMatch();
+}
+function fmSetSearch(val) {
+  _fmSearch = val;
+  _fmFocusSearch = true;
+  renderFindMatch();
+}
+let _fmFocusSearch = false;
+function fmSetDate(which, val) {
+  if (which === 'from') _fmDateFrom = val; else _fmDateTo = val;
+  renderFindMatch();
+}
 
 // Full pick-list for the Find Match overlay: Orion's generated likely matches
 // plus every Rent Manager record in the account that hasn't been matched to an
@@ -2926,20 +2975,22 @@ function fmRows(tx) {
   const inflow = tx.deposit != null;
   const bankAmt = (tx.payment != null ? tx.payment : tx.deposit) || 0;
   const acctId = txAcctId(tx.id);
-  const rows = fmCandidates(tx).map(c => ({ ...c }));
+  const rows = fmCandidates(tx).map(c => ({ ...c, gen: true }));
   (BR_TX[acctId] || []).filter(r => !r.cleared).forEach(r => {
     rows.push({
       date: r.date.replace(/\/(\d{2})$/, '/20$1'), type: r.type, ref: r.ref,
       property: '\u2014', info: r.info, comment: '', amount: r.deposit != null ? r.deposit : (r.payment || 0),
     });
   });
+  (inflow ? FM_POOL_DEPOSITS : FM_POOL_PAYMENTS).forEach(r => rows.push({ ...r }));
   const inflowTypes = ['Deposit', 'Credit'];
   const outflowTypes = ['Check', 'Bill', 'Charge'];
   rows.forEach((r, i) => {
     r._i = i;
     const dirOk = (inflow ? inflowTypes : outflowTypes).includes(r.type);
-    r.possible = dirOk && r.amount <= bankAmt + 0.005;
+    r.possible = !!r.gen && dirOk && r.amount <= bankAmt + 0.005;
   });
+  rows.sort((a, b) => _recDateVal(b.date) - _recDateVal(a.date));
   return rows;
 }
 
@@ -2949,12 +3000,17 @@ function openFindMatch(txId) {
   _findMatchSel = new Set();
   _findMatchFiltered = false;
   _fmTypeOpen = false;
+  _fmPropOpen = false;
+  _fmSearch = '';
+  _fmDateFrom = '04/01/2026';
+  _fmDateTo = '06/30/2026';
   const tx = findTxGlobal(txId);
   _fmTypeSel = new Set(tx ? fmTypeOptions(tx) : []);
+  _fmPropSel = new Set([...FM_PROPERTIES, '\u2014']);
   if (!_fmTypeBound) {
     _fmTypeBound = true;
     document.addEventListener('click', () => {
-      if (_fmTypeOpen) { _fmTypeOpen = false; if (_findMatchOpen) renderFindMatch(); }
+      if (_fmTypeOpen || _fmPropOpen) { _fmTypeOpen = false; _fmPropOpen = false; if (_findMatchOpen) renderFindMatch(); }
     });
   }
   renderFindMatch();
@@ -3004,7 +3060,12 @@ function renderFindMatch() {
   const bankAmt = (tx.payment != null ? tx.payment : tx.deposit) || 0;
   const rows = fmRows(tx);
   const possibleCount = rows.filter(r => r.possible).length;
-  let shown = rows.filter(r => _fmTypeSel.has(r.type));
+  let shown = rows.filter(r => _fmTypeSel.has(r.type) && _fmPropSel.has(r.property));
+  const q = _fmSearch.trim().toLowerCase();
+  if (q) shown = shown.filter(r => [r.info, r.comment, r.ref, r.property].join(' ').toLowerCase().includes(q));
+  const from = _recDateVal(_fmDateFrom) || -Infinity;
+  const to = _recDateVal(_fmDateTo) || Infinity;
+  shown = shown.filter(r => { const d = _recDateVal(r.date); return d >= from && d <= to; });
   if (_findMatchFiltered) shown = shown.filter(r => r.possible);
   const visibleIds = shown.map(r => r._i);
   const selected = [..._findMatchSel].reduce((s,i)=> s + (rows[i]?rows[i].amount:0), 0);
@@ -3047,7 +3108,17 @@ function renderFindMatch() {
         <div class="fm-filters">
           <div class="fm-fld">
             <label>Search</label>
-            <input class="fm-input" placeholder="Find a transaction">
+            <input class="fm-input" id="fm-search-input" placeholder="Find a transaction" value="${_fmSearch.replace(/"/g, '&quot;')}" oninput="fmSetSearch(this.value)">
+          </div>
+          <div class="fm-fld">
+            <label>Property</label>
+            <div class="fm-typesel">
+              <button class="fm-typesel-btn" onclick="event.stopPropagation();fmTogglePropMenu()">${_fmPropSel.size >= FM_PROPERTIES.length + 1 ? 'All Selected' : _fmPropSel.size + ' Selected'}</button>
+              ${_fmPropOpen ? `<div class="fm-typesel-menu" onclick="event.stopPropagation()">
+                ${FM_PROPERTIES.map(p => `<label class="fm-typesel-item"><input type="checkbox" ${_fmPropSel.has(p) ? 'checked' : ''} onchange="fmToggleProp('${p.replace(/'/g, "\\'")}')"> ${p}</label>`).join('')}
+                <label class="fm-typesel-item"><input type="checkbox" ${_fmPropSel.has('\u2014') ? 'checked' : ''} onchange="fmToggleProp('\u2014')"> No property</label>
+              </div>` : ''}
+            </div>
           </div>
           <div class="fm-fld">
             <label>Transaction Type</label>
@@ -3061,9 +3132,9 @@ function renderFindMatch() {
           <div class="fm-fld">
             <label>Date Range</label>
             <div class="fm-date-wrap">
-              <input class="fm-date-field" value="01/01/2026">
+              <input class="fm-date-field" value="${_fmDateFrom}" onchange="fmSetDate('from',this.value)">
               <div class="fm-date-icon">${ic(P.cal,16,'#666')}</div>
-              <input class="fm-date-field" value="01/15/2026">
+              <input class="fm-date-field" value="${_fmDateTo}" onchange="fmSetDate('to',this.value)">
               <div class="fm-date-icon">${ic(P.cal,16,'#666')}</div>
               <div class="fm-date-filter">${ic(P.filter,16,'#666')}</div>
             </div>
@@ -3092,6 +3163,12 @@ function renderFindMatch() {
         </div>
       </div>
     </div>`;
+
+  if (_fmFocusSearch) {
+    _fmFocusSearch = false;
+    const inp = document.getElementById('fm-search-input');
+    if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+  }
 }
 
 function setHelpful(id, dir) {
@@ -3374,7 +3451,7 @@ function showRulePopup(txId) {
 
       <div style="width:1px;background:#cedbe7;align-self:stretch;flex-shrink:0;margin:0 4px"></div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:12px;flex-shrink:0">
-        <button class="btn-primary" style="height:36px;white-space:nowrap" onclick="dismissRulePopup();openAddRule()">Add Rule</button>
+        <button class="btn-primary" style="height:36px;white-space:nowrap" onclick="dismissRulePopup();openAddRule('${desc.replace(/'/g, "\\'")}')">Add Rule</button>
         <button class="link-btn" style="font-size:14px;color:#008dd5" onclick="dismissRulePopup()">Dismiss</button>
 
     </div>`;
@@ -3818,9 +3895,26 @@ const OG_CHK = `<svg width="20" height="20" viewBox="0 0 20 20"><rect width="20"
 let _addRuleOpen = false;
 let _addRuleConditions = [{id:1}];
 
-function openAddRule() {
+const AR_APPLY_OPTS = ['Money in', 'Money out', 'All transactions'];
+const AR_FIELD_OPTS = ['Description', 'Amount', 'Check #', 'Bank Text', 'Transaction Date'];
+const AR_OP_OPTS = ['contains', 'equals', 'starts with', 'ends with', 'is greater than', 'is less than'];
+const AR_TYPE_OPTS = ['Deposit', 'Check', 'Bill', 'Journal', 'Credit', 'Charge'];
+const AR_GL_OPTS = ['4000 Management Fee Income', '4100 Rental Income', '4110 Commercial Rent', '4200 Application Fee Income', '4300 Late Fee Income', '4500 Interest Income', '5400 Operating Expense', '5402 Repairs & Maintenance', '5403 Utilities', '5404 Insurance', '5500 Office Expense', '5701 Salaries & Wages', '5702 Payroll Taxes', '2100 Owner Liability'];
+const AR_PROP_OPTS = ['Hawthorne Court Apartments', 'Pearl District Lofts', 'Alberta Commons', 'Sellwood Row'];
+const AR_VENDOR_OPTS = ['Portland General Electric', 'NW Natural', 'Rose City Plumbing', 'Cascade HVAC', 'Stumptown Landscaping', 'Recology', 'CenturyLink', 'Standard Insurance', 'City of Portland', 'Multnomah County', 'Zego (Tenant Payments)'];
+
+let _addRuleMatch = 'any';
+let _addRuleFilter = { apply: 'Money in', account: 'All Bank Accounts' };
+let _addRuleFields = { type: '', account: '', property: '', vendor: '', memo: '' };
+let _addRuleName = '';
+
+function openAddRule(prefillDesc) {
   _addRuleOpen = true;
-  _addRuleConditions = [{id: Date.now()}];
+  _addRuleMatch = 'any';
+  _addRuleFilter = { apply: 'Money in', account: 'All Bank Accounts' };
+  _addRuleFields = { type: '', account: '', property: '', vendor: '', memo: '' };
+  _addRuleConditions = [{ id: Date.now(), field: 'Description', op: 'contains', value: prefillDesc || '' }];
+  _addRuleName = prefillDesc ? prefillDesc.toLowerCase().replace(/\b\w/g, c => c.toUpperCase()) : '';
   renderAddRule();
   _ubOpenOverlaySignal('create-rule');
 }
@@ -3831,21 +3925,44 @@ function closeAddRule() {
 }
 
 function addRuleCondition() {
-  _addRuleConditions.push({id: Date.now()});
+  _addRuleConditions.push({ id: Date.now(), field: 'Description', op: 'contains', value: '' });
   renderAddRule();
 }
 function removeRuleCondition(id) {
   _addRuleConditions = _addRuleConditions.filter(c => c.id !== id);
+  if (!_addRuleConditions.length) _addRuleConditions = [{ id: Date.now(), field: 'Description', op: 'contains', value: '' }];
+  renderAddRule();
+}
+function setRuleCond(id, key, val) {
+  const c = _addRuleConditions.find(c => c.id === id);
+  if (c) c[key] = val;
+}
+function setRuleMatch(m) {
+  _addRuleMatch = m;
   renderAddRule();
 }
 
 function saveRule() {
   const name = document.getElementById('ar-rule-name')?.value?.trim();
-  if (!name) { document.getElementById('ar-rule-name').style.borderColor='#e04040'; return; }
+  if (!name) { document.getElementById('ar-rule-name').style.borderColor = '#e04040'; return; }
+  const em = s => `<em style="color:#13314c">${s}</em>`;
+  const applyTxt = { 'Money in': 'incoming transactions', 'Money out': 'outgoing transactions', 'All transactions': 'all transactions' }[_addRuleFilter.apply];
+  const conds = _addRuleConditions.filter(c => (c.value || '').trim());
+  const joiner = _addRuleMatch === 'any' ? ' or ' : ' and ';
+  const condTxt = conds.length
+    ? ` When the ${conds.map(c => `${c.field.toLowerCase()} ${c.op} ${em(`'${c.value.trim()}'`)}`).join(joiner)}.`
+    : '';
+  const fieldDefs = [
+    ['Transaction Type:', _addRuleFields.type],
+    ['Expense/Income Account:', _addRuleFields.account],
+    ['Property:', _addRuleFields.property],
+    ['Vendor:', _addRuleFields.vendor],
+    ['Memo/Comment/Information:', _addRuleFields.memo ? `'${_addRuleFields.memo}'` : ''],
+  ];
   RULES.push({
     id: 'r' + Date.now(), name,
-    summary: `Applies to <em style="color:#13314c">incoming transactions</em> in <em style="color:#13314c">all bank accounts.</em>`,
-    details: []
+    summary: `Applies to ${em(applyTxt)} in ${em(_addRuleFilter.account.toLowerCase() === 'all bank accounts' ? 'all bank accounts.' : _addRuleFilter.account + '.')}${condTxt}`,
+    details: fieldDefs.filter(([, v]) => v).map(([label, value]) => ({ label, value })),
   });
   closeAddRule();
   renderSettings();
@@ -3856,39 +3973,15 @@ function renderAddRule() {
   const root = document.getElementById('add-rule-root');
   if (!_addRuleOpen) { root.innerHTML = ''; return; }
 
-  const inp = (label, id='', placeholder='') => `
-    <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:0">
-      ${label ? `<label style="font-size:14px;color:#666">${label}</label>` : ''}
-      <div style="display:flex;align-items:center;height:36px;background:#f5f8fa;border:1px solid #cedbe7;border-radius:4px;padding:0 8px;gap:6px">
-        <input ${id?`id="${id}"`:''}  type="text" placeholder="${placeholder}" style="flex:1;border:none;background:none;outline:none;font-size:14px;color:#13314c;font-family:Roboto,sans-serif">
-      </div>
-    </div>`;
+  const opts = (list, selected, placeholder) => `${placeholder ? `<option value=""${!selected ? ' selected' : ''}>${placeholder}</option>` : ''}${list.map(o => `<option${o === selected ? ' selected' : ''}>${o}</option>`).join('')}`;
+  const acctOpts = ['All Bank Accounts', ...ACCOUNTS.filter(a => a.kind === 'bank').map(a => a.gl)];
 
-  const sel = (label, value, id='') => `
-    <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:0">
-      ${label ? `<label style="font-size:14px;color:#666">${label}</label>` : ''}
-      <div ${id?`id="${id}"`:''}  style="display:flex;align-items:center;height:36px;background:#f5f8fa;border:1px solid #cedbe7;border-radius:4px;padding:0 8px;gap:6px;cursor:pointer">
-        <span style="flex:1;font-size:14px;color:#13314c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${value}</span>
-        ${CHEV_DN}
-      </div>
-    </div>`;
-
-  const searchSel = (label, placeholder='') => `
-    <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:0">
-      ${label ? `<label style="font-size:14px;color:#666">${label}</label>` : ''}
-      <div style="display:flex;align-items:center;height:36px;background:#f5f8fa;border:1px solid #cedbe7;border-radius:4px;padding:0 8px;gap:6px;cursor:pointer">
-        ${SEARCH_ICO}
-        <span style="flex:1;font-size:14px;color:#b3b3b3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${placeholder}</span>
-        ${CHEV_DN}
-      </div>
-    </div>`;
-
-  const conditionRows = _addRuleConditions.map((c, i) => `
+  const conditionRows = _addRuleConditions.map(c => `
     <div style="display:flex;align-items:center;gap:12px">
-      ${sel('', 'Description')}
-      ${sel('', 'contains')}
-      ${inp('', '', '')}
-      <button onclick="removeRuleCondition(${c.id})" style="background:none;border:none;padding:4px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;margin-top:0">${CLOSE_ICO_SM}</button>
+      <div class="ar-fld"><select class="ar-select" onchange="setRuleCond(${c.id},'field',this.value)">${opts(AR_FIELD_OPTS, c.field)}</select></div>
+      <div class="ar-fld" style="max-width:170px"><select class="ar-select" onchange="setRuleCond(${c.id},'op',this.value)">${opts(AR_OP_OPTS, c.op)}</select></div>
+      <div class="ar-fld"><input class="ar-input" type="text" placeholder="e.g. ZEGO BATCH" value="${(c.value || '').replace(/"/g, '&quot;')}" oninput="setRuleCond(${c.id},'value',this.value)"></div>
+      <button onclick="removeRuleCondition(${c.id})" style="background:none;border:none;padding:4px;cursor:pointer;flex-shrink:0;display:flex;align-items:center">${CLOSE_ICO_SM}</button>
     </div>`).join('');
 
   root.innerHTML = `
@@ -3908,19 +4001,22 @@ function renderAddRule() {
           <p style="font-size:14px;color:#666;margin:0">Auto-fill fields when an incoming transaction matches this criteria.</p>
 
           <!-- Rule Name -->
-          <div style="display:flex;flex-direction:column;gap:4px">
-            <label style="font-size:14px;color:#666">Rule Name *</label>
-            <input id="ar-rule-name" type="text" style="height:36px;background:#f5f8fa;border:1px solid #cedbe7;border-radius:4px;padding:0 8px;font-size:14px;color:#13314c;font-family:Roboto,sans-serif;outline:none;width:100%;box-sizing:border-box">
+          <div class="ar-fld">
+            <label>Rule Name *</label>
+            <input id="ar-rule-name" class="ar-input" type="text" value="${_addRuleName.replace(/"/g, '&quot;')}" oninput="_addRuleName=this.value">
           </div>
 
           <!-- Filter tile -->
           <div style="border:1px solid #cedbe7;border-radius:4px;padding:16px;display:flex;flex-direction:column;gap:16px">
             <span style="font-size:14px;font-weight:600;color:#13314c">Filter</span>
             <div style="display:flex;align-items:flex-end;gap:12px">
-              ${sel('Apply to', 'Money in')}
+              <div class="ar-fld">
+                <label>Apply to</label>
+                <select class="ar-select" onchange="_addRuleFilter.apply=this.value">${opts(AR_APPLY_OPTS, _addRuleFilter.apply)}</select>
+              </div>
               <span style="font-size:14px;color:#666;height:36px;display:flex;align-items:center;flex-shrink:0">in</span>
-              <div style="width:248px;flex-shrink:0">
-                ${sel('', 'All Bank Accounts')}
+              <div class="ar-fld" style="max-width:248px">
+                <select class="ar-select" onchange="_addRuleFilter.account=this.value">${opts(acctOpts, _addRuleFilter.account)}</select>
               </div>
             </div>
           </div>
@@ -3931,9 +4027,9 @@ function renderAddRule() {
               <span style="font-size:14px;font-weight:600;color:#13314c">When</span>
               <div style="display:flex;align-items:center;gap:8px">
                 <span style="font-size:14px;color:#666">Match</span>
-                <div style="display:flex;border-radius:4px;overflow:hidden;border:1px solid #cedbe7" id="ar-match-toggle">
-                  <button onclick="document.getElementById('ar-match-any').style.background='#ebf1f5';document.getElementById('ar-match-any').style.borderRight='1px solid #008dd5';document.getElementById('ar-match-all').style.background='#fff'" id="ar-match-any" style="height:36px;padding:0 16px;font-size:14px;font-weight:600;color:#666;background:#ebf1f5;border:none;border-right:1px solid #cedbe7;cursor:pointer">Any</button>
-                  <button onclick="document.getElementById('ar-match-all').style.background='#ebf1f5';document.getElementById('ar-match-any').style.background='#fff'" id="ar-match-all" style="height:36px;padding:0 16px;font-size:14px;color:#666;background:#fff;border:none;cursor:pointer">All</button>
+                <div style="display:flex;border-radius:4px;overflow:hidden;border:1px solid ${_addRuleMatch ? '#cedbe7' : '#cedbe7'}">
+                  <button onclick="setRuleMatch('any')" style="height:36px;padding:0 16px;font-size:14px;${_addRuleMatch === 'any' ? 'font-weight:600;background:#ebf1f5;' : 'background:#fff;'}color:#666;border:none;border-right:1px solid #cedbe7;cursor:pointer;font-family:Roboto,sans-serif">Any</button>
+                  <button onclick="setRuleMatch('all')" style="height:36px;padding:0 16px;font-size:14px;${_addRuleMatch === 'all' ? 'font-weight:600;background:#ebf1f5;' : 'background:#fff;'}color:#666;border:none;cursor:pointer;font-family:Roboto,sans-serif">All</button>
                 </div>
                 <span style="font-size:14px;color:#666">of the following</span>
               </div>
@@ -3949,14 +4045,29 @@ function renderAddRule() {
           <!-- Auto-Fill Fields tile -->
           <div style="border:1px solid #cedbe7;border-radius:4px;padding:16px;display:flex;flex-direction:column;gap:16px">
             <span style="font-size:14px;font-weight:600;color:#13314c">Auto-Fill Fields</span>
-            ${sel('Transaction Type', '')}
-            <div style="display:flex;gap:16px">
-              ${searchSel('Expense/Income Account')}
-              ${searchSel('Property')}
+            <div class="ar-fld">
+              <label>Transaction Type</label>
+              <select class="ar-select" onchange="_addRuleFields.type=this.value">${opts(AR_TYPE_OPTS, _addRuleFields.type, '\u2014 Select \u2014')}</select>
             </div>
             <div style="display:flex;gap:16px">
-              ${searchSel('Vendor')}
-              ${inp('Memo')}
+              <div class="ar-fld">
+                <label>Expense/Income Account</label>
+                <select class="ar-select" onchange="_addRuleFields.account=this.value">${opts(AR_GL_OPTS, _addRuleFields.account, '\u2014 Select \u2014')}</select>
+              </div>
+              <div class="ar-fld">
+                <label>Property</label>
+                <select class="ar-select" onchange="_addRuleFields.property=this.value">${opts(AR_PROP_OPTS, _addRuleFields.property, '\u2014 Select \u2014')}</select>
+              </div>
+            </div>
+            <div style="display:flex;gap:16px">
+              <div class="ar-fld">
+                <label>Vendor</label>
+                <select class="ar-select" onchange="_addRuleFields.vendor=this.value">${opts(AR_VENDOR_OPTS, _addRuleFields.vendor, '\u2014 Select \u2014')}</select>
+              </div>
+              <div class="ar-fld">
+                <label>Memo</label>
+                <input class="ar-input" type="text" value="${(_addRuleFields.memo || '').replace(/"/g, '&quot;')}" oninput="_addRuleFields.memo=this.value">
+              </div>
             </div>
           </div>
 
