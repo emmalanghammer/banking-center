@@ -569,14 +569,17 @@ svg.ico{display:block;flex-shrink:0}
 .sr-seg-btn:last-child{border-radius:0 4px 4px 0}
 .sr-seg-btn.on{background:#ebf1f5;border-color:#008dd5;font-weight:600;position:relative;z-index:1}
 .sr-scroll{flex:1;overflow:auto;padding:0 20px 16px;min-height:0}
-.sr-sec{min-width:1080px}
+.sr-sec{min-width:1320px}
 .sr-sec-hdr{display:flex;align-items:center;gap:8px;margin:16px 0 8px}
 .sr-sec-hdr .chev{background:none;border:none;display:flex;padding:0;cursor:pointer}
 .sr-sec-title{font-size:14px;font-weight:700;color:#13314c}
 .sr-sec-sums{margin-left:auto;display:flex;gap:16px;font-size:13px;color:#666;white-space:nowrap}
 .sr-sec-sums b{color:#13314c;font-variant-numeric:tabular-nums;margin-left:5px}
 .sr-sec-sums b.neg{color:#eb343c}
-.sr-tbl{width:100%;min-width:1080px;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid #cedbe7;table-layout:fixed}
+.sr-tbl{width:100%;min-width:1320px;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid #cedbe7;table-layout:fixed}
+.sr-tbl tbody td.sr-insight-cell{white-space:normal;padding:6px 10px}
+.sr-insight{display:flex;align-items:flex-start;gap:6px;font-size:12.5px;color:#444;line-height:1.35}
+.sr-insight img{margin-top:2px}
 .sr-tbl thead th{background:#737373;color:#fff;font-size:11.5px;font-weight:500;letter-spacing:.5px;padding:0 10px;height:30px;text-align:left;white-space:nowrap;overflow:hidden}
 .sr-tbl thead th.r{text-align:right}
 .sr-tbl tbody td{padding:0 10px;height:38px;border-bottom:1px solid #eef2f7;color:#13314c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -4322,8 +4325,18 @@ function recData(acctId) {
       id: 'o' + i, inflow: r.deposit != null, date: r.date.replace(/\/(\d{2})$/, '/20$1'),
       bankDesc: r.cleared ? r.info : null, bankAmt: r.cleared ? amt : null,
       ref: r.ref, rmText: r.info, account: r.gl, rmAmt: amt,
-      status: r.cleared ? 'Matched' : 'Review',
+      status: r.cleared ? 'Matched' : 'Review', recType: r.type,
     });
+  });
+  // Orion insight: a plain-language guess at why each unmatched record has no
+  // bank transaction yet — a likely duplicate, an uncashed check, or activity
+  // the bank simply hasn't posted yet.
+  rows.filter(r => r.status === 'Review').forEach(r => {
+    const dup = rows.find(o => o !== r && o.inflow === r.inflow && Math.abs(o.rmAmt - r.rmAmt) < 0.005);
+    if (dup) r.insight = `Possible duplicate \u2014 ${dup.ref} for this exact amount was already recorded on ${dup.date}.`;
+    else if (r.recType === 'Check') r.insight = `Check likely hasn't been cashed yet \u2014 vendor checks typically clear within 5\u201310 days of being sent.`;
+    else if (r.inflow) r.insight = `No matching bank deposit yet \u2014 batches recorded ${r.date} usually settle within 1\u20132 business days. Likely still pending.`;
+    else r.insight = `Transfer initiated ${r.date} \u2014 likely still pending with the bank. Larger transfers can take 2\u20133 business days to post.`;
   });
   rows.sort((a, b) => _recDateVal(a.date) - _recDateVal(b.date));
   return { deposits: rows.filter(r => r.inflow), payments: rows.filter(r => !r.inflow) };
@@ -4539,6 +4552,7 @@ function srSection(title, key, rows, acctId) {
       <td>${r.account}</td>
       <td class="r">${fmtN(r.rmAmt)}</td>
       <td><span class="sr-pill ${r.status === 'Matched' ? 'matched' : 'review'}">${r.status}</span></td>
+      <td class="sr-insight-cell">${r.insight ? `<div class="sr-insight">${orionSpark(14)}<span>${r.insight}</span></div>` : ''}</td>
     </tr>`).join('');
   return `
     <div class="sr-sec-hdr">
@@ -4553,14 +4567,15 @@ function srSection(title, key, rows, acctId) {
     ${collapsed ? '' : `<table class="sr-tbl">
       <colgroup>
         <col style="width:36px"><col style="width:92px"><col><col style="width:92px">
-        <col style="width:96px"><col><col style="width:180px"><col style="width:92px"><col style="width:86px">
+        <col style="width:96px"><col><col style="width:170px"><col style="width:92px"><col style="width:86px"><col style="width:250px">
       </colgroup>
       <thead><tr>
         <th style="text-align:center;padding:0"><input type="checkbox" ${allChecked ? 'checked' : ''} onclick="toggleSrAll('${key}',this.checked)"></th>
         <th>Date</th><th>Bank Description</th><th class="r">Amount</th>
         <th>Reference</th><th>Rent Manager Transaction</th><th>Account</th><th class="r">Amount</th><th>Status</th>
+        <th><span style="display:inline-flex;align-items:center;gap:5px">${orionSpark(13)} Orion Insight</span></th>
       </tr></thead>
-      <tbody>${body || `<tr><td colspan="9" style="text-align:center;color:#9aa7b3;padding:20px 0">No transactions</td></tr>`}</tbody>
+      <tbody>${body || `<tr><td colspan="10" style="text-align:center;color:#9aa7b3;padding:20px 0">No transactions</td></tr>`}</tbody>
     </table>`}`;
 }
 
