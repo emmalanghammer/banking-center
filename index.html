@@ -529,6 +529,7 @@ svg.ico{display:block;flex-shrink:0}
 .sr-in{height:38px;padding:0 10px;border:1px solid #cedbe7;border-radius:4px;background:#f5f8fa;font-size:14px;color:#13314c;width:100%;font-family:inherit;outline:none}
 .sr-in:focus{border-color:#008dd5}
 .sr-in::placeholder{color:#9aa7b3;font-style:italic}
+.sr-in:disabled{opacity:.55;cursor:not-allowed}
 .sr-lbl-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
 .sr-lbl-row label{font-size:13px;color:#444}
 .sr-lbl-row a{color:#4db8e8;text-decoration:none;font-size:13px}
@@ -4469,11 +4470,11 @@ function renderRecStart() {
           <div class="sr-2col">
             <div class="sr-field">
               <label>Statement End Date</label>
-              <input class="sr-in at-input-date" type="text" placeholder="mm/dd/yyyy" value="${REC_STATE.startDate}" onchange="recStartField('date',this.value)">
+              <input class="sr-in at-input-date" type="text" placeholder="mm/dd/yyyy" value="${REC_STATE.startDate}"${inReview ? ' disabled' : ''} onchange="recStartField('date',this.value)">
             </div>
             <div class="sr-field">
               <label>Statement Ending Balance</label>
-              <input class="sr-in" type="text" inputmode="decimal" placeholder="00.00" value="${REC_STATE.startBalance != null ? fmtN(REC_STATE.startBalance) : ''}" onchange="recStartField('balance',this.value)">
+              <input class="sr-in" type="text" inputmode="decimal" placeholder="00.00" value="${REC_STATE.startBalance != null ? fmtN(REC_STATE.startBalance) : ''}"${inReview ? ' disabled' : ''} onchange="recStartField('balance',this.value)">
             </div>
           </div>
         </div>
