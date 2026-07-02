@@ -4522,7 +4522,10 @@ function srSection(title, key, rows, acctId) {
   if (q) shown = shown.filter(r => (r.bankDesc || '').toLowerCase().includes(q) || r.rmText.toLowerCase().includes(q) || (r.ref || '').toLowerCase().includes(q));
   const stmtTotal = rows.reduce((s, r) => s + (r.bankAmt || 0), 0);
   const rmTotal = rows.reduce((s, r) => s + r.rmAmt, 0);
-  const outstanding = +(rmTotal - stmtTotal).toFixed(2);
+  // Outstanding = what hasn't cleared: RM activity minus the selected rows —
+  // tracks the Difference box as rows are checked and unchecked.
+  const selTotal = rows.reduce((s, r) => REC_STATE.checked[r.id] ? s + (r.bankAmt != null ? r.bankAmt : r.rmAmt) : s, 0);
+  const outstanding = +(rmTotal - selTotal).toFixed(2);
   const collapsed = !!REC_STATE.collapsed[key];
   const allChecked = shown.length > 0 && shown.every(r => REC_STATE.checked[r.id]);
   const body = shown.map(r => `
