@@ -356,8 +356,39 @@ svg.ico{display:block;flex-shrink:0}
 /* ── Settings overlay ── */
 .settings-backdrop{position:fixed;inset:0;background:rgba(19,49,76,.35);z-index:400;display:flex;align-items:center;justify-content:center}
 /* ── Orion Chat ── */
-.oc-pane{position:fixed;background:#fff;border:1px solid #cedbe7;border-radius:12px;box-shadow:0 12px 40px rgba(19,49,76,.22);z-index:301;display:flex;flex-direction:column;overflow:hidden;resize:both;min-width:340px;min-height:380px;max-width:94vw;max-height:calc(100vh - 70px)}
+.oc-pane{position:fixed;background:linear-gradient(135deg,#5fbf9f,#2f9fdc);padding:1.5px;border-radius:13px;box-shadow:0 12px 40px rgba(19,49,76,.22);z-index:301;display:flex;overflow:hidden;resize:both;min-width:360px;min-height:300px;max-width:94vw;max-height:calc(100vh - 70px)}
+.oc-frame{flex:1;min-width:0;min-height:0;background:#fff;border-radius:11.5px;display:flex;flex-direction:column;overflow:hidden}
 .oc-pane .oc-hdr{cursor:grab;user-select:none}
+.oc-hdr-ico{background:none;border:none;display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:5px;cursor:pointer;padding:0}
+.oc-hdr-ico:hover{background:#f1f6fa}
+.oc-home{flex:1;overflow-y:auto;background:linear-gradient(160deg,#f2faf5 0%,#eef6fc 100%);display:flex;flex-direction:column;gap:14px;padding:20px 16px 16px}
+.oc-home-hi{font-size:21px;font-weight:700;color:#13314c;text-align:center}
+.oc-home-sub{font-size:13px;color:#666;text-align:center;line-height:1.5;max-width:360px;margin:0 auto}
+.oc-home-card{background:#fff;border:1px solid #e3edf5;border-radius:10px;box-shadow:0 2px 10px rgba(19,49,76,.06);padding:16px;display:flex;flex-direction:column;gap:12px;margin-top:6px}
+.oc-home-card-title{font-size:15px;font-weight:700;color:#13314c}
+.oc-home-input-wrap{position:relative;display:flex;align-items:center}
+.oc-home-input-wrap .oc-input{padding-right:42px;border-radius:8px}
+.oc-home-send{position:absolute;right:5px;background:none;border:none;display:flex;align-items:center;cursor:pointer;padding:4px}
+.oc-suggested{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #cedbe7;border-radius:8px;padding:10px 12px;font-size:13px;cursor:pointer;text-align:left;width:100%;font-family:inherit}
+.oc-suggested:hover{border-color:#008dd5}
+.oc-suggested .lbl{color:#9aa7b3;flex-shrink:0}
+.oc-suggested .q{color:#13314c;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.oc-home-foot{display:flex;align-items:center;gap:10px;padding:12px 16px;border-top:1px solid #e3edf5;flex-shrink:0;font-size:12.5px;color:#666}
+.oc-home-foot a{color:#008dd5;text-decoration:none}
+.oc-home-foot a:hover{text-decoration:underline}
+.oc-home-foot .btn-outline{margin-left:auto;height:32px;white-space:nowrap}
+.oc-hist{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column}
+.oc-hist-search{position:relative;display:flex;align-items:center;margin-bottom:12px}
+.oc-hist-search input{width:100%;height:38px;background:#f1f5f8;border:1px solid #dbe5ed;border-radius:8px;padding:0 12px 0 36px;font-size:13px;color:#13314c;outline:none;font-family:inherit}
+.oc-hist-search input::placeholder{color:#9aa7b3;font-style:italic}
+.oc-hist-search .ico{position:absolute;left:10px;display:flex;pointer-events:none}
+.oc-hist-sec{font-size:13.5px;font-weight:700;color:#13314c;padding:8px 0}
+.oc-hist-row{display:flex;flex-direction:column;gap:4px;padding:10px 2px;border-bottom:1px solid #eef2f7;cursor:pointer}
+.oc-hist-row:hover{background:#f8fbfd}
+.oc-hist-row-top{display:flex;align-items:center;gap:10px}
+.oc-hist-title{flex:1;font-size:13.5px;color:#13314c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.oc-hist-when{font-size:12px;color:#9aa7b3}
+.oc-hist-act{background:none;border:none;display:flex;align-items:center;cursor:pointer;padding:2px;flex-shrink:0}
 .oc-pane.oc-dragging{cursor:grabbing}
 .oc-pane.oc-dragging .oc-hdr{cursor:grabbing}
 .oc-resize-grip{position:absolute;right:2px;bottom:2px;width:14px;height:14px;pointer-events:none;opacity:.55}
@@ -5135,10 +5166,25 @@ function _ubInit() {
 
 /* ── Orion Chat ──────────────────────────────────────────── */
 let _ocOpen = false;
+let _ocView = 'home'; // 'home' | 'chat' | 'history'
 const _ocMessages = [];
+let _ocHistSearch = '';
+let _ocFocusHist = false;
+
+// Past conversations for the History view. Each replays live through
+// orionAnswer() when reopened, so answers always reflect current data.
+const _ocChats = [
+  { id: 'c1', title: 'Accounts with differences',  q: 'What accounts have differences?',      when: '2mo ago', fav: true },
+  { id: 'c2', title: 'Items needing review',       q: 'How many items need review?',          when: '1d ago',  fav: false },
+  { id: 'c3', title: 'June close status',          q: "How's the June close looking?",        when: '2d ago',  fav: false },
+  { id: 'c4', title: 'Overdraft risk check',       q: 'Any overdraft risk?',                  when: '1w ago',  fav: false },
+  { id: 'c5', title: 'Operating account balance',  q: "What's the operating account balance?", when: '2mo ago', fav: false },
+  { id: 'c6', title: 'Active alerts rundown',      q: 'Show me active alerts',                when: '2mo ago', fav: false },
+];
+
 // Floating-window geometry — survives re-renders (each new message repaints
 // the pane) and reopens where the user left it.
-const _ocWin = { x: null, y: null, w: 440, h: 620 };
+const _ocWin = { x: null, y: null, w: 460, h: 620 };
 let _ocRO = null;
 
 function ocDragStart(e) {
@@ -5173,15 +5219,18 @@ const OC_SUGGESTIONS = [
   'How\'s the June close looking?',
 ];
 
+const OC_NEW_ICO = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#13314c" stroke-width="1.7"><path d="M12 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/><path d="M18.4 2.6a2.05 2.05 0 0 1 2.9 2.9L12.5 14.4 8.6 15.4l1-3.9z"/></svg>`;
+const OC_HIST_ICO = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#13314c" stroke-width="1.7"><path d="M3.2 12a8.8 8.8 0 1 0 2.6-6.2"/><path d="M3.5 3.8v4.4h4.4"/><path d="M12 7.5V12l3 2.4"/></svg>`;
+const OC_STAR = f => `<svg width="17" height="17" viewBox="0 0 24 24" ${f ? 'fill="#f5a623" stroke="#f5a623"' : 'fill="none" stroke="#9aa7b3"'} stroke-width="1.6"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+const OC_EXT_ICO = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#008dd5" stroke-width="1.8"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>`;
+
 function openOrionChat() {
   _ocOpen = true;
+  _ocView = _ocMessages.some(m => m.role === 'user') ? 'chat' : 'home';
   if (_ocWin.x == null) {
     _ocWin.x = Math.max(8, window.innerWidth - _ocWin.w - 24);
     _ocWin.y = 96;
     _ocWin.h = Math.min(_ocWin.h, window.innerHeight - 130);
-  }
-  if (_ocMessages.length === 0) {
-    _ocMessages.push({role:'orion', text:'Hi! I\'m Orion. Ask me anything about Cascade Property Group\'s accounts, transactions, or alerts — I\'ll search the data and give you a direct answer.'});
   }
   renderOrionChat();
 }
@@ -5191,11 +5240,99 @@ function closeOrionChat() {
   renderOrionChat();
 }
 
-function renderOrionChat() {
-  const root = document.getElementById('orion-chat-root');
-  if (!root) return;
-  if (!_ocOpen) { root.innerHTML = ''; return; }
+function ocNewChat() {
+  _ocMessages.length = 0;
+  _ocView = 'home';
+  renderOrionChat();
+}
+function ocShowHistory() {
+  _ocView = 'history';
+  _ocHistSearch = '';
+  renderOrionChat();
+}
+function ocLoadChat(id) {
+  const c = _ocChats.find(c => c.id === id);
+  if (!c) return;
+  _ocMessages.length = 0;
+  _ocMessages.push({ role: 'user', text: c.q });
+  _ocMessages.push({ role: 'orion', text: orionAnswer(c.q) });
+  _ocView = 'chat';
+  renderOrionChat();
+}
+function ocToggleFav(id, e) {
+  e.stopPropagation();
+  const c = _ocChats.find(c => c.id === id);
+  if (c) c.fav = !c.fav;
+  renderOrionChat();
+}
+function ocDeleteChat(id, e) {
+  e.stopPropagation();
+  const i = _ocChats.findIndex(c => c.id === id);
+  if (i > -1) _ocChats.splice(i, 1);
+  renderOrionChat();
+}
+function ocHistFilter(val) {
+  _ocHistSearch = val;
+  _ocFocusHist = true;
+  renderOrionChat();
+}
 
+function ocHomeView() {
+  return `
+    <div class="oc-home">
+      <div class="oc-home-hi">Hi Morgan!</div>
+      <div class="oc-home-sub">Ask me anything about Cascade Property Group \u2014 I can answer questions about accounts, transactions, alerts, and reconciliation.</div>
+      <div class="oc-home-card">
+        <div class="oc-home-card-title">What do you want help with today?</div>
+        <div class="oc-home-input-wrap">
+          <input class="oc-input" id="oc-input" placeholder="Ask a question\u2026" onkeydown="if(event.key==='Enter')ocSend()">
+          <button class="oc-home-send" onclick="ocSend()" title="Send"><svg width="19" height="19" viewBox="0 0 24 24" fill="#008dd5"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+        </div>
+      </div>
+      <button class="oc-suggested" onclick="ocAsk('${OC_SUGGESTIONS[0].replace(/'/g, "\\'")}')">
+        <span class="lbl">Suggested Question</span>
+        <span class="q">${OC_SUGGESTIONS[0]}</span>
+        ${OC_EXT_ICO}
+      </button>
+      <button class="oc-suggested" onclick="ocAsk('${OC_SUGGESTIONS[5].replace(/'/g, "\\'")}')">
+        <span class="lbl">Suggested Question</span>
+        <span class="q">${OC_SUGGESTIONS[5]}</span>
+        ${OC_EXT_ICO}
+      </button>
+    </div>
+    <div class="oc-home-foot">
+      <span>Need the bigger picture? See <a href="#" onclick="openInsights();return false">Banking Insights</a></span>
+      <button class="btn-outline" onclick="showToast('Connecting you with support\u2026')">Contact Support</button>
+    </div>`;
+}
+
+function ocHistoryView() {
+  const q = _ocHistSearch.trim().toLowerCase();
+  const match = c => !q || c.title.toLowerCase().includes(q);
+  const row = c => `
+    <div class="oc-hist-row" onclick="ocLoadChat('${c.id}')">
+      <div class="oc-hist-row-top">
+        <span class="oc-hist-title">${c.title}</span>
+        <button class="oc-hist-act" onclick="ocToggleFav('${c.id}',event)" title="${c.fav ? 'Unfavorite' : 'Favorite'}">${OC_STAR(c.fav)}</button>
+        <button class="oc-hist-act" onclick="ocDeleteChat('${c.id}',event)" title="Delete">${ic(P.trash, 16, '#008dd5')}</button>
+      </div>
+      <span class="oc-hist-when">${c.when}</span>
+    </div>`;
+  const favs = _ocChats.filter(c => c.fav && match(c));
+  const rest = _ocChats.filter(c => !c.fav && match(c));
+  return `
+    <div class="oc-hist">
+      <div class="oc-hist-search">
+        <span class="ico">${ic(P.search, 16, '#008dd5')}</span>
+        <input id="oc-hist-input" placeholder="Find a chat" value="${_ocHistSearch.replace(/"/g, '&quot;')}" oninput="ocHistFilter(this.value)">
+      </div>
+      ${favs.length ? `<div class="oc-hist-sec">Favorites</div>${favs.map(row).join('')}` : ''}
+      <div class="oc-hist-sec"${favs.length ? ' style="margin-top:10px"' : ''}>All Chats</div>
+      ${rest.length ? rest.map(row).join('') : '<div style="font-size:13px;color:#9aa7b3;padding:10px 2px">No chats found.</div>'}
+    </div>`;
+}
+
+function ocChatView() {
   const msgHtml = _ocMessages.map(m => {
     if (m.role === 'orion') {
       return `<div class="oc-msg-orion">
@@ -5215,24 +5352,46 @@ function renderOrionChat() {
     `<button class="oc-chip" onclick="ocAsk('${s.replace(/'/g, "\\'")}')">${s}</button>`
   ).join('')}</div>` : '';
 
+  return `
+    <div class="oc-msgs" id="oc-msgs">${msgHtml}</div>
+    ${chipsHtml}
+    <div class="oc-input-row">
+      <input class="oc-input" id="oc-input" placeholder="Ask about accounts, balances, alerts\u2026"
+        onkeydown="if(event.key==='Enter')ocSend()">
+      <button class="oc-send" onclick="ocSend()" title="Send">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>`;
+}
+
+function renderOrionChat() {
+  const root = document.getElementById('orion-chat-root');
+  if (!root) return;
+  if (!_ocOpen) { root.innerHTML = ''; return; }
+
+  const title = _ocView === 'history' ? 'Ask Orion History' : 'Ask Orion';
+  const hdrIcons = `
+    ${_ocView !== 'home' ? `<button class="oc-hdr-ico" onclick="ocNewChat()" title="New chat">${OC_NEW_ICO}</button>` : ''}
+    ${_ocView !== 'history' ? `<button class="oc-hdr-ico" onclick="ocShowHistory()" title="Chat history">${OC_HIST_ICO}</button>` : ''}
+    <button class="oc-hdr-ico" onclick="closeOrionChat()" title="Close">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#13314c"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+    </button>`;
+
+  const body = _ocView === 'home' ? ocHomeView() : _ocView === 'history' ? ocHistoryView() : ocChatView();
+  const sizeStyle = _ocView === 'home'
+    ? `width:${_ocWin.w}px;height:auto;max-height:calc(100vh - ${_ocWin.y + 20}px)`
+    : `width:${_ocWin.w}px;height:${_ocWin.h}px`;
+
   root.innerHTML = `
-    <div class="oc-pane" id="oc-pane" style="left:${_ocWin.x}px;top:${_ocWin.y}px;width:${_ocWin.w}px;height:${_ocWin.h}px">
-      <div class="oc-hdr" onmousedown="ocDragStart(event)">
-        <span class="bc-ico-badge" style="background:#e2f1da">${orionSpark(16)}</span>
-        <span class="oc-hdr-title">Ask Orion</span>
-        <span class="oc-hdr-sub">Cascade Property Group · Jun 2026</span>
-        <button onclick="closeOrionChat()" style="margin-left:12px;background:none;border:none;padding:4px;cursor:pointer;display:flex;align-items:center;color:#666">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-        </button>
-      </div>
-      <div class="oc-msgs" id="oc-msgs">${msgHtml}</div>
-      ${chipsHtml}
-      <div class="oc-input-row">
-        <input class="oc-input" id="oc-input" placeholder="Ask about accounts, balances, alerts…"
-          onkeydown="if(event.key==='Enter')ocSend()">
-        <button class="oc-send" onclick="ocSend()" title="Send">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-        </button>
+    <div class="oc-pane" id="oc-pane" style="left:${_ocWin.x}px;top:${_ocWin.y}px;${sizeStyle}">
+      <div class="oc-frame">
+        <div class="oc-hdr" onmousedown="ocDragStart(event)">
+          <span class="bc-ico-badge" style="background:#e2f1da">${orionSpark(16)}</span>
+          <span class="oc-hdr-title">${title}</span>
+          <span class="oc-hdr-sub">Cascade Property Group \u00b7 Jun 2026</span>
+          ${hdrIcons}
+        </div>
+        ${body}
       </div>
       <svg class="oc-resize-grip" viewBox="0 0 14 14"><path d="M13 5v2l-6 6H5zM13 10v2l-1 1h-2z" fill="#9aa7b3"/></svg>
     </div>`;
@@ -5240,15 +5399,22 @@ function renderOrionChat() {
   const msgs = document.getElementById('oc-msgs');
   if (msgs) msgs.scrollTop = msgs.scrollHeight;
 
+  if (_ocFocusHist) {
+    _ocFocusHist = false;
+    const hi = document.getElementById('oc-hist-input');
+    if (hi) { hi.focus(); hi.setSelectionRange(hi.value.length, hi.value.length); }
+  }
+
   // Persist user resizes (native CSS resize fires no events) so the next
-  // repaint doesn't snap the window back.
+  // repaint doesn't snap the window back. Home sizes to its content, so
+  // only chat/history heights are recorded.
   if (_ocRO) _ocRO.disconnect();
   const pane = document.getElementById('oc-pane');
   if (pane && window.ResizeObserver) {
     _ocRO = new ResizeObserver(() => {
       if (!pane.isConnected) return;
       _ocWin.w = pane.offsetWidth;
-      _ocWin.h = pane.offsetHeight;
+      if (_ocView !== 'home') _ocWin.h = pane.offsetHeight;
     });
     _ocRO.observe(pane);
   }
@@ -5265,6 +5431,7 @@ function ocSend() {
 function ocAsk(q) {
   const inp = document.getElementById('oc-input');
   if (inp) inp.value = '';
+  _ocView = 'chat';
   _ocMessages.push({role:'user', text:q});
   _ocMessages.push({role:'typing'});
   renderOrionChat();
