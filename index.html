@@ -534,6 +534,7 @@ svg.ico{display:block;flex-shrink:0}
 .sr-lbl-row label{font-size:13px;color:#444}
 .sr-lbl-row a{color:#4db8e8;text-decoration:none;font-size:13px}
 .sr-lbl-row a:hover{text-decoration:underline}
+.sr-lbl-row a.disabled{color:#9aa7b3;cursor:not-allowed;pointer-events:none}
 .sr-stmt-box{border:1px solid #cedbe7;border-radius:4px;min-height:118px;padding:8px;display:flex;flex-direction:column;gap:4px}
 .sr-stmt-box.empty{align-items:center;justify-content:center;color:#9aa7b3;font-style:italic;font-size:14px}
 .sr-file-row{display:flex;align-items:center;justify-content:space-between;background:#eaf4fb;border-radius:3px;padding:9px 10px;font-size:13px}
@@ -4455,7 +4456,9 @@ function renderRecStart() {
           <div>
             <div class="sr-lbl-row">
               <label>Bank Statement</label>
-              <a href="#" onclick="showToast('Statement uploaded');return false">Upload Manually</a>
+              ${inReview
+                ? `<a class="disabled">Upload Manually</a>`
+                : `<a href="#" onclick="showToast('Statement uploaded');return false">Upload Manually</a>`}
             </div>
             ${canContinue ? `<div class="sr-stmt-box">
               <div class="sr-file-row"><a href="#" onclick="return false">${stmtFile}</a><button style="background:none;border:none;display:flex;cursor:pointer" onclick="recStartPick('')">${ic(P.close, 16, '#008dd5')}</button></div>
