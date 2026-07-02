@@ -513,25 +513,79 @@ svg.ico{display:block;flex-shrink:0}
 
 /* ── Electronic Bank Reconcile ── */
 .rec-layout{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden;background:#f5f8fa}
-.rec-body-wrap{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:16px}
-.rec-card{background:#fff;border:1px solid #cedbe7;border-radius:4px;padding:16px}
-.rec-card-label{font-size:13px;color:#666;margin-bottom:12px}
-.rec-stmt-fields{display:flex;gap:16px}
-.rec-hint{font-size:13px;color:#666;margin-top:-8px}
-.rec-section-hdr{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;color:#13314c}
-.rec-badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:10px;font-size:12px;font-weight:600}
-.rec-badge.warn{background:#fef0d9;color:#8a5a00}
-.rec-badge.ok{background:#e3f3e3;color:#2e7d32}
-.rec-note{font-size:13px;color:#666}
-.rec-pending-tbl{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid #cedbe7;border-radius:4px;overflow:hidden}
-.rec-pending-tbl thead th{background:#596775;color:#fff;font-size:12px;font-weight:500;padding:0 12px;height:32px;text-align:left;white-space:nowrap}
-.rec-pending-tbl thead th.r{text-align:right}
-.rec-pending-tbl tbody td{padding:0 12px;height:40px;border-bottom:1px solid #eef2f7;color:#13314c}
-.rec-pending-tbl tbody td.r{text-align:right;font-variant-numeric:tabular-nums}
-.rec-pending-tbl tbody tr:last-child td{border-bottom:none}
-.rec-pending-actions{display:flex;gap:14px;justify-content:flex-end}
-.rec-all-clear{display:flex;align-items:center;gap:8px;background:#eef8ee;border:1px solid #cfe9cf;color:#2e7d32;font-size:13px;font-weight:600;padding:12px 16px;border-radius:4px}
 .rec-foot{display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:10px 20px;background:#f5f8fa;border-top:1px solid #cedbe7;flex-shrink:0}
+.rec-foot-notice{display:flex;align-items:center;gap:6px;color:#eb343c;font-size:13px;margin-right:6px}
+/* Start Smart Reconciliation overlay */
+.sr-modal{background:#fff;border-radius:4px;width:750px;max-width:94vw;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.22);max-height:92vh}
+.sr-body{padding:16px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+.sr-banner{display:flex;align-items:center;gap:10px;border:1px solid #9ed3ee;border-radius:4px;padding:10px 12px;font-size:13px;color:#13314c;background:#fff}
+.sr-banner a{margin-left:auto;color:#008dd5;text-decoration:none;white-space:nowrap;font-size:13px}
+.sr-banner a:hover{text-decoration:underline}
+.sr-field label{display:block;font-size:13px;color:#444;margin-bottom:5px}
+.sr-2col{display:flex;gap:24px}
+.sr-2col>div{flex:1;min-width:0}
+.sr-ro{font-size:14px;color:#13314c;font-weight:700}
+.sr-ro.empty{color:#9aa7b3;font-weight:400;font-style:italic}
+.sr-in{height:38px;padding:0 10px;border:1px solid #cedbe7;border-radius:4px;background:#f5f8fa;font-size:14px;color:#13314c;width:100%;font-family:inherit;outline:none}
+.sr-in:focus{border-color:#008dd5}
+.sr-in::placeholder{color:#9aa7b3;font-style:italic}
+.sr-lbl-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.sr-lbl-row label{font-size:13px;color:#444}
+.sr-lbl-row a{color:#4db8e8;text-decoration:none;font-size:13px}
+.sr-lbl-row a:hover{text-decoration:underline}
+.sr-stmt-box{border:1px solid #cedbe7;border-radius:4px;min-height:118px;padding:8px;display:flex;flex-direction:column;gap:4px}
+.sr-stmt-box.empty{align-items:center;justify-content:center;color:#9aa7b3;font-style:italic;font-size:14px}
+.sr-file-row{display:flex;align-items:center;justify-content:space-between;background:#eaf4fb;border-radius:3px;padding:9px 10px;font-size:13px}
+.sr-file-row a{color:#008dd5;text-decoration:none}
+.sr-file-row a:hover{text-decoration:underline}
+.sr-check-row{display:flex;align-items:center;gap:8px;font-size:13px;color:#13314c;padding:3px 4px}
+.sr-orion-note{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#13314c;line-height:1.45}
+.sr-foot{display:flex;justify-content:flex-end;gap:10px;padding:10px 16px;border-top:1px solid #cedbe7;background:#f5f8fa;border-radius:0 0 4px 4px}
+/* Smart Reconciliation screen */
+.sr-strip{background:#fff;border:1px solid #cedbe7;border-radius:4px;margin:16px 20px 0;padding:12px 20px;display:flex;align-items:center;gap:14px;flex-shrink:0;flex-wrap:wrap}
+.sr-acct{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;color:#13314c;white-space:nowrap}
+.sr-acct .bank{font-size:13px;font-weight:400;color:#888;font-style:italic}
+.sr-cells{margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sr-cell{display:flex;flex-direction:column;gap:3px;white-space:nowrap}
+.sr-cell-lbl{font-size:12px;color:#666}
+.sr-cell-val{font-size:15px;font-weight:700;color:#13314c;font-variant-numeric:tabular-nums}
+.sr-cell-val.pos{color:#2e7d32}
+.sr-cell-val.neg{color:#eb343c}
+.sr-op{color:#666;font-size:15px;padding:0 1px}
+.sr-vdiv{width:1px;height:34px;background:#e3edf5}
+.sr-diff{display:flex;align-items:center;gap:10px;border:1.5px solid #eb343c;background:#fdecec;border-radius:4px;padding:7px 14px}
+.sr-diff.ok{border-color:#6eb744;background:#eef8ee}
+.sr-diff .lbl{font-size:14px;color:#13314c}
+.sr-diff .val{font-size:15px;font-weight:700;color:#13314c;font-variant-numeric:tabular-nums;margin-left:8px}
+.sr-toolbar{display:flex;align-items:center;justify-content:space-between;margin:12px 20px 0;flex-shrink:0}
+.sr-search{position:relative;width:270px}
+.sr-search input{width:100%;height:34px;border:1px solid #6fc4ea;border-radius:4px;padding:0 10px 0 32px;font-size:13px;color:#13314c;background:#fff;outline:none;font-family:inherit}
+.sr-search input::placeholder{color:#9aa7b3;font-style:italic}
+.sr-search .ico-wrap{position:absolute;left:9px;top:50%;transform:translateY(-50%);display:flex;pointer-events:none}
+.sr-seg{display:inline-flex}
+.sr-seg-btn{height:32px;min-width:56px;padding:0 14px;font-size:13px;color:#666;background:#fff;border:1px solid #cedbe7;cursor:pointer;font-family:'Roboto',sans-serif;display:flex;align-items:center;justify-content:center}
+.sr-seg-btn+.sr-seg-btn{margin-left:-1px}
+.sr-seg-btn:first-child{border-radius:4px 0 0 4px}
+.sr-seg-btn:last-child{border-radius:0 4px 4px 0}
+.sr-seg-btn.on{background:#ebf1f5;border-color:#008dd5;font-weight:600;position:relative;z-index:1}
+.sr-scroll{flex:1;overflow:auto;padding:0 20px 16px;min-height:0}
+.sr-sec{min-width:1080px}
+.sr-sec-hdr{display:flex;align-items:center;gap:8px;margin:16px 0 8px}
+.sr-sec-hdr .chev{background:none;border:none;display:flex;padding:0;cursor:pointer}
+.sr-sec-title{font-size:14px;font-weight:700;color:#13314c}
+.sr-sec-sums{margin-left:auto;display:flex;gap:16px;font-size:13px;color:#666;white-space:nowrap}
+.sr-sec-sums b{color:#13314c;font-variant-numeric:tabular-nums;margin-left:5px}
+.sr-sec-sums b.neg{color:#eb343c}
+.sr-tbl{width:100%;min-width:1080px;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid #cedbe7;table-layout:fixed}
+.sr-tbl thead th{background:#737373;color:#fff;font-size:11.5px;font-weight:500;letter-spacing:.5px;padding:0 10px;height:30px;text-align:left;white-space:nowrap;overflow:hidden}
+.sr-tbl thead th.r{text-align:right}
+.sr-tbl tbody td{padding:0 10px;height:38px;border-bottom:1px solid #eef2f7;color:#13314c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sr-tbl tbody td.r{text-align:right;font-variant-numeric:tabular-nums}
+.sr-tbl tbody tr:last-child td{border-bottom:none}
+.sr-tbl tbody td.muted{color:#9aa7b3}
+.sr-pill{display:inline-flex;padding:3px 9px;border-radius:3px;font-size:12px}
+.sr-pill.matched{background:#dff0df;color:#2e7d32}
+.sr-pill.review{background:#f8d7da;color:#b3261e}
 .rec-done-wrap{flex:1;display:flex;align-items:center;justify-content:center;overflow-y:auto}
 .rec-done-panel{display:flex;flex-direction:column;align-items:center;gap:16px;padding:40px 20px}
 .rec-done-title{font-size:20px;font-weight:600;color:#13314c}
@@ -761,6 +815,7 @@ svg.ico{display:block;flex-shrink:0}
 
 <!-- SLIDEOUT + TOAST rendered by JS -->
 <div id="slideout-root"></div>
+<div id="rec-start-root"></div>
 <div id="toast-root"></div>
 <div id="rule-popup-root"></div>
 <div id="settings-root"></div>
@@ -1040,7 +1095,7 @@ function orionSpark(size=14){
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-'+id).classList.add('active');
-  const titles = { bc:'Banking Center', tr:'Transaction Review', br:'Bank Register', cr:'Credit Card Register', rec:'Electronic Bank Reconcile' };
+  const titles = { bc:'Banking Center', tr:'Transaction Review', br:'Bank Register', cr:'Credit Card Register', rec:'Smart Reconciliation' };
   document.getElementById('ctx-title').textContent = titles[id] || id;
   document.getElementById('ctx-extra').innerHTML = (id === 'tr' || id === 'br' || id === 'cr' || id === 'rec')
     ? `<button onclick="showScreen('bc')" style="background:none;border:none;color:#fff;font-size:14px;display:flex;align-items:center;gap:4px;cursor:pointer;padding:0;font-family:'Roboto',sans-serif">Banking Center <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v2.5l-3.5 3.5 3.5 3.5V17l-6-6 6-6zm8 0l6 6-6 6v-2.5l3.5-3.5-3.5-3.5V5z" style="display:none"/><path d="M16.01 11H4v2h12.01v3L20 12l-3.99-4v3z"/></svg></button>`
@@ -1049,7 +1104,7 @@ function showScreen(id) {
   if (id==='tr') renderTR();
   if (id==='br') { if (!BR_STATE.acctId) BR_STATE.acctId = ACCOUNTS.find(a=>a.kind==='bank').id; renderBR(); }
   if (id==='cr') { if (!CR_STATE.acctId) CR_STATE.acctId = ACCOUNTS.find(a=>a.kind==='card').id; renderCR(); }
-  if (id==='rec') { if (!REC_STATE.acctId) REC_STATE.acctId = ACCOUNTS.find(a=>a.kind==='bank').id; renderReconcile(); }
+  if (id==='rec') { if (!REC_STATE.acctId) seedReconcile(ACCOUNTS.find(a=>a.kind==='bank').id); renderReconcile(); }
   _ubSetView(_UB_SCREEN_TO_SLUG[id] || id);
 }
 
@@ -4175,70 +4230,262 @@ function renderCR() {
   });
 }
 
-/* ── Electronic Bank Reconcile ── */
-const REC_STATE = { acctId: null, statementDate: '', statementBalance: null };
+/* ── Smart Reconciliation ── */
+const REC_STATE = {
+  acctId: null, statementDate: '', statementBalance: null,
+  checked: {}, filter: 'all', search: '', collapsed: {},
+  // Start-overlay state
+  startOpen: false, startAcctId: null, startDate: '', startBalance: null,
+};
+
+const REC_STMT_DATE = '06/30/2026';
+const REC_LAST_REC_DATE = '05/31/2026';
+
+// ── Data ──
+
+// Does this account still have bank-feed items open in Transaction Review?
+function recHasInReview(acctId) {
+  return acctTxs(acctId).some(t => !S.matchedIds.has(t.id) && !S.excludedIds.has(t.id));
+}
+
+// Beginning balance = book balance as of the last reconciliation. Excluded
+// feed activity is folded in so the demo still proves out to $0 regardless of
+// how each review item was resolved (matched vs excluded).
+function recBeginningBalance(acctId) {
+  const acct = ACCOUNTS.find(a => a.id === acctId);
+  const excludedNet = acctTxs(acctId).reduce((s, t) => S.excludedIds.has(t.id)
+    ? s + (t.deposit != null ? t.deposit : -(t.payment || 0)) : s, 0);
+  return acct.inRm + excludedNet;
+}
+
+// RM-side display info for a matched bank transaction: reference short code,
+// human-readable record text, and GL account. Prefers the real matched record
+// (matchRow / selected multi-match / rmLink); synthesizes sensible text for
+// records the user created via Add Transaction.
+function rmSideForTx(tx) {
+  const inflow = tx.deposit != null;
+  if (tx.multiMatches) {
+    const m = tx.multiMatches[S.multiSel[tx.id] ?? 0] || tx.multiMatches[0];
+    return { ref: regRefCode(m.ref), text: m.ref.replace(':', ' -'), gl: '4100 Rental Income', amount: m.amount };
+  }
+  const mr = matchRowFromTx(tx);
+  if (mr && mr.ref) {
+    return { ref: regRefCode(mr.ref), text: mr.comment ? `${mr.ref} - ${mr.comment}` : mr.ref,
+      gl: inflow ? '4100 Rental Income' : '5400 Operating Expense', amount: mr.amount };
+  }
+  const desc = tx.desc || '';
+  const amt = inflow ? tx.deposit : tx.payment;
+  const tc = s => s.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+  const chk = desc.match(/CHECK\s+0*(\d+)\s*(.*)/i);
+  if (chk) return { ref: chk[1], text: `Check #${chk[1]} - ${tc(chk[2])}`, gl: '5402 Repairs & Maintenance', amount: amt };
+  if (!inflow) {
+    const rest = desc.replace(/^(ACH|POS)\s+DEBIT\s*[\u2014-]?\s*/i, '');
+    return { ref: 'EFT', text: `ACH - ${tc(rest)}`, gl: '5400 Operating Expense', amount: amt };
+  }
+  const num = 8800 + Math.abs(desc.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % 60);
+  return { ref: 'D' + num, text: `Deposit batch - ${tc(desc)}`, gl: '4100 Rental Income', amount: amt };
+}
+
+// Rows for the reconciliation tables:
+// - Matched: bank transactions matched to Rent Manager records in Transaction
+//   Review — bank side + RM side populated, pre-checked.
+// - Review: records created in / living in Rent Manager with no bank
+//   transaction to match (e.g. a check the vendor hasn't cashed) — bank side
+//   shows "-", status Review, unchecked.
+function recData(acctId) {
+  const rows = [];
+  acctTxs(acctId).filter(t => S.matchedIds.has(t.id)).forEach(t => {
+    const inflow = t.deposit != null;
+    const rm = rmSideForTx(t);
+    rows.push({
+      id: 'm' + t.id, inflow, date: t.date, bankDesc: t.desc,
+      bankAmt: inflow ? t.deposit : t.payment,
+      ref: rm.ref, rmText: rm.text, account: rm.gl,
+      rmAmt: rm.amount != null ? rm.amount : (inflow ? t.deposit : t.payment),
+      status: 'Matched',
+    });
+  });
+  (BR_TX[acctId] || []).filter(r => !r.cleared).forEach((r, i) => {
+    rows.push({
+      id: 'o' + i, inflow: r.deposit != null, date: r.date.replace(/\/(\d{2})$/, '/20$1'), bankDesc: null, bankAmt: null,
+      ref: r.ref, rmText: r.info, account: r.gl,
+      rmAmt: r.deposit != null ? r.deposit : (r.payment || 0),
+      status: 'Review',
+    });
+  });
+  return { deposits: rows.filter(r => r.inflow), payments: rows.filter(r => !r.inflow) };
+}
+
+function seedReconcile(acctId, dateOverride, balanceOverride) {
+  const acct = ACCOUNTS.find(a => a.id === acctId);
+  if (!acct) return;
+  REC_STATE.acctId = acctId;
+  REC_STATE.statementDate = dateOverride || REC_STMT_DATE;
+  REC_STATE.statementBalance = balanceOverride != null ? balanceOverride : acct.bankBalance;
+  REC_STATE.filter = 'all';
+  REC_STATE.search = '';
+  REC_STATE.collapsed = {};
+  const d = recData(acctId);
+  REC_STATE.checked = {};
+  [...d.deposits, ...d.payments].forEach(r => { REC_STATE.checked[r.id] = r.status === 'Matched'; });
+}
+
+// ── Start Smart Reconciliation overlay ──
 
 function openReconcile(acctId) {
-  if (acctId && acctId !== REC_STATE.acctId) {
-    REC_STATE.statementDate = '';
-    REC_STATE.statementBalance = null;
+  REC_STATE.startOpen = true;
+  REC_STATE.startAcctId = acctId || null;
+  if (acctId) {
+    const acct = ACCOUNTS.find(a => a.id === acctId);
+    REC_STATE.startDate = REC_STMT_DATE;
+    REC_STATE.startBalance = acct ? acct.bankBalance : null;
+  } else {
+    REC_STATE.startDate = ''; REC_STATE.startBalance = null;
   }
-  if (acctId) REC_STATE.acctId = acctId;
+  renderRecStart();
+  _ubOpenOverlaySignal('smart-reconcile');
+}
+function closeRecStart() {
+  REC_STATE.startOpen = false;
+  document.getElementById('rec-start-root').innerHTML = '';
+  _ubCloseOverlaySignal();
+}
+// Picking an account "uploads" its statement automatically and extracts the
+// statement end date + ending balance from it.
+function recStartPick(acctId) {
+  REC_STATE.startAcctId = acctId || null;
+  const acct = ACCOUNTS.find(a => a.id === acctId);
+  REC_STATE.startDate = acct ? REC_STMT_DATE : '';
+  REC_STATE.startBalance = acct ? acct.bankBalance : null;
+  renderRecStart();
+}
+function recStartField(field, val) {
+  if (field === 'date') REC_STATE.startDate = val;
+  else { const n = parseFloat(String(val).replace(/[^0-9.-]/g, '')); REC_STATE.startBalance = isNaN(n) ? null : n; }
+}
+function recStartContinue() {
+  const acctId = REC_STATE.startAcctId;
+  if (!acctId || recHasInReview(acctId)) return;
+  seedReconcile(acctId, REC_STATE.startDate, REC_STATE.startBalance);
+  closeRecStart();
   showScreen('rec');
 }
 
-// Bank-feed transactions for an account, flagging which are still open in
-// Transaction Review (not yet matched or excluded there) — these are the
-// only things standing between the account and a clean reconciliation.
-function recData(acctId) {
-  const bankList = acctTxs(acctId).map(t => {
-    const resolved = S.matchedIds.has(t.id) || S.excludedIds.has(t.id);
-    return {
-      date: t.date, desc: t.desc,
-      amount: t.deposit != null ? t.deposit : (t.payment != null ? t.payment : 0),
-      pending: !resolved, txId: t.id,
-    };
-  });
-  // Rent Manager records that haven't shown up on the bank feed yet — e.g. a
-  // check that's been written and recorded but the vendor hasn't cashed it.
-  // These are expected and don't block finishing; they clear on their own
-  // once the bank feed catches up.
-  const outstandingList = (BR_TX[acctId] || []).filter(r => !r.cleared).map(r => ({
-    date: r.date, ref: r.ref, desc: r.info,
-    amount: r.deposit != null ? r.deposit : (r.payment || 0),
-  }));
-  return { bankList, outstandingList };
+const SR_CHECK_CIRCLE = `<svg width="15" height="15" viewBox="0 0 24 24" fill="#6eb744" style="flex-shrink:0"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`;
+const SR_INFO_ICO = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#008dd5" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8" stroke-width="3" stroke-linecap="round"/></svg>`;
+const SR_ALERT_ICO = `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#eb343c" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16" stroke-width="3" stroke-linecap="round"/></svg>`;
+
+function renderRecStart() {
+  const root = document.getElementById('rec-start-root');
+  if (!REC_STATE.startOpen) { root.innerHTML = ''; return; }
+  const acct = ACCOUNTS.find(a => a.id === REC_STATE.startAcctId);
+  const hasAcct = !!acct;
+  const inReview = hasAcct && recHasInReview(acct.id);
+  const canContinue = hasAcct && !inReview;
+
+  const acctOpts = [
+    { value: '', label: '<span style="color:#9aa7b3">Select an account\u2026</span>' },
+    ...ACCOUNTS.filter(a => a.kind === 'bank' && a.bankName).map(a => ({
+      value: a.id,
+      label: `${a.gl} <span style="color:#9aa7b3">- Last synced ${a.syncedMin === 0 ? 'now' : (a.syncedMin != null ? a.syncedMin + 'm ago' : '\u2014')}</span>`,
+    })),
+  ];
+  const selHtml = cSel('sr-acct', REC_STATE.startAcctId || '', acctOpts, "recStartPick(value)", 'width:100%')
+    .replace('class="csel-btn"', 'class="csel-btn" style="width:100%;height:38px;background:#f5f8fa;justify-content:space-between;font-size:14px"');
+
+  const stmtFile = hasAcct ? `${acct.bankName.toLowerCase().replace(/\s+/g, '')}bankstatement_june.pdf` : '';
+
+  root.innerHTML = `
+    <div class="at-overlay" onclick="if(event.target===this)closeRecStart()">
+      <div class="sr-modal">
+        <div class="at-hdr">
+          <span class="at-hdr-title" style="font-size:17px;font-weight:600">Start Smart Reconciliation</span>
+          <button class="at-hdr-ico" onclick="closeRecStart()" title="Close">${AT_X_ICO}</button>
+        </div>
+        <div class="sr-body">
+          ${hasAcct ? `<div class="sr-banner">
+            ${SR_INFO_ICO}
+            <span>Accounts with bank transactions in review are unable to be reconciled.</span>
+            <a href="#" onclick="closeRecStart();openAcct('${acct.id}');return false">Review Transactions</a>
+          </div>` : ''}
+          <div class="sr-field">
+            <label>Bank Account</label>
+            ${selHtml}
+          </div>
+          <div class="sr-2col">
+            <div class="sr-field">
+              <label>Last Reconciliation Date</label>
+              <div class="sr-ro${hasAcct ? '' : ' empty'}">${hasAcct ? REC_LAST_REC_DATE : 'mm/dd/yyyy'}</div>
+            </div>
+            <div class="sr-field">
+              <label>Beginning Balance</label>
+              <div class="sr-ro${hasAcct ? '' : ' empty'}">${hasAcct ? fmtN(recBeginningBalance(acct.id)) : '00.00'}</div>
+            </div>
+          </div>
+          <div>
+            <div class="sr-lbl-row">
+              <label>Bank Statement</label>
+              <a href="#" onclick="showToast('Statement uploaded');return false">Upload Manually</a>
+            </div>
+            ${hasAcct ? `<div class="sr-stmt-box">
+              <div class="sr-file-row"><a href="#" onclick="return false">${stmtFile}</a><button style="background:none;border:none;display:flex;cursor:pointer" onclick="recStartPick('')">${ic(P.close, 16, '#008dd5')}</button></div>
+              <div class="sr-check-row">${SR_CHECK_CIRCLE} Statement uploaded automatically</div>
+              <div class="sr-check-row">${SR_CHECK_CIRCLE} Statement information extracted</div>
+            </div>` : `<div class="sr-stmt-box empty">Select an account for your statement to be uploaded</div>`}
+          </div>
+          ${hasAcct ? `<div class="sr-orion-note">
+            ${orionSpark(17)}
+            <span>The <b>end date</b> and <b>ending balance</b> have been pulled from your statement. Confirm the information is correct before proceeding.</span>
+          </div>` : ''}
+          <div class="sr-2col">
+            <div class="sr-field">
+              <label>Statement End Date</label>
+              <input class="sr-in at-input-date" type="text" placeholder="mm/dd/yyyy" value="${REC_STATE.startDate}" onchange="recStartField('date',this.value)">
+            </div>
+            <div class="sr-field">
+              <label>Statement Ending Balance</label>
+              <input class="sr-in" type="text" inputmode="decimal" placeholder="00.00" value="${REC_STATE.startBalance != null ? fmtN(REC_STATE.startBalance) : ''}" onchange="recStartField('balance',this.value)">
+            </div>
+          </div>
+        </div>
+        <div class="sr-foot">
+          <button class="btn-primary" style="height:34px;padding:0 18px"${canContinue ? '' : ' disabled'} onclick="recStartContinue()">Continue</button>
+          <button class="at-cancel" style="height:34px" onclick="closeRecStart()">Cancel</button>
+        </div>
+      </div>
+    </div>`;
 }
 
-// Live book balance for an account: the static `inRm` figure plus the net
-// effect of every bank-feed item resolved so far (matched or excluded) —
-// same computation renderRight() uses for its own "In Rent Manager" figure.
-function liveBookBalance(acctId) {
-  const acct = ACCOUNTS.find(a => a.id === acctId);
-  const allTxs = acctTxs(acctId);
-  const resolvedNet = allTxs.reduce((s, t) => (S.matchedIds.has(t.id) || S.excludedIds.has(t.id))
-    ? s + (t.deposit != null ? t.deposit : (t.payment != null ? -t.payment : 0)) : s, 0);
-  return acct.inRm + resolvedNet;
-}
+// ── Smart Reconciliation screen ──
 
-function setStatementField(field, val) {
-  if (field === 'date') {
-    REC_STATE.statementDate = val;
-  } else {
-    const n = parseFloat(String(val).replace(/[^0-9.-]/g, ''));
-    REC_STATE.statementBalance = isNaN(n) ? null : n;
-  }
+function toggleSrRow(id, checked) {
+  REC_STATE.checked[id] = checked;
+  renderReconcile();
+}
+function toggleSrAll(section, checked) {
+  const d = recData(REC_STATE.acctId);
+  (section === 'dep' ? d.deposits : d.payments).forEach(r => { REC_STATE.checked[r.id] = checked; });
+  renderReconcile();
+}
+function srSetSearch(val) {
+  REC_STATE.search = val;
+  REC_STATE._focusSearch = true;
+  renderReconcile();
+}
+function srToggleSection(key) {
+  REC_STATE.collapsed[key] = !REC_STATE.collapsed[key];
   renderReconcile();
 }
 
 function finishReconciliation() {
   const acct = ACCOUNTS.find(a => a.id === REC_STATE.acctId);
   if (!acct) return;
-  const matchedCount = acctTxs(acct.id).filter(t => S.matchedIds.has(t.id)).length;
-  // Native date inputs give ISO (YYYY-MM-DD); display it in the app's MM/DD/YYYY convention.
-  const periodEnd = REC_STATE.statementDate
-    ? (([y,m,d]) => `${m}/${d}/${y}`)(REC_STATE.statementDate.split('-'))
-    : '—';
+  const d = recData(acct.id);
+  const all = [...d.deposits, ...d.payments];
+  const matchedCount = all.filter(r => r.status === 'Matched').length;
+  const selNet = all.reduce((s, r) => REC_STATE.checked[r.id]
+    ? s + (r.inflow ? 1 : -1) * (r.bankAmt != null ? r.bankAmt : r.rmAmt) : s, 0);
+  const cleared = recBeginningBalance(acct.id) + selNet;
   document.getElementById('rec-inner').innerHTML = `
     <div class="rec-done-wrap">
       <div class="rec-done-panel">
@@ -4246,8 +4493,8 @@ function finishReconciliation() {
         <div class="rec-done-title">Reconciliation complete.</div>
         <div class="rec-done-card">
           <div class="rec-done-row"><span>Closing balance</span><span>${fmt(REC_STATE.statementBalance)}</span></div>
-          <div class="rec-done-row"><span>Book balance in RM</span><span>${fmt(liveBookBalance(acct.id))}</span></div>
-          <div class="rec-done-row"><span>Period end date</span><span>${periodEnd}</span></div>
+          <div class="rec-done-row"><span>Book balance in RM</span><span>${fmt(cleared)}</span></div>
+          <div class="rec-done-row"><span>Period end date</span><span>${REC_STATE.statementDate || '\u2014'}</span></div>
           <div class="rec-done-row"><span>Transactions matched</span><span>${matchedCount}</span></div>
         </div>
         <button class="btn-primary" style="height:36px;padding:0 24px" onclick="showScreen('bc')">Done</button>
@@ -4255,112 +4502,121 @@ function finishReconciliation() {
     </div>`;
 }
 
+function srSection(title, key, rows, acctId) {
+  const q = REC_STATE.search.trim().toLowerCase();
+  let shown = rows;
+  if (REC_STATE.filter === 'uncleared') shown = shown.filter(r => !REC_STATE.checked[r.id]);
+  if (q) shown = shown.filter(r => (r.bankDesc || '').toLowerCase().includes(q) || r.rmText.toLowerCase().includes(q) || (r.ref || '').toLowerCase().includes(q));
+  const stmtTotal = rows.reduce((s, r) => s + (r.bankAmt || 0), 0);
+  const rmTotal = rows.reduce((s, r) => s + r.rmAmt, 0);
+  const outstanding = +(rmTotal - stmtTotal).toFixed(2);
+  const collapsed = !!REC_STATE.collapsed[key];
+  const allChecked = shown.length > 0 && shown.every(r => REC_STATE.checked[r.id]);
+  const body = shown.map(r => `
+    <tr>
+      <td style="text-align:center"><input type="checkbox" ${REC_STATE.checked[r.id] ? 'checked' : ''} onclick="toggleSrRow('${r.id}',this.checked)"></td>
+      <td>${r.date}</td>
+      <td ${r.bankDesc == null ? 'class="muted"' : ''}>${r.bankDesc == null ? '-' : r.bankDesc}</td>
+      <td class="r${r.bankAmt == null ? ' muted' : ''}">${r.bankAmt == null ? '-' : fmtN(r.bankAmt)}</td>
+      <td>${r.ref}</td>
+      <td>${r.rmText}</td>
+      <td>${r.account}</td>
+      <td class="r">${fmtN(r.rmAmt)}</td>
+      <td><span class="sr-pill ${r.status === 'Matched' ? 'matched' : 'review'}">${r.status}</span></td>
+    </tr>`).join('');
+  return `
+    <div class="sr-sec-hdr">
+      <button class="chev" onclick="srToggleSection('${key}')">${ic(collapsed ? P.right : P.down, 18, '#13314c')}</button>
+      <span class="sr-sec-title">${title}</span>
+      <div class="sr-sec-sums">
+        <span>Statement<b>${fmt(stmtTotal)}</b></span>
+        <span>Rent Manager<b>${fmt(rmTotal)}</b></span>
+        <span>Outstanding<b class="${outstanding > 0 ? 'neg' : ''}">${outstanding > 0 ? '+' : ''}${fmt(outstanding)}</b></span>
+      </div>
+    </div>
+    ${collapsed ? '' : `<table class="sr-tbl">
+      <colgroup>
+        <col style="width:36px"><col style="width:92px"><col><col style="width:92px">
+        <col style="width:96px"><col><col style="width:180px"><col style="width:92px"><col style="width:86px">
+      </colgroup>
+      <thead><tr>
+        <th style="text-align:center;padding:0"><input type="checkbox" ${allChecked ? 'checked' : ''} onclick="toggleSrAll('${key}',this.checked)"></th>
+        <th>Date</th><th>Bank Description</th><th class="r">Amount</th>
+        <th>Reference</th><th>Rent Manager Transaction</th><th>Account</th><th class="r">Amount</th><th>Status</th>
+      </tr></thead>
+      <tbody>${body || `<tr><td colspan="9" style="text-align:center;color:#9aa7b3;padding:20px 0">No transactions</td></tr>`}</tbody>
+    </table>`}`;
+}
+
 function renderReconcile() {
   const acct = ACCOUNTS.find(a => a.id === REC_STATE.acctId);
   if (!acct) return;
-
-  const liveInRm = liveBookBalance(acct.id);
-  const hasStatement = REC_STATE.statementBalance != null;
-  const diff = hasStatement ? +(REC_STATE.statementBalance - liveInRm).toFixed(2) : null;
-  const diffZero = diff !== null && Math.abs(diff) < 0.005;
-  const diffColor = diff === null ? '#13314c' : (diffZero ? '#2e7d32' : '#eb343c');
-  const diffDisplay = diff === null ? '—' : (diffZero ? '$0.00' : `${diff < 0 ? '-' : '+'}${fmt(Math.abs(diff))}`);
-
-  const { bankList, outstandingList } = recData(acct.id);
-  const pending = bankList.filter(b => b.pending);
-
-  const pendingRows = pending.map(t => `
-    <tr>
-      <td>${t.date}</td>
-      <td>${t.desc}</td>
-      <td class="r">${fmtN(t.amount)}</td>
-      <td>
-        <div class="rec-pending-actions">
-          <button class="link-btn" style="font-size:13px" onclick="openAcct('${acct.id}')">Go to Transaction Review</button>
-          <button class="link-btn" style="font-size:13px" onclick="doExclude('${t.txId}');renderReconcile()">Exclude</button>
-        </div>
-      </td>
-    </tr>`).join('');
-
-  const outstandingRows = outstandingList.map(r => `
-    <tr>
-      <td>${r.date}</td>
-      <td>${r.ref}</td>
-      <td>${r.desc}</td>
-      <td class="r">${fmtN(r.amount)}</td>
-    </tr>`).join('');
-
-  const acctOpts = ACCOUNTS.filter(a => a.kind === 'bank').map(a => ({ value: a.id, label: a.gl }));
-  const selHtml = cSel('rec-acct', REC_STATE.acctId, acctOpts, 'openReconcile(value)', 'min-width:180px')
-    .replace('class="csel-btn"', 'class="csel-btn csel-btn--acct"');
-
-  const finishDisabled = !hasStatement || !diffZero || pending.length > 0;
+  const d = recData(acct.id);
+  const all = [...d.deposits, ...d.payments];
+  const beginning = recBeginningBalance(acct.id);
+  const selDeps = d.deposits.filter(r => REC_STATE.checked[r.id]);
+  const selPays = d.payments.filter(r => REC_STATE.checked[r.id]);
+  const amtOf = r => r.bankAmt != null ? r.bankAmt : r.rmAmt;
+  const selDepTotal = selDeps.reduce((s, r) => s + amtOf(r), 0);
+  const selPayTotal = selPays.reduce((s, r) => s + amtOf(r), 0);
+  const cleared = beginning + selDepTotal - selPayTotal;
+  const stmtBal = REC_STATE.statementBalance != null ? REC_STATE.statementBalance : acct.bankBalance;
+  const diff = +(stmtBal - cleared).toFixed(2);
+  const balanced = Math.abs(diff) < 0.005;
 
   document.getElementById('rec-inner').innerHTML = `
-    <div class="br-top-wrap">
-      <div class="br-top">
-        ${selHtml}
-        <span class="br-bank-info">${acct.bankName ? acct.bankName + ' ••••' + acct.last4 : 'No bank account linked'}</span>
+    <div class="sr-strip">
+      <div class="sr-acct">
+        ${ic(P.bank, 18, '#13314c')}
+        <span>${acct.gl}</span>
+        <span class="bank">${acct.bankName ? acct.bankName + '\u2022\u2022\u2022\u2022' + acct.last4 : ''}</span>
+      </div>
+      <div class="sr-cells">
+        <div class="sr-cell"><span class="sr-cell-lbl">Beginning Balance</span><span class="sr-cell-val">${fmt(beginning)}</span></div>
+        <span class="sr-op">+</span>
+        <div class="sr-cell"><span class="sr-cell-lbl">Selected Deposits (${selDeps.length})</span><span class="sr-cell-val pos">${fmt(selDepTotal)}</span></div>
+        <span class="sr-op">\u2212</span>
+        <div class="sr-cell"><span class="sr-cell-lbl">Selected Payments (${selPays.length})</span><span class="sr-cell-val neg">${fmt(selPayTotal)}</span></div>
+        <span class="sr-op">=</span>
+        <div class="sr-cell"><span class="sr-cell-lbl">Cleared Balance</span><span class="sr-cell-val">${fmt(cleared)}</span></div>
+        <span class="sr-vdiv"></span>
+        <div class="sr-cell"><span class="sr-cell-lbl">Statement Ending</span><span class="sr-cell-val">${fmt(stmtBal)}</span></div>
+        <div class="sr-cell"><span class="sr-cell-lbl">Statement End Date</span><span class="sr-cell-val">${REC_STATE.statementDate || REC_STMT_DATE}</span></div>
+        <div class="sr-diff${balanced ? ' ok' : ''}">
+          ${balanced ? ic(P.check, 17, '#2e7d32') : SR_ALERT_ICO}
+          <span class="lbl">Difference</span><span class="val">${fmt(Math.abs(diff))}</span>
+        </div>
       </div>
     </div>
-    <div class="rec-body-wrap">
-      <div class="rec-card">
-        <div class="rec-card-label">Enter your bank statement details to begin.</div>
-        <div class="rec-stmt-fields">
-          <div class="at-field" style="flex:1">
-            <label>Statement Ending Date</label>
-            <input class="at-input" type="date" value="${REC_STATE.statementDate}" onchange="setStatementField('date',this.value)">
-          </div>
-          <div class="at-field" style="flex:1">
-            <label>Statement Ending Balance</label>
-            <input class="at-input" type="text" inputmode="decimal" placeholder="0.00" value="${REC_STATE.statementBalance != null ? fmtN(REC_STATE.statementBalance) : ''}" onchange="setStatementField('balance',this.value)">
-          </div>
-        </div>
+    <div class="sr-toolbar">
+      <div class="sr-search">
+        <span class="ico-wrap">${ic(P.search, 15, '#9aa7b3')}</span>
+        <input id="sr-search-input" placeholder="Find a transaction" value="${REC_STATE.search.replace(/"/g, '&quot;')}" oninput="srSetSearch(this.value)">
       </div>
-
-      <div class="sum-strip">
-        <div class="sum-cell"><span class="sum-lbl">Bank Balance:</span><span class="sum-val">${fmt(acct.bankBalance)}</span></div>
-        <div class="sum-cell"><span class="sum-lbl">Book Balance (In RM):</span><span class="sum-val">${fmt(liveInRm)}</span></div>
-        <div class="sum-cell"><span class="sum-lbl">Statement Ending Balance:</span><span class="sum-val">${hasStatement ? fmt(REC_STATE.statementBalance) : '—'}</span></div>
-        <div class="sum-cell"><span class="sum-lbl">Difference to resolve:</span><span class="sum-val" style="color:${diffColor}">${diffDisplay}</span></div>
+      <div class="sr-seg">
+        <button class="sr-seg-btn${REC_STATE.filter === 'uncleared' ? ' on' : ''}" onclick="REC_STATE.filter='uncleared';renderReconcile()">Uncleared</button>
+        <button class="sr-seg-btn${REC_STATE.filter === 'all' ? ' on' : ''}" onclick="REC_STATE.filter='all';renderReconcile()">All</button>
       </div>
-      ${!diffZero ? `<div class="rec-hint">When the difference reaches $0.00, you're ready to finish.</div>` : ''}
-
-      <div>
-        <div class="rec-section-hdr">
-          <span>Unresolved transactions</span>
-          <span class="rec-badge ${pending.length > 0 ? 'warn' : 'ok'}">${pending.length}</span>
-        </div>
-        ${pending.length > 0 ? `
-          <div class="rec-note" style="margin:6px 0 10px">These items are still open in Transaction Review. Resolve them there, or exclude them here if they don't belong in RM.</div>
-          <table class="rec-pending-tbl">
-            <thead><tr><th style="width:96px">Date</th><th>Description</th><th class="r" style="width:110px">Amount</th><th style="width:260px"></th></tr></thead>
-            <tbody>${pendingRows}</tbody>
-          </table>
-        ` : `<div class="rec-all-clear" style="margin-top:10px">${ic(P.check,16,'#2e7d32')} All transactions reviewed</div>`}
-      </div>
-
-      <div>
-        <div class="rec-section-hdr">
-          <span>Outstanding Rent Manager transactions</span>
-          <span class="rec-badge ${outstandingList.length > 0 ? 'warn' : 'ok'}">${outstandingList.length}</span>
-        </div>
-        ${outstandingList.length > 0 ? `
-          <div class="rec-note" style="margin:6px 0 10px">These are recorded in Rent Manager but haven't shown up on the bank feed yet — e.g. a check that hasn't been cashed. They'll clear on their own once the bank catches up and don't block finishing.</div>
-          <table class="rec-pending-tbl">
-            <thead><tr><th style="width:96px">Date</th><th style="width:100px">Reference</th><th>Description</th><th class="r" style="width:110px">Amount</th></tr></thead>
-            <tbody>${outstandingRows}</tbody>
-          </table>
-        ` : `<div class="rec-all-clear" style="margin-top:10px">${ic(P.check,16,'#2e7d32')} No outstanding transactions</div>`}
+    </div>
+    <div class="sr-scroll">
+      <div class="sr-sec">
+        ${srSection('Deposits', 'dep', d.deposits, acct.id)}
+        ${srSection('Payments', 'pay', d.payments, acct.id)}
       </div>
     </div>
     <div class="rec-foot">
-      <button id="rec-finish-btn" class="btn-primary" style="height:36px;padding:0 16px"${finishDisabled ? ' disabled' : ''} onclick="finishReconciliation()">Finish Reconciliation</button>
-      <button class="at-cancel" onclick="showToast('Progress saved');showScreen('br')">Save For Later</button>
-      <button class="link-btn" style="font-size:14px" onclick="showScreen('br')">Cancel</button>
+      ${balanced ? '' : `<span class="rec-foot-notice">${SR_ALERT_ICO} Account is not in balance</span>`}
+      <button class="btn-primary" style="height:34px;padding:0 16px"${balanced ? '' : ' disabled'} onclick="finishReconciliation()">Save &amp; Finish</button>
+      <button class="btn-primary" style="height:34px;padding:0 16px" onclick="showToast('Progress saved');showScreen('br')">Save For Later</button>
+      <button class="at-cancel" style="height:34px" onclick="showScreen('br')">Cancel</button>
     </div>`;
-}
 
+  if (REC_STATE._focusSearch) {
+    REC_STATE._focusSearch = false;
+    const inp = document.getElementById('sr-search-input');
+    if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+  }
+}
 
 function _renderRegister(STATE, opts) {
   const acct = ACCOUNTS.find(a=>a.id===STATE.acctId);
