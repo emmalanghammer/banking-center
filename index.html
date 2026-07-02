@@ -4363,10 +4363,10 @@ function seedReconcile(acctId, dateOverride, balanceOverride) {
 function openReconcile(acctId) {
   REC_STATE.startOpen = true;
   REC_STATE.startAcctId = acctId || null;
-  if (acctId) {
-    const acct = ACCOUNTS.find(a => a.id === acctId);
+  const acct = acctId ? ACCOUNTS.find(a => a.id === acctId) : null;
+  if (acct && !recHasInReview(acct.id)) {
     REC_STATE.startDate = REC_STMT_DATE;
-    REC_STATE.startBalance = acct ? acct.bankBalance : null;
+    REC_STATE.startBalance = acct.bankBalance;
   } else {
     REC_STATE.startDate = ''; REC_STATE.startBalance = null;
   }
@@ -4383,8 +4383,9 @@ function closeRecStart() {
 function recStartPick(acctId) {
   REC_STATE.startAcctId = acctId || null;
   const acct = ACCOUNTS.find(a => a.id === acctId);
-  REC_STATE.startDate = acct ? REC_STMT_DATE : '';
-  REC_STATE.startBalance = acct ? acct.bankBalance : null;
+  const clean = !!acct && !recHasInReview(acct.id);
+  REC_STATE.startDate = clean ? REC_STMT_DATE : '';
+  REC_STATE.startBalance = clean ? acct.bankBalance : null;
   renderRecStart();
 }
 function recStartField(field, val) {
@@ -4431,7 +4432,7 @@ function renderRecStart() {
           <button class="at-hdr-ico" onclick="closeRecStart()" title="Close">${AT_X_ICO}</button>
         </div>
         <div class="sr-body">
-          ${hasAcct ? `<div class="sr-banner">
+          ${inReview ? `<div class="sr-banner">
             ${SR_INFO_ICO}
             <span>Accounts with bank transactions in review are unable to be reconciled.</span>
             <a href="#" onclick="closeRecStart();openAcct('${acct.id}');return false">Review Transactions</a>
@@ -4455,13 +4456,13 @@ function renderRecStart() {
               <label>Bank Statement</label>
               <a href="#" onclick="showToast('Statement uploaded');return false">Upload Manually</a>
             </div>
-            ${hasAcct ? `<div class="sr-stmt-box">
+            ${canContinue ? `<div class="sr-stmt-box">
               <div class="sr-file-row"><a href="#" onclick="return false">${stmtFile}</a><button style="background:none;border:none;display:flex;cursor:pointer" onclick="recStartPick('')">${ic(P.close, 16, '#008dd5')}</button></div>
               <div class="sr-check-row">${SR_CHECK_CIRCLE} Statement uploaded automatically</div>
               <div class="sr-check-row">${SR_CHECK_CIRCLE} Statement information extracted</div>
-            </div>` : `<div class="sr-stmt-box empty">Select an account for your statement to be uploaded</div>`}
+            </div>` : `<div class="sr-stmt-box empty">${inReview ? 'Statement upload unavailable \u2014 this account still has transactions in review' : 'Select an account for your statement to be uploaded'}</div>`}
           </div>
-          ${hasAcct ? `<div class="sr-orion-note">
+          ${canContinue ? `<div class="sr-orion-note">
             ${orionSpark(17)}
             <span>The <b>end date</b> and <b>ending balance</b> have been pulled from your statement. Confirm the information is correct before proceeding.</span>
           </div>` : ''}
