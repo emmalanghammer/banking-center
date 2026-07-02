@@ -569,14 +569,14 @@ svg.ico{display:block;flex-shrink:0}
 .sr-seg-btn:last-child{border-radius:0 4px 4px 0}
 .sr-seg-btn.on{background:#ebf1f5;border-color:#008dd5;font-weight:600;position:relative;z-index:1}
 .sr-scroll{flex:1;overflow:auto;padding:0 20px 16px;min-height:0}
-.sr-sec{min-width:1320px}
+.sr-sec{min-width:1270px}
 .sr-sec-hdr{display:flex;align-items:center;gap:8px;margin:16px 0 8px}
 .sr-sec-hdr .chev{background:none;border:none;display:flex;padding:0;cursor:pointer}
 .sr-sec-title{font-size:14px;font-weight:700;color:#13314c}
 .sr-sec-sums{margin-left:auto;display:flex;gap:16px;font-size:13px;color:#666;white-space:nowrap}
 .sr-sec-sums b{color:#13314c;font-variant-numeric:tabular-nums;margin-left:5px}
 .sr-sec-sums b.neg{color:#eb343c}
-.sr-tbl{width:100%;min-width:1320px;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid #cedbe7;table-layout:fixed}
+.sr-tbl{width:100%;min-width:1270px;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid #cedbe7;table-layout:fixed}
 .sr-tbl tbody td.sr-insight-cell{overflow:visible}
 .sr-insight{position:relative;display:flex;align-items:center;gap:6px;font-size:12.5px;color:#444;min-width:0}
 .sr-insight span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -4569,13 +4569,13 @@ function srSection(title, key, rows, acctId) {
     ${collapsed ? '' : `<table class="sr-tbl">
       <colgroup>
         <col style="width:36px"><col style="width:92px"><col><col style="width:92px">
-        <col style="width:96px"><col><col style="width:170px"><col style="width:92px"><col style="width:86px"><col style="width:250px">
+        <col style="width:96px"><col><col style="width:170px"><col style="width:92px"><col style="width:86px"><col style="width:200px">
       </colgroup>
       <thead><tr>
         <th style="text-align:center;padding:0"><input type="checkbox" ${allChecked ? 'checked' : ''} onclick="toggleSrAll('${key}',this.checked)"></th>
         <th>Date</th><th>Bank Description</th><th class="r">Amount</th>
         <th>Reference</th><th>Rent Manager Transaction</th><th>Account</th><th class="r">Amount</th><th>Status</th>
-        <th><span style="display:inline-flex;align-items:center;gap:5px">${orionSpark(13)} Orion Insight</span></th>
+        <th>Transaction Insight</th>
       </tr></thead>
       <tbody>${body || `<tr><td colspan="10" style="text-align:center;color:#9aa7b3;padding:20px 0">No transactions</td></tr>`}</tbody>
     </table>`}`;
