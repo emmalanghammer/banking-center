@@ -577,9 +577,11 @@ svg.ico{display:block;flex-shrink:0}
 .sr-sec-sums b{color:#13314c;font-variant-numeric:tabular-nums;margin-left:5px}
 .sr-sec-sums b.neg{color:#eb343c}
 .sr-tbl{width:100%;min-width:1320px;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid #cedbe7;table-layout:fixed}
-.sr-tbl tbody td.sr-insight-cell{white-space:normal;padding:6px 10px}
-.sr-insight{display:flex;align-items:flex-start;gap:6px;font-size:12.5px;color:#444;line-height:1.35}
-.sr-insight img{margin-top:2px}
+.sr-tbl tbody td.sr-insight-cell{overflow:visible}
+.sr-insight{position:relative;display:flex;align-items:center;gap:6px;font-size:12.5px;color:#444;min-width:0}
+.sr-insight span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sr-insight[data-tip]:hover::after{content:attr(data-tip);position:absolute;top:calc(100% + 7px);right:0;background:#13314c;color:#fff;font-size:12px;line-height:1.45;padding:8px 10px;border-radius:4px;white-space:normal;width:270px;text-align:left;z-index:80;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.sr-insight[data-tip]:hover::before{content:'';position:absolute;top:100%;right:14px;border:5px solid transparent;border-bottom-color:#13314c;margin-top:-3px;z-index:80}
 .sr-tbl thead th{background:#737373;color:#fff;font-size:11.5px;font-weight:500;letter-spacing:.5px;padding:0 10px;height:30px;text-align:left;white-space:nowrap;overflow:hidden}
 .sr-tbl thead th.r{text-align:right}
 .sr-tbl tbody td{padding:0 10px;height:38px;border-bottom:1px solid #eef2f7;color:#13314c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -4552,7 +4554,7 @@ function srSection(title, key, rows, acctId) {
       <td>${r.account}</td>
       <td class="r">${fmtN(r.rmAmt)}</td>
       <td><span class="sr-pill ${r.status === 'Matched' ? 'matched' : 'review'}">${r.status}</span></td>
-      <td class="sr-insight-cell">${r.insight ? `<div class="sr-insight">${orionSpark(14)}<span>${r.insight}</span></div>` : ''}</td>
+      <td class="sr-insight-cell">${r.insight ? `<div class="sr-insight" data-tip="${r.insight.replace(/"/g, '&quot;')}">${orionSpark(14)}<span>${r.insight}</span></div>` : ''}</td>
     </tr>`).join('');
   return `
     <div class="sr-sec-hdr">
