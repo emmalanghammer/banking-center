@@ -731,6 +731,11 @@ svg.ico{display:block;flex-shrink:0}
 .fm-fld .fm-input{height:36px;width:100%;border:1px solid #008dd5;border-radius:4px;background:#fff;padding:0 8px;font-size:14px;color:#13314c;font-family:'Roboto',sans-serif;box-sizing:border-box}
 .fm-fld .fm-input::placeholder{color:#b3b3b3;font-style:italic}
 .fm-fld .fm-select{height:36px;width:100%;border:1px solid #008dd5;border-radius:4px;background:#fff url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 24 24' fill='%2313314c'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 4px center;padding:0 28px 0 8px;font-size:14px;color:#13314c;font-family:'Roboto',sans-serif;appearance:none;box-sizing:border-box}
+.fm-typesel{position:relative;width:100%}
+.fm-typesel-btn{height:36px;width:100%;border:1px solid #008dd5;border-radius:4px;background:#fff url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 24 24' fill='%2313314c'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 4px center;padding:0 28px 0 8px;font-size:14px;color:#13314c;font-family:'Roboto',sans-serif;text-align:left;cursor:pointer;box-sizing:border-box}
+.fm-typesel-menu{position:absolute;top:calc(100% + 3px);left:0;right:0;background:#fff;border:1px solid #cedbe7;border-radius:4px;box-shadow:0 4px 16px rgba(19,49,76,.13);z-index:60;padding:4px}
+.fm-typesel-item{display:flex;align-items:center;gap:9px;height:34px;padding:0 10px;font-size:13px;color:#13314c;cursor:pointer;border-radius:3px}
+.fm-typesel-item:hover{background:#f1f6fa}
 .fm-date-wrap{display:flex;height:36px;border:1px solid #008dd5;border-radius:4px;overflow:hidden;width:100%;box-sizing:border-box}
 .fm-date-field{flex:1;border:none;background:#fff;padding:0 8px;font-size:14px;color:#13314c;font-family:'Roboto',sans-serif;min-width:0;outline:none}
 .fm-date-icon{width:28px;background:#f5f8fa;border-left:1px solid #008dd5;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -2894,6 +2899,23 @@ function fmCandidates(tx) {
   }
 }
 let _findMatchFiltered = false;
+let _fmTypeSel = new Set();
+let _fmTypeOpen = false;
+let _fmTypeBound = false;
+
+// Record types this bank transaction could match: payments clear as checks,
+// bills, or journals; deposits clear as deposits or journals.
+function fmTypeOptions(tx) {
+  return tx.deposit != null ? ['Deposit', 'Journal'] : ['Check', 'Bill', 'Journal'];
+}
+function fmToggleTypeMenu() {
+  _fmTypeOpen = !_fmTypeOpen;
+  renderFindMatch();
+}
+function fmToggleType(t) {
+  if (_fmTypeSel.has(t)) _fmTypeSel.delete(t); else _fmTypeSel.add(t);
+  renderFindMatch();
+}
 
 // Full pick-list for the Find Match overlay: Orion's generated likely matches
 // plus every Rent Manager record in the account that hasn't been matched to an
@@ -2926,6 +2948,15 @@ function openFindMatch(txId) {
   _findMatchOpen = true;
   _findMatchSel = new Set();
   _findMatchFiltered = false;
+  _fmTypeOpen = false;
+  const tx = findTxGlobal(txId);
+  _fmTypeSel = new Set(tx ? fmTypeOptions(tx) : []);
+  if (!_fmTypeBound) {
+    _fmTypeBound = true;
+    document.addEventListener('click', () => {
+      if (_fmTypeOpen) { _fmTypeOpen = false; if (_findMatchOpen) renderFindMatch(); }
+    });
+  }
   renderFindMatch();
   _ubOpenOverlaySignal('find-match');
 }
@@ -2973,7 +3004,8 @@ function renderFindMatch() {
   const bankAmt = (tx.payment != null ? tx.payment : tx.deposit) || 0;
   const rows = fmRows(tx);
   const possibleCount = rows.filter(r => r.possible).length;
-  const shown = _findMatchFiltered ? rows.filter(r => r.possible) : rows;
+  let shown = rows.filter(r => _fmTypeSel.has(r.type));
+  if (_findMatchFiltered) shown = shown.filter(r => r.possible);
   const visibleIds = shown.map(r => r._i);
   const selected = [..._findMatchSel].reduce((s,i)=> s + (rows[i]?rows[i].amount:0), 0);
   const diff = bankAmt - selected;
@@ -3019,7 +3051,12 @@ function renderFindMatch() {
           </div>
           <div class="fm-fld">
             <label>Transaction Type</label>
-            <select class="fm-select"><option>2 Selected</option></select>
+            <div class="fm-typesel">
+              <button class="fm-typesel-btn" onclick="event.stopPropagation();fmToggleTypeMenu()">${_fmTypeSel.size} Selected</button>
+              ${_fmTypeOpen ? `<div class="fm-typesel-menu" onclick="event.stopPropagation()">
+                ${fmTypeOptions(tx).map(t => `<label class="fm-typesel-item"><input type="checkbox" ${_fmTypeSel.has(t) ? 'checked' : ''} onchange="fmToggleType('${t}')"> ${t}</label>`).join('')}
+              </div>` : ''}
+            </div>
           </div>
           <div class="fm-fld">
             <label>Date Range</label>
