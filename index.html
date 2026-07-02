@@ -4567,7 +4567,11 @@ function finishReconciliation() {
           <div class="rec-done-row"><span>Transactions matched</span><span>${matchedCount}</span></div>
           ${Math.abs(srDifference()) >= 0.005 ? `<div class="rec-done-row"><span>Unresolved difference</span><span style="color:#eb343c">${fmt(Math.abs(srDifference()))}</span></div>` : ''}
         </div>
-        <button class="btn-primary" style="height:36px;padding:0 24px" onclick="showScreen('bc')">Done</button>
+        <div style="display:flex;gap:10px">
+          <button class="btn-primary" style="height:36px;padding:0 18px" onclick="showToast('Reconciliation report sent to printer')">${ic(P.print,15,'#fff')} Print Report</button>
+          <button class="btn-outline" style="height:36px;padding:0 18px" onclick="openReconcile()">Start New Reconciliation</button>
+        </div>
+        <button class="link-btn" style="font-size:13px;cursor:pointer" onclick="showScreen('bc')">Back to Banking Center</button>
       </div>
     </div>`;
 }
