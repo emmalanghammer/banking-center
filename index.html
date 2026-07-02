@@ -4252,11 +4252,19 @@ function recHasInReview(acctId) {
 // feed activity is folded in so the demo still proves out to $0 regardless of
 // how each review item was resolved (matched vs excluded).
 function recBeginningBalance(acctId) {
+  // Last statement's ending balance: the live bank balance minus everything
+  // that cleared this period (matched feed transactions + RM records already
+  // cleared against the bank). Excluded feed activity stays baked in, so the
+  // demo proves out to $0 regardless of how each review item was resolved.
   const acct = ACCOUNTS.find(a => a.id === acctId);
-  const excludedNet = acctTxs(acctId).reduce((s, t) => S.excludedIds.has(t.id)
+  const matchedNet = acctTxs(acctId).reduce((s, t) => S.matchedIds.has(t.id)
     ? s + (t.deposit != null ? t.deposit : -(t.payment || 0)) : s, 0);
-  return acct.inRm + excludedNet;
+  const clearedNet = (BR_TX[acctId] || []).reduce((s, r) => r.cleared
+    ? s + (r.deposit != null ? r.deposit : -(r.payment || 0)) : s, 0);
+  return acct.bankBalance - matchedNet - clearedNet;
 }
+
+const _recDateVal = s => { let [m, d, y] = s.split('/').map(Number); if (y < 100) y += 2000; return new Date(y, m - 1, d).getTime(); };
 
 // RM-side display info for a matched bank transaction: reference short code,
 // human-readable record text, and GL account. Prefers the real matched record
@@ -4305,14 +4313,19 @@ function recData(acctId) {
       status: 'Matched',
     });
   });
-  (BR_TX[acctId] || []).filter(r => !r.cleared).forEach((r, i) => {
+  // Every record created in / living in Rent Manager appears too: ones that
+  // already cleared the bank are matched pairs; ones with no bank transaction
+  // yet (e.g. an uncashed check) show "-" on the bank side and need review.
+  (BR_TX[acctId] || []).forEach((r, i) => {
+    const amt = r.deposit != null ? r.deposit : (r.payment || 0);
     rows.push({
-      id: 'o' + i, inflow: r.deposit != null, date: r.date.replace(/\/(\d{2})$/, '/20$1'), bankDesc: null, bankAmt: null,
-      ref: r.ref, rmText: r.info, account: r.gl,
-      rmAmt: r.deposit != null ? r.deposit : (r.payment || 0),
-      status: 'Review',
+      id: 'o' + i, inflow: r.deposit != null, date: r.date.replace(/\/(\d{2})$/, '/20$1'),
+      bankDesc: r.cleared ? r.info : null, bankAmt: r.cleared ? amt : null,
+      ref: r.ref, rmText: r.info, account: r.gl, rmAmt: amt,
+      status: r.cleared ? 'Matched' : 'Review',
     });
   });
+  rows.sort((a, b) => _recDateVal(a.date) - _recDateVal(b.date));
   return { deposits: rows.filter(r => r.inflow), payments: rows.filter(r => !r.inflow) };
 }
 
