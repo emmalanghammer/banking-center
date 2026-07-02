@@ -589,7 +589,7 @@ svg.ico{display:block;flex-shrink:0}
 .sr-tbl tbody tr:last-child td{border-bottom:none}
 .sr-tbl tbody td.muted{color:#9aa7b3}
 .sr-pill{display:inline-flex;padding:3px 9px;border-radius:3px;font-size:12px}
-.sr-pill.matched{background:#dff0df;color:#2e7d32}
+.sr-pill.cleared{background:#dff0df;color:#2e7d32}
 .sr-pill.review{background:#f8d7da;color:#b3261e}
 .rec-done-wrap{flex:1;display:flex;align-items:center;justify-content:center;overflow-y:auto}
 .rec-done-panel{display:flex;flex-direction:column;align-items:center;gap:16px;padding:40px 20px}
@@ -4553,7 +4553,7 @@ function srSection(title, key, rows, acctId) {
       <td>${r.rmText}</td>
       <td>${r.account}</td>
       <td class="r">${fmtN(r.rmAmt)}</td>
-      <td><span class="sr-pill ${r.status === 'Matched' ? 'matched' : 'review'}">${r.status}</span></td>
+      <td><span class="sr-pill ${REC_STATE.checked[r.id] ? 'cleared' : 'review'}">${REC_STATE.checked[r.id] ? 'Cleared' : 'Review'}</span></td>
       <td class="sr-insight-cell">${r.insight ? `<div class="sr-insight" data-tip="${r.insight.replace(/"/g, '&quot;')}">${orionSpark(14)}<span>${r.insight}</span></div>` : ''}</td>
     </tr>`).join('');
   return `
