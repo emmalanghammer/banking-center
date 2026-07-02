@@ -541,6 +541,8 @@ svg.ico{display:block;flex-shrink:0}
 .sr-file-row a{color:#008dd5;text-decoration:none}
 .sr-file-row a:hover{text-decoration:underline}
 .sr-check-row{display:flex;align-items:center;gap:8px;font-size:13px;color:#13314c;padding:3px 4px}
+.sr-spin{width:14px;height:14px;border:2px solid #cedbe7;border-top-color:#008dd5;border-radius:50%;flex-shrink:0;animation:sr-rot .7s linear infinite}
+@keyframes sr-rot{to{transform:rotate(360deg)}}
 .sr-orion-note{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#13314c;line-height:1.45}
 .sr-foot{display:flex;justify-content:flex-end;gap:10px;padding:10px 16px;border-top:1px solid #cedbe7;background:#f5f8fa;border-radius:0 0 4px 4px}
 /* Smart Reconciliation screen */
@@ -4364,15 +4366,7 @@ function seedReconcile(acctId, dateOverride, balanceOverride) {
 
 function openReconcile(acctId) {
   REC_STATE.startOpen = true;
-  REC_STATE.startAcctId = acctId || null;
-  const acct = acctId ? ACCOUNTS.find(a => a.id === acctId) : null;
-  if (acct && !recHasInReview(acct.id)) {
-    REC_STATE.startDate = REC_STMT_DATE;
-    REC_STATE.startBalance = acct.bankBalance;
-  } else {
-    REC_STATE.startDate = ''; REC_STATE.startBalance = null;
-  }
-  renderRecStart();
+  recStartPick(acctId || '');
   _ubOpenOverlaySignal('smart-reconcile');
 }
 function closeRecStart() {
@@ -4382,12 +4376,32 @@ function closeRecStart() {
 }
 // Picking an account "uploads" its statement automatically and extracts the
 // statement end date + ending balance from it.
+let _recLoadToken = 0;
 function recStartPick(acctId) {
   REC_STATE.startAcctId = acctId || null;
   const acct = ACCOUNTS.find(a => a.id === acctId);
   const clean = !!acct && !recHasInReview(acct.id);
-  REC_STATE.startDate = clean ? REC_STMT_DATE : '';
-  REC_STATE.startBalance = clean ? acct.bankBalance : null;
+  REC_STATE.startDate = '';
+  REC_STATE.startBalance = null;
+  REC_STATE.startLoading = 0;
+  const token = ++_recLoadToken;
+  if (clean) {
+    // Simulate the statement upload: fetching the file, then extracting the
+    // end date + ending balance from it before the fields fill in.
+    REC_STATE.startLoading = 1;
+    setTimeout(() => {
+      if (_recLoadToken !== token || !REC_STATE.startOpen) return;
+      REC_STATE.startLoading = 2;
+      renderRecStart();
+    }, 700);
+    setTimeout(() => {
+      if (_recLoadToken !== token || !REC_STATE.startOpen) return;
+      REC_STATE.startLoading = 0;
+      REC_STATE.startDate = REC_STMT_DATE;
+      REC_STATE.startBalance = acct.bankBalance;
+      renderRecStart();
+    }, 1500);
+  }
   renderRecStart();
 }
 function recStartField(field, val) {
@@ -4412,7 +4426,8 @@ function renderRecStart() {
   const acct = ACCOUNTS.find(a => a.id === REC_STATE.startAcctId);
   const hasAcct = !!acct;
   const inReview = hasAcct && recHasInReview(acct.id);
-  const canContinue = hasAcct && !inReview;
+  const loading = !!REC_STATE.startLoading;
+  const canContinue = hasAcct && !inReview && !loading;
 
   const acctOpts = [
     { value: '', label: '<span style="color:#9aa7b3">Select an account\u2026</span>' },
@@ -4424,7 +4439,7 @@ function renderRecStart() {
   const selHtml = cSel('sr-acct', REC_STATE.startAcctId || '', acctOpts, "recStartPick(value)", 'width:100%')
     .replace('class="csel-btn"', 'class="csel-btn" style="width:100%;height:38px;background:#f5f8fa;justify-content:space-between;font-size:14px"');
 
-  const stmtFile = hasAcct ? `${acct.bankName.toLowerCase().replace(/\s+/g, '')}bankstatement_june.pdf` : '';
+  const stmtFile = hasAcct ? `${acct.bankName.toLowerCase().replace(/\s+/g, '').replace(/bank$/, '')}bankstatement_june.pdf` : '';
 
   root.innerHTML = `
     <div class="at-overlay" onclick="if(event.target===this)closeRecStart()">
@@ -4460,7 +4475,13 @@ function renderRecStart() {
                 ? `<a class="disabled">Upload Manually</a>`
                 : `<a href="#" onclick="showToast('Statement uploaded');return false">Upload Manually</a>`}
             </div>
-            ${canContinue ? `<div class="sr-stmt-box">
+            ${loading ? `<div class="sr-stmt-box">
+              <div class="sr-file-row"><a href="#" onclick="return false">${stmtFile}</a></div>
+              ${REC_STATE.startLoading >= 2
+                ? `<div class="sr-check-row">${SR_CHECK_CIRCLE} Statement uploaded automatically</div>
+                   <div class="sr-check-row"><span class="sr-spin"></span> Extracting statement information\u2026</div>`
+                : `<div class="sr-check-row"><span class="sr-spin"></span> Uploading statement automatically\u2026</div>`}
+            </div>` : canContinue ? `<div class="sr-stmt-box">
               <div class="sr-file-row"><a href="#" onclick="return false">${stmtFile}</a><button style="background:none;border:none;display:flex;cursor:pointer" onclick="recStartPick('')">${ic(P.close, 16, '#008dd5')}</button></div>
               <div class="sr-check-row">${SR_CHECK_CIRCLE} Statement uploaded automatically</div>
               <div class="sr-check-row">${SR_CHECK_CIRCLE} Statement information extracted</div>
@@ -4473,11 +4494,11 @@ function renderRecStart() {
           <div class="sr-2col">
             <div class="sr-field">
               <label>Statement End Date</label>
-              <input class="sr-in at-input-date" type="text" placeholder="mm/dd/yyyy" value="${REC_STATE.startDate}"${inReview ? ' disabled' : ''} onchange="recStartField('date',this.value)">
+              <input class="sr-in at-input-date" type="text" placeholder="mm/dd/yyyy" value="${REC_STATE.startDate}"${inReview || loading ? ' disabled' : ''} onchange="recStartField('date',this.value)">
             </div>
             <div class="sr-field">
               <label>Statement Ending Balance</label>
-              <input class="sr-in" type="text" inputmode="decimal" placeholder="00.00" value="${REC_STATE.startBalance != null ? fmtN(REC_STATE.startBalance) : ''}"${inReview ? ' disabled' : ''} onchange="recStartField('balance',this.value)">
+              <input class="sr-in" type="text" inputmode="decimal" placeholder="00.00" value="${REC_STATE.startBalance != null ? fmtN(REC_STATE.startBalance) : ''}"${inReview || loading ? ' disabled' : ''} onchange="recStartField('balance',this.value)">
             </div>
           </div>
         </div>
