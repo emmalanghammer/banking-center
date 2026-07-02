@@ -862,11 +862,11 @@ const INSIGHTS = [
     tag:'CASH FORECAST', lozColor:'#fbd6d8', severity:'err',
     title:'3 owners will be negative after Friday\'s disbursement',
     subtitle:'Hawthorne Holdings, Pearl District, Alberta Commons',
-    body:'KeyBank••••4471 holds <b>$44,363</b> but <b>$55,600</b> in vendor payments clear before the next deposit settles projecting a low of <b>−$11,200.</b>',
+    body:'Friday\'s disbursements exceed funds on hand for <b>3 owners</b> \u2014 Hawthorne Holdings (<b>\u2212$1,420</b>), Pearl District (<b>\u2212$640</b>), and Alberta Commons (<b>\u2212$210</b>). Sellwood Row clears with $8,900 to spare.',
     viz:'owner-bars', actionLabel:'Action', callout:{label:'Why was this flagged?', detail:'Orion models each owner\'s cash position after Friday\'s scheduled disbursement. Hawthorne Holdings, Pearl District, and Alberta Commons are projected negative because their disbursements exceed the owner funds currently on hand.'}},
   {id:'i3', section:'watch', borderColor:'#f79b4d', lozBg:'#feedd2', dotColor:'#faa61c', lozTag:'RETURN RISK - INCOMING ACH',
     tag:'RETURN RISK', lozColor:'#feedd2', severity:'warn',
-    title:'$8,400 in tenant ACH shows elevated return risk',
+    title:'$12,350 in tenant ACH shows elevated return risk',
     subtitle:'6 payments, Zego 10-day blind spot',
     body:'6 payments this cycle carry higher-than-usual NSF likelihood. Zego returns often aren\'t confirmed for 10+ days — long enough to miss eviction timelines.',
     viz:'gradient-bar', actionLabel:'Action', callout:{label:'Why was this flagged?', detail:'Orion scores incoming ACH payments using NSF history, payment timing, and processor behavior. These 6 payments scored above your normal return threshold, and Zego typically doesn\'t confirm returns for 10+ days.'}},
@@ -874,7 +874,7 @@ const INSIGHTS = [
     tag:'AGING ALERT', lozColor:'#feedd2', severity:'warn',
     title:'6 transactions are older than your usual matching window',
     subtitle:'1001 Operating, up to 11 days',
-    body:'You typically match this account within 2 days. These 6 are 6–11 days old — the longest unmatched streak in 3 months.',
+    body:'You typically match this account within 2 days. The oldest of these 6 has now waited 11 days — the longest unmatched streak in 3 months.',
     viz:null, actionLabel:'Match Transactions', actionFn:"closeInsights();openAcct('op3487')", callout:{label:'Why was this flagged?', detail:'Based on your matching history over the past 90 days. Average time-to-match for this account: 1.8 days.'}},
   {id:'i5', section:'forecast', borderColor:'#178c7e', lozBg:'#d1f0ec', dotColor:'#178c7e', lozTag:'CLOSE FORECAST - JUNE PERIOD',
     tag:'CLOSE FORECAST', lozColor:'#d1f0ec', severity:'info',
@@ -886,8 +886,8 @@ const INSIGHTS = [
     tag:'CASH RUNWAY', lozColor:'#d1f0ec', severity:'info',
     title:'Operating trends toward its reserve floor in ~7 weeks',
     subtitle:'Chase••••3847, projected late July',
-    body:'Chase••••3847 is projected to reach your $600K working reserve by late July at the current pace of inflows and outflows.',
-    viz:'runway-chart', actionLabel:'Action', callout:{label:'Why was this flagged?', detail:'Orion projects this account\'s balance from your typical inflow and outflow pace. At the current rate it reaches your $600K working-reserve floor in about 7 weeks (late July).'}},
+    body:'Chase••••3847 is projected to reach your $450K working reserve by late July at the current pace of inflows and outflows.',
+    viz:'runway-chart', actionLabel:'Action', callout:{label:'Why was this flagged?', detail:'Orion projects this account\'s balance from your typical inflow and outflow pace. At the current rate it reaches your $450K working-reserve floor in about 7 weeks (late July).'}},
 ];
 
 const ACCOUNTS = [
@@ -1395,7 +1395,7 @@ function insViz(ins) {
   if (ins.viz === 'runway-chart') return `
     <div style="position:relative;height:108px;overflow:hidden;background:#fff">
       <div style="position:absolute;left:0;right:0;top:88px;height:1px;border-top:1px dashed #faa61c"></div>
-      <div style="position:absolute;left:4px;top:76px;transform:translateY(-50%);font-size:10px;color:#faa61c">$600k floor</div>
+      <div style="position:absolute;left:4px;top:76px;transform:translateY(-50%);font-size:10px;color:#faa61c">$450k floor</div>
       <div style="position:absolute;left:50%;top:11px;transform:translate(-50%,-50%);font-size:10px;color:#b3b3b3">Today</div>
       <div style="position:absolute;right:8px;top:100px;transform:translateY(-50%);font-size:10px;color:#faa61c;font-weight:500">~late Jul</div>
       <svg viewBox="0 0 444 108" style="position:absolute;inset:0;width:100%;height:100%" fill="none">
