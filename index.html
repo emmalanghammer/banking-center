@@ -717,6 +717,9 @@ svg.ico{display:block;flex-shrink:0}
 .fm-sub-title{font-size:14px;font-weight:600;color:#13314c;margin-bottom:8px}
 .fm-orion{display:flex;align-items:center;gap:6px;font-size:13px;color:#666}
 .fm-orion a{color:#008dd5;text-decoration:none;margin-left:4px}
+.fm-loz{display:inline-flex;align-items:center;gap:7px;background:#eaf4fb;border:1px solid #8fd0f0;color:#0b6ba8;border-radius:14px;padding:3px 6px 3px 11px;font-size:12.5px;margin-left:4px;white-space:nowrap}
+.fm-loz button{background:none;border:none;display:flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;cursor:pointer;color:#0b6ba8;font-size:13px;line-height:1;padding:0}
+.fm-loz button:hover{background:#d2e9f7}
 .fm-prog{display:flex;align-items:center;gap:16px}
 .fm-prog-bar{width:240px;height:12px;background:#e5e5e5;border-radius:200px;overflow:hidden;flex-shrink:0}
 .fm-prog-fill{height:12px;background:#008dd5;border-radius:200px;transition:width .15s}
@@ -2888,10 +2891,39 @@ function fmCandidates(tx) {
     ];
   }
 }
+let _findMatchFiltered = false;
+
+// Full pick-list for the Find Match overlay: Orion's generated likely matches
+// plus every Rent Manager record in the account that hasn't been matched to an
+// incoming bank transaction (BR_TX rows not yet cleared). A row is a
+// "possible match" when it flows the same direction as the bank transaction
+// and could plausibly be part of it (amount not exceeding the bank amount).
+function fmRows(tx) {
+  const inflow = tx.deposit != null;
+  const bankAmt = (tx.payment != null ? tx.payment : tx.deposit) || 0;
+  const acctId = txAcctId(tx.id);
+  const rows = fmCandidates(tx).map(c => ({ ...c }));
+  (BR_TX[acctId] || []).filter(r => !r.cleared).forEach(r => {
+    rows.push({
+      date: r.date.replace(/\/(\d{2})$/, '/20$1'), type: r.type, ref: r.ref,
+      property: '\u2014', info: r.info, comment: '', amount: r.deposit != null ? r.deposit : (r.payment || 0),
+    });
+  });
+  const inflowTypes = ['Receipt', 'Deposit'];
+  const outflowTypes = ['Bill', 'Check', 'Withdrawal', 'ePay', 'Journal'];
+  rows.forEach((r, i) => {
+    r._i = i;
+    const dirOk = (inflow ? inflowTypes : outflowTypes).includes(r.type);
+    r.possible = dirOk && r.amount <= bankAmt + 0.005;
+  });
+  return rows;
+}
+
 function openFindMatch(txId) {
   _findMatchTxId = txId;
   _findMatchOpen = true;
   _findMatchSel = new Set();
+  _findMatchFiltered = false;
   renderFindMatch();
   _ubOpenOverlaySignal('find-match');
 }
@@ -2902,6 +2934,22 @@ function closeFindMatch() {
 }
 function toggleFmRow(i) {
   if (_findMatchSel.has(i)) _findMatchSel.delete(i); else _findMatchSel.add(i);
+  renderFindMatch();
+}
+// "Select Matches" narrows the list to Orion's possible matches (left
+// unchecked for the user to confirm); the lozenge's \u00d7 restores the full list.
+function fmSelectMatches() {
+  _findMatchFiltered = true;
+  _findMatchSel = new Set();
+  renderFindMatch();
+}
+function fmClearFilter() {
+  _findMatchFiltered = false;
+  renderFindMatch();
+}
+function fmToggleAll(checked, visibleIds) {
+  if (checked) visibleIds.forEach(i => _findMatchSel.add(i));
+  else visibleIds.forEach(i => _findMatchSel.delete(i));
   renderFindMatch();
 }
 function confirmFindMatch() {
@@ -2921,13 +2969,17 @@ function renderFindMatch() {
   if (!tx) { root.innerHTML=''; return; }
   const acct = ACCOUNTS.find(a=>a.id===txAcctId(_findMatchTxId));
   const bankAmt = (tx.payment != null ? tx.payment : tx.deposit) || 0;
-  const cands = fmCandidates(tx);
-  const selected = [..._findMatchSel].reduce((s,i)=> s + (cands[i]?cands[i].amount:0), 0);
+  const rows = fmRows(tx);
+  const possibleCount = rows.filter(r => r.possible).length;
+  const shown = _findMatchFiltered ? rows.filter(r => r.possible) : rows;
+  const visibleIds = shown.map(r => r._i);
+  const selected = [..._findMatchSel].reduce((s,i)=> s + (rows[i]?rows[i].amount:0), 0);
   const diff = bankAmt - selected;
+  const allVisChecked = shown.length > 0 && shown.every(r => _findMatchSel.has(r._i));
 
-  const rowsHtml = cands.map((c,i)=>`
-    <tr class="${_findMatchSel.has(i)?'sel':''}" onclick="toggleFmRow(${i})" style="cursor:pointer">
-      <td style="width:36px"><input class="fm-cb" type="checkbox" ${_findMatchSel.has(i)?'checked':''} onclick="event.stopPropagation();toggleFmRow(${i})"></td>
+  const rowsHtml = shown.map(c=>`
+    <tr class="${_findMatchSel.has(c._i)?'sel':''}" onclick="toggleFmRow(${c._i})" style="cursor:pointer">
+      <td style="width:36px"><input class="fm-cb" type="checkbox" ${_findMatchSel.has(c._i)?'checked':''} onclick="event.stopPropagation();toggleFmRow(${c._i})"></td>
       <td>${c.date}</td>
       <td>${c.type}</td>
       <td>${regRefCode(c.ref)}</td>
@@ -2949,7 +3001,9 @@ function renderFindMatch() {
         <div class="fm-sub">
           <div>
             <div class="fm-sub-title">Find and select transaction(s) to match</div>
-            <div class="fm-orion">${orionSpark(16)}<span>${cands.length} possible matches containing ${fmt(bankAmt)}</span><a href="#" onclick="_findMatchSel=new Set([0,1]);renderFindMatch();return false">Select Matches</a></div>
+            <div class="fm-orion">${orionSpark(16)}<span>${possibleCount} possible match${possibleCount!==1?'es':''} containing ${fmt(bankAmt)}</span>${_findMatchFiltered
+              ? `<span class="fm-loz">Matches selected<button title="Show all transactions" onclick="fmClearFilter()">\u00d7</button></span>`
+              : `<a href="#" onclick="fmSelectMatches();return false">Select Matches</a>`}</div>
           </div>
           <div class="fm-prog">
             <div class="fm-prog-bar"><div class="fm-prog-fill${diff===0?' done':''}" style="width:${bankAmt>0?Math.min(100,selected/bankAmt*100):0}%"></div></div>
@@ -2980,7 +3034,7 @@ function renderFindMatch() {
           <table class="fm-tbl">
             <thead>
               <tr>
-                <th style="width:36px"><input class="fm-cb" type="checkbox" ${_findMatchSel.size===cands.length?'checked':''} onclick="_findMatchSel=this.checked?new Set(${JSON.stringify(cands.map((_,i)=>i))}):new Set();renderFindMatch()"></th>
+                <th style="width:36px"><input class="fm-cb" type="checkbox" ${allVisChecked?'checked':''} onclick="fmToggleAll(this.checked,${JSON.stringify(visibleIds)})"></th>
                 <th>Date</th>
                 <th>Type</th>
                 <th>Reference</th>
@@ -2990,7 +3044,7 @@ function renderFindMatch() {
                 <th class="r">Amount</th>
               </tr>
             </thead>
-            <tbody>${rowsHtml}</tbody>
+            <tbody>${rowsHtml || `<tr><td colspan="8" style="text-align:center;color:#9aa7b3;padding:20px 0">No transactions</td></tr>`}</tbody>
           </table>
         </div>
         <div class="at-footer">
