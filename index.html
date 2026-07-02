@@ -4505,6 +4505,47 @@ function srToggleSection(key) {
   renderReconcile();
 }
 
+// Current out-of-balance amount, same math the strip's Difference box shows.
+function srDifference() {
+  const acct = ACCOUNTS.find(a => a.id === REC_STATE.acctId);
+  if (!acct) return 0;
+  const d = recData(acct.id);
+  const amtOf = r => r.bankAmt != null ? r.bankAmt : r.rmAmt;
+  const selNet = [...d.deposits, ...d.payments].reduce((s, r) => REC_STATE.checked[r.id]
+    ? s + (r.inflow ? 1 : -1) * amtOf(r) : s, 0);
+  const stmtBal = REC_STATE.statementBalance != null ? REC_STATE.statementBalance : acct.bankBalance;
+  return +(stmtBal - (recBeginningBalance(acct.id) + selNet)).toFixed(2);
+}
+
+// Save & Finish: balanced accounts finish straight away; out-of-balance ones
+// get a confirmation overlay so finishing with a difference is deliberate.
+function srTryFinish() {
+  const diff = srDifference();
+  if (Math.abs(diff) < 0.005) { finishReconciliation(); return; }
+  document.getElementById('rec-start-root').innerHTML = `
+    <div class="at-overlay" onclick="if(event.target===this)srCloseWarn()">
+      <div class="sr-modal" style="width:480px">
+        <div class="at-hdr">
+          <span class="at-hdr-title" style="font-size:17px;font-weight:600">Finish with a difference?</span>
+          <button class="at-hdr-ico" onclick="srCloseWarn()" title="Close">${AT_X_ICO}</button>
+        </div>
+        <div class="sr-body" style="gap:10px">
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            ${SR_ALERT_ICO}
+            <div style="font-size:14px;color:#13314c;line-height:1.5">This account is out of balance by <b>${fmt(Math.abs(diff))}</b>. Finishing now will record the reconciliation with an unresolved difference.</div>
+          </div>
+          <div style="font-size:13px;color:#666;line-height:1.5">You can go back to clear the remaining transactions, or confirm the statement ending balance, before finishing.</div>
+        </div>
+        <div class="sr-foot">
+          <button class="btn-primary" style="height:34px;padding:0 16px" onclick="srConfirmFinish()">Finish Anyway</button>
+          <button class="at-cancel" style="height:34px" onclick="srCloseWarn()">Go Back</button>
+        </div>
+      </div>
+    </div>`;
+}
+function srCloseWarn() { document.getElementById('rec-start-root').innerHTML = ''; }
+function srConfirmFinish() { srCloseWarn(); finishReconciliation(); }
+
 function finishReconciliation() {
   const acct = ACCOUNTS.find(a => a.id === REC_STATE.acctId);
   if (!acct) return;
@@ -4524,6 +4565,7 @@ function finishReconciliation() {
           <div class="rec-done-row"><span>Book balance in RM</span><span>${fmt(cleared)}</span></div>
           <div class="rec-done-row"><span>Period end date</span><span>${REC_STATE.statementDate || '\u2014'}</span></div>
           <div class="rec-done-row"><span>Transactions matched</span><span>${matchedCount}</span></div>
+          ${Math.abs(srDifference()) >= 0.005 ? `<div class="rec-done-row"><span>Unresolved difference</span><span style="color:#eb343c">${fmt(Math.abs(srDifference()))}</span></div>` : ''}
         </div>
         <button class="btn-primary" style="height:36px;padding:0 24px" onclick="showScreen('bc')">Done</button>
       </div>
@@ -4639,7 +4681,7 @@ function renderReconcile() {
     </div>
     <div class="rec-foot">
       ${balanced ? '' : `<span class="rec-foot-notice">${SR_ALERT_ICO} Account is not in balance</span>`}
-      <button class="btn-primary" style="height:34px;padding:0 16px"${balanced ? '' : ' disabled'} onclick="finishReconciliation()">Save &amp; Finish</button>
+      <button class="btn-primary" style="height:34px;padding:0 16px" onclick="srTryFinish()">Save &amp; Finish</button>
       <button class="btn-primary" style="height:34px;padding:0 16px" onclick="showToast('Progress saved');showScreen('br')">Save For Later</button>
       <button class="at-cancel" style="height:34px" onclick="showScreen('br')">Cancel</button>
     </div>`;
