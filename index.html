@@ -534,15 +534,18 @@ svg.ico{display:block;flex-shrink:0}
 .br-fld label{font-size:11px;color:#666;font-weight:500}
 .br-fld-date{display:flex;align-items:center;gap:6px}
 .br-date-in{height:32px;border:1px solid #cedbe7;border-radius:4px;padding:0 8px;font-size:13px;color:#13314c;width:100px;font-family:Roboto,sans-serif}
-.br-tbl-wrap{flex:1;overflow-y:auto;min-height:0;padding:0 20px 12px}
-.br-tbl{width:100%;border-collapse:collapse;background:#fff;border:1px solid #cedbe7;border-radius:4px;overflow:hidden;margin-top:12px;table-layout:fixed}
-.br-tbl thead th{background:#737373;color:#fff;font-size:14px;font-weight:400;padding:0 8px;height:28px;text-align:left;white-space:nowrap;overflow:hidden;user-select:none}
+.br-tbl-wrap{flex:1;overflow:auto;min-height:0;padding:0 20px 12px}
+.br-tbl{width:100%;min-width:1060px;border-collapse:collapse;background:#fff;border:1px solid #cedbe7;margin-top:12px;table-layout:fixed}
+.br-tbl thead th{background:#737373;color:#fff;font-size:12px;font-weight:400;letter-spacing:.2px;padding:0 10px;height:25px;text-align:left;white-space:nowrap;overflow:hidden;user-select:none}
 .br-tbl thead th.r{text-align:right}
-.br-tbl tbody tr{border-top:1px solid #cedbe7}
+.br-tbl tbody tr{border-top:1px solid #e8eef4}
 .br-tbl tbody tr:first-child{border-top:none}
-.br-tbl tbody td{padding:0 8px;height:40px;font-size:14px;color:#13314c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
+.br-tbl tbody tr:hover{background:#f8fbfd}
+.br-tbl tbody td{padding:0 10px;height:34px;font-size:13px;color:#13314c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle}
 .br-tbl tbody td.r{text-align:right;font-variant-numeric:tabular-nums}
 .br-tbl tbody td.muted{color:#9aa7b3}
+.br-kebab{background:none;border:none;cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:4px}
+.br-kebab:hover{background:#eef4f9}
 .br-footer{padding:8px 20px;background:#f5f8fa;display:flex;align-items:center;justify-content:flex-end;flex-shrink:0}
 .br-footer-count{font-size:12px;color:#9aa7b3}
 
@@ -4270,15 +4273,15 @@ const BR_STATE = { acctId: null, search: '', typeFilter: 'all' };
 const BR_TX = {
   // 1001 Operating Account — rental income in, operating expenses + sweeps out
   op3487: [
-    { date:'06/01/26', ref:'D1621', type:'Deposit',    info:'ePay Batch Auto Deposit',                gl:'4100 Rental Income',         deposit:18250.00, payment:null,     cleared:false },
+    { date:'06/01/26', ref:'D1621', type:'Deposit',    info:'ePay Batch Auto Deposit',                gl:'4100 Rental Income',         deposit:18250.00, payment:null,     cleared:false, multi:true },
     { date:'05/28/26', ref:'1042',  type:'Check',      info:'Rose City Plumbing — Roof repair',       gl:'5402 Repairs & Maintenance', deposit:null,     payment:8400.00,  cleared:false },
     { date:'05/26/26', ref:'EFT',   type:'Check',      info:'Owner Distribution — Hawthorne Holdings LLC',   gl:'2100 Owner Liability',       deposit:null,     payment:25000.00, cleared:false },
-    { date:'05/22/26', ref:'D1614', type:'Deposit',    info:'Management fee sweep',                    gl:'4000 Management Fee Income', deposit:9654.01,  payment:null,     cleared:true },
+    { date:'05/22/26', ref:'D1614', type:'Deposit',    info:'Management fee sweep',                    gl:'4000 Management Fee Income', deposit:9654.01,  payment:null,     cleared:true, multi:true },
     { date:'05/20/26', ref:'1041',  type:'Check',      info:'City of Portland — Water/Sewer',           gl:'5403 Utilities',             deposit:null,     payment:1245.18,  cleared:true },
-    { date:'05/15/26', ref:'D1609', type:'Deposit',    info:'ePay Batch Auto Deposit',                gl:'4100 Rental Income',         deposit:12450.50, payment:null,     cleared:true },
+    { date:'05/15/26', ref:'D1609', type:'Deposit',    info:'ePay Batch Auto Deposit',                gl:'4100 Rental Income',         deposit:12450.50, payment:null,     cleared:true, multi:true },
     { date:'05/10/26', ref:'J1573', type:'Journal',    info:'Payroll transfer to 1002 Payroll',       gl:'1002 Payroll Account',       deposit:null,     payment:42860.00, cleared:true },
     { date:'05/05/26', ref:'ePay',  type:'Check',       info:'Standard Insurance — Property Policy',         gl:'5404 Insurance',             deposit:null,     payment:4850.00,  cleared:true },
-    { date:'05/01/26', ref:'D1591', type:'Deposit',    info:'ePay Batch Auto Deposit',                gl:'4100 Rental Income',         deposit:18200.00, payment:null,     cleared:true },
+    { date:'05/01/26', ref:'D1591', type:'Deposit',    info:'ePay Batch Auto Deposit',                gl:'4100 Rental Income',         deposit:18200.00, payment:null,     cleared:true, multi:true },
     { date:'04/28/26', ref:'1040',  type:'Check',      info:'Portland General Electric',                             gl:'5403 Utilities',             deposit:null,     payment:2310.45,  cleared:true },
     { date:'04/22/26', ref:'D1580', type:'Deposit',    info:'Application fees batch',                  gl:'4200 Application Fee Income',deposit:650.00,   payment:null,     cleared:true },
     { date:'04/18/26', ref:'1039',  type:'Check',      info:'Stumptown Landscaping — Grounds',              gl:'5402 Repairs & Maintenance', deposit:null,     payment:1200.00,  cleared:true },
@@ -4996,12 +4999,12 @@ function _renderRegister(STATE, opts) {
       <td>${r.ref}</td>
       <td>${r.type}</td>
       <td style="overflow:hidden;text-overflow:ellipsis">${r.info}</td>
-      <td style="overflow:hidden;text-overflow:ellipsis" class="muted">${r.gl}</td>
-      <td style="text-align:center">${r.cleared ? '<span style="color:#008dd5;font-size:15px">✓</span>' : ''}</td>
+      <td style="overflow:hidden;text-overflow:ellipsis">${r.gl}${r.multi ? `<span class="dep-chip">+1 ${ic(P.down, 8, '#008dd5')}</span>` : ''}</td>
+      <td style="text-align:right">${r.cleared ? '<span style="color:#008dd5;font-size:14px">✓</span>' : ''}</td>
       <td class="r">${r.deposit ? fmtN(r.deposit) : ''}</td>
       <td class="r">${r.payment ? fmtN(r.payment) : ''}</td>
       <td class="r">${fmtN(r.balance)}</td>
-      <td style="text-align:center;width:32px"><button style="background:none;border:none;cursor:pointer;color:#9aa7b3;font-size:16px;padding:0 4px;line-height:1" title="More">⋮</button></td>
+      <td style="text-align:center"><button class="br-kebab" title="More">${ic(P.kebab, 17, '#008dd5')}</button></td>
     </tr>`).join('');
 
   document.getElementById(opts.mount).innerHTML = `
@@ -5063,16 +5066,16 @@ function _renderRegister(STATE, opts) {
     <div class="br-tbl-wrap">
       <table class="br-tbl">
         <colgroup>
-          <col style="width:82px">
-          <col style="width:88px">
-          <col style="width:72px">
-          <col style="width:26%">
+          <col style="width:76px">
+          <col style="width:84px">
+          <col style="width:68px">
+          <col style="width:27%">
           <col style="width:auto">
-          <col style="width:60px">
+          <col style="width:64px">
+          <col style="width:100px">
+          <col style="width:100px">
           <col style="width:110px">
-          <col style="width:110px">
-          <col style="width:120px">
-          <col style="width:32px">
+          <col style="width:36px">
         </colgroup>
         <thead>
           <tr>
@@ -5081,7 +5084,7 @@ function _renderRegister(STATE, opts) {
             <th>Type</th>
             <th>Information</th>
             <th>Account</th>
-            <th style="text-align:center">Cleared</th>
+            <th class="r">Cleared</th>
             <th class="r">${opts.depositLabel}</th>
             <th class="r">${opts.paymentLabel}</th>
             <th class="r">Balance</th>
