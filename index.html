@@ -4656,8 +4656,16 @@ function recStartPick(acctId) {
   renderRecStart();
 }
 function recStartField(field, val) {
-  if (field === 'date') REC_STATE.startDate = val;
+  if (field === 'date') {
+    // Native date inputs emit ISO (YYYY-MM-DD); keep MM/DD/YYYY internally.
+    const m = String(val).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    REC_STATE.startDate = m ? `${m[2]}/${m[3]}/${m[1]}` : val;
+  }
   else { const n = parseFloat(String(val).replace(/[^0-9.-]/g, '')); REC_STATE.startBalance = isNaN(n) ? null : n; }
+}
+function _recDateISO(mdY) {
+  const m = String(mdY).match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  return m ? `${m[3]}-${m[1]}-${m[2]}` : '';
 }
 function recStartContinue() {
   const acctId = REC_STATE.startAcctId;
@@ -4745,7 +4753,7 @@ function renderRecStart() {
           <div class="sr-2col">
             <div class="sr-field">
               <label>Statement End Date</label>
-              <input class="sr-in at-input-date" type="text" placeholder="mm/dd/yyyy" value="${REC_STATE.startDate}"${inReview || loading ? ' disabled' : ''} onchange="recStartField('date',this.value)">
+              <input class="sr-in" type="date" value="${_recDateISO(REC_STATE.startDate)}"${inReview || loading ? ' disabled' : ''} onchange="recStartField('date',this.value)">
             </div>
             <div class="sr-field">
               <label>Statement Ending Balance</label>
