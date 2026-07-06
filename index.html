@@ -4571,6 +4571,7 @@ function recData(acctId) {
       ref: rm.ref, rmText: rm.text, account: rm.gl,
       rmAmt: rm.amount != null ? rm.amount : (inflow ? t.deposit : t.payment),
       status: 'Matched',
+      insight: `Matched to ${rm.text} in Transaction Review \u2014 cleared and selected automatically.`,
     });
   });
   // Every record created in / living in Rent Manager appears too: ones that
