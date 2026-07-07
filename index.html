@@ -958,7 +958,7 @@ const TRANSACTIONS = [
   // [SELECT MATCH] two candidate records for the same deposit
   {id:'t2',date:'06/15/2026',desc:'ACH DEPOSIT OKAFOR 0615',deposit:2100.00,matchStatus:'multi',orion:'2 deposits found matching $2,100.00 around 6/15/2026.',multiOrion:'2 deposits found matching $2,100.00 on 06/14/2026 and 06/15/2026. Select the correct match.',multiMatches:[{date:'06/14/2026',ref:'Deposit 8838: D. Okafor',account:'1001 Operating Account',property:'Pearl District Lofts',comment:'June rent',amount:2100.00},{date:'06/15/2026',ref:'Deposit 8840: D. Okafor',account:'1001 Operating Account',property:'Pearl District Lofts',comment:'June rent payment',amount:2100.00}]},
   // [ADD] vendor check, no match — Add overlay pre-fills payee/amount/check #
-  {id:'t3',date:'06/12/2026',desc:'CHECK 2209 ROSE CITY PLUMBING',payment:1240.00,matchStatus:'none',rmLink:null},
+  {id:'t3',date:'06/12/2026',desc:'CHECK 2209 ROSE CITY PLUMBING',payment:1240.00,matchStatus:'match',rmLink:'06/12/2026 Check 2209: Rose City Plumbing',orion:'1 check found matching $1,240.00 \u2014 Check #2209 pays Bill B1167 from Rose City Plumbing.',matchRow:{date:'06/12/2026',ref:'Check 2209',account:'1001 Operating Account',property:'Sellwood Row',vendor:'Rose City Plumbing',comment:'Drain repair \u2014 Unit 4',amount:1240.00,gl:'5402 Repairs & Maintenance',bill:{ref:'Bill B1167',invoice:'#RCP-1138',status:'Paid'}}},
   // [SPLIT] one batch deposit covering multiple residents — split to match
   {id:'t4',date:'06/11/2026',desc:'ZEGO BATCH DEPOSIT 0611',deposit:5400.00,matchStatus:'none',rmLink:null,orion:'Batch deposit of $5,400.00 likely covers multiple resident payments. Split across tenants to match.'},
   // [FIND MATCH] vendor ACH — search the ledger for the matching record
@@ -1856,7 +1856,7 @@ function renderExpandedMatch(tx) {
     </div>
     <div class="sub-tbl">
       <div class="sub-tbl-hdr" style="${cols}">
-        ${['Deposit Date','Reference','Bank Account','Property','Comment','Total Amount'].map((h,i)=>`<div class="sub-tbl-hdr-cell"${i===5?' style="justify-content:flex-end"':''}>${h}</div>`).join('')}
+        ${[tx.deposit != null ? 'Deposit Date' : 'Check Date','Reference','Bank Account','Property','Comment','Total Amount'].map((h,i)=>`<div class="sub-tbl-hdr-cell"${i===5?' style="justify-content:flex-end"':''}>${h}</div>`).join('')}
       </div>
       <div class="sub-tbl-row" style="${cols}">
         <div class="sub-tbl-cell">${mr.date}</div>
@@ -3263,7 +3263,8 @@ function slideoutView(tx) {
     const d = tx.matchRow.depositDetails || {};
     return { ref: tx.matchRow.ref, date: tx.matchRow.date, amount: tx.matchRow.amount,
       bankAccount: d.bankAccount || (acct?acct.gl:''), comment: d.comment || tx.matchRow.comment || tx.desc,
-      payments: d.payments || [], type: matchedRecordType(tx.matchRow.ref, isInflow) };
+      payments: d.payments || [], type: matchedRecordType(tx.matchRow.ref, isInflow),
+      vendor: tx.matchRow.vendor, bill: tx.matchRow.bill };
   }
   if (tx.multiMatches) {
     const m = tx.multiMatches[S.multiSel[tx.id]??0] || tx.multiMatches[0];
@@ -3381,9 +3382,9 @@ function journalTopCard(v) {
     </div>`;
 }
 function checkTopCard(v) {
-  // For a Check record, the "comment" we parsed out of its reference IS the
-  // payee name (e.g. "Check 812: Menards" -> comment "Menards") — there's no
-  // separate memo text in this data, so it belongs in the Vendor field.
+  // A check's payee: an explicit vendor when the matched record carries one,
+  // otherwise the name parsed out of its reference (e.g. "Check 812: Menards").
+  const payee = v.vendor || v.comment || '';
   return `
     <div class="so-card">
       <div class="so-field">
@@ -3400,12 +3401,20 @@ function checkTopCard(v) {
       </div>
       <div class="so-field">
         <label>Vendor / Owner / Tenant / Prospect</label>
-        <div class="so-input"><span>${v.comment||''}</span></div>
+        <div class="so-input"><span>${payee}</span></div>
       </div>
+      ${v.bill ? `<div class="so-field">
+        <label>Pays Bill</label>
+        <div class="so-input"><span>${v.bill.ref} \u00b7 Invoice ${v.bill.invoice}</span><span class="sr-pill cleared" style="flex:0 0 auto">${v.bill.status}</span></div>
+      </div>` : ''}
       <div class="so-field">
         <label>Amount</label>
         <div class="so-input"><span>${fmt(v.amount)}</span></div>
       </div>
+      ${v.vendor && v.comment ? `<div class="so-field">
+        <label>Memo</label>
+        <textarea class="so-textarea" readonly>${v.comment}</textarea>
+      </div>` : ''}
     </div>`;
 }
 function genericTopCard(v) {
@@ -4539,7 +4548,7 @@ function rmSideForTx(tx) {
   const mr = matchRowFromTx(tx);
   if (mr && mr.ref) {
     return { ref: regRefCode(mr.ref), text: mr.comment ? `${mr.ref} - ${mr.comment}` : mr.ref,
-      gl: inflow ? '4100 Rental Income' : '5400 Operating Expense', amount: mr.amount };
+      gl: mr.gl || (inflow ? '4100 Rental Income' : '5400 Operating Expense'), amount: mr.amount };
   }
   const desc = tx.desc || '';
   const amt = inflow ? tx.deposit : tx.payment;
