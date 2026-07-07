@@ -95,6 +95,11 @@ input[type="checkbox"]:checked::after{content:'';position:absolute;left:6px;top:
 .bc-card.hi::before{content:'';position:absolute;inset:0;border-radius:4px;padding:1px;background:linear-gradient(135deg,#6eb744 0%,#008dd5 50%,#6eb744 100%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
 .bc-card-h{font-size:14px;font-weight:600;color:#13314c;margin-bottom:0;display:flex;align-items:center;gap:6px}
 .bc-card-hrow{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.bc-cat-btn{display:flex;align-items:center;gap:5px;margin-left:auto;background:none;border:none;padding:4px 6px;border-radius:4px;font-size:12.5px;color:#008dd5;cursor:pointer;font-family:inherit}
+.bc-cat-btn:hover{background:#eaf4fb}
+.bc-cat-pop{position:absolute;top:42px;right:14px;width:252px;background:#fff;border:1px solid #cedbe7;border-radius:6px;box-shadow:0 6px 24px rgba(19,49,76,.18);padding:12px;z-index:60;display:flex;flex-direction:column;gap:10px}
+.bc-cat-pop label{display:block;font-size:11px;color:#666;margin-bottom:3px}
+.bc-cat-sum{font-size:11.5px;color:#9aa7b3;margin:0 0 10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bc-cat-sel{height:26px;font-size:11.5px;color:#13314c;border:1px solid #cedbe7;border-radius:4px;background:#fff url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 24 24' fill='%23666'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 4px center;padding:0 20px 0 8px;appearance:none;outline:none;font-family:inherit;min-width:0;width:100%;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bc-ico-badge{width:24px;height:24px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
 .bc-ico-badge.purple{background:#ede8fa}
@@ -1206,8 +1211,13 @@ function visibleOrderedAccounts() {
 }
 
 // Category Breakdown tile filters: direction, date range, account, property.
-const BC_CAT = { dir: 'out', range: '90', acct: 'all', prop: 'all' };
+const BC_CAT = { dir: 'out', range: '90', acct: 'all', prop: 'all', open: false };
 function bcCatSet(k, v) { BC_CAT[k] = v; renderBC(); }
+function bcCatToggleFilters() {
+  BC_CAT.open = !BC_CAT.open;
+  renderBC();
+}
+let _bcCatBound = false;
 const BC_PROPS = ['Hawthorne Court Apartments', 'Pearl District Lofts', 'Alberta Commons', 'Sellwood Row'];
 // Register rows don't carry a property; assign one deterministically so the
 // property filter behaves consistently across renders.
@@ -1217,6 +1227,12 @@ function bcCatProp(r) {
 }
 
 function renderBC() {
+  if (!_bcCatBound) {
+    _bcCatBound = true;
+    document.addEventListener('click', () => {
+      if (BC_CAT.open) { BC_CAT.open = false; renderBC(); }
+    });
+  }
   const qaLabels = {makeDeposit:'Make Deposit',payBills:'Pay Bills',reviewTx:'Review Transactions',bankRegister:'Bank Register',balanceSheet:'Run Balance Sheet Report',eBankRec:'Electronic Bank Reconcile',askOrion:'Ask Orion'};
   const qaActions = {makeDeposit:'',payBills:'',reviewTx:"showScreen('tr')",bankRegister:"openBR('op3487')",balanceSheet:'',eBankRec:'',askOrion:''};
   const QA = SETTINGS_STATE;
@@ -1371,28 +1387,46 @@ function renderBC() {
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><div class="bc-alert-dot"></div><span class="bc-num">${unTotal}</span></div>
       <span class="bc-sub">${fmt(unAmt)} across ${unAccts} account${unAccts===1?'':'s'}</span>
     </div>`,
-    categoryBreakdown: `<div class="bc-card">
-      <div class="bc-card-hrow"><span class="bc-ico-badge" style="background:#fdf0dc">${ic(P.split,15,'#c07d10')}</span><span class="bc-card-h">Category Breakdown</span></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:2px 0 12px">
-        <select class="bc-cat-sel" onchange="bcCatSet('dir',this.value)">
-          <option value="out"${BC_CAT.dir === 'out' ? ' selected' : ''}>Money Out</option>
-          <option value="in"${BC_CAT.dir === 'in' ? ' selected' : ''}>Money In</option>
-        </select>
-        <select class="bc-cat-sel" onchange="bcCatSet('range',this.value)">
-          <option value="90"${BC_CAT.range === '90' ? ' selected' : ''}>Last 90 Days</option>
-          <option value="30"${BC_CAT.range === '30' ? ' selected' : ''}>Last 30 Days</option>
-          <option value="jun"${BC_CAT.range === 'jun' ? ' selected' : ''}>This Month</option>
-          <option value="may"${BC_CAT.range === 'may' ? ' selected' : ''}>Last Month</option>
-        </select>
-        <select class="bc-cat-sel" onchange="bcCatSet('acct',this.value)">
-          <option value="all"${BC_CAT.acct === 'all' ? ' selected' : ''}>All Bank Accounts</option>
-          ${ACCOUNTS.filter(a => a.kind === 'bank' && a.bankName).map(a => `<option value="${a.id}"${BC_CAT.acct === a.id ? ' selected' : ''}>${a.gl}</option>`).join('')}
-        </select>
-        <select class="bc-cat-sel" onchange="bcCatSet('prop',this.value)">
-          <option value="all"${BC_CAT.prop === 'all' ? ' selected' : ''}>All Properties</option>
-          ${BC_PROPS.map(p => `<option value="${p}"${BC_CAT.prop === p ? ' selected' : ''}>${p}</option>`).join('')}
-        </select>
-      </div>
+    categoryBreakdown: (() => {
+      const rangeLabels = { '90': 'Last 90 Days', '30': 'Last 30 Days', jun: 'This Month', may: 'Last Month' };
+      const acctLabel = BC_CAT.acct === 'all' ? 'All Bank Accounts' : (ACCOUNTS.find(a => a.id === BC_CAT.acct) || {}).gl;
+      const summary = `${BC_CAT.dir === 'out' ? 'Money Out' : 'Money In'} \u00b7 ${rangeLabels[BC_CAT.range]} \u00b7 ${acctLabel} \u00b7 ${BC_CAT.prop === 'all' ? 'All Properties' : BC_CAT.prop}`;
+      const activeCount = (BC_CAT.dir !== 'out') + (BC_CAT.range !== '90') + (BC_CAT.acct !== 'all') + (BC_CAT.prop !== 'all');
+      return `<div class="bc-card" style="position:relative">
+      <div class="bc-card-hrow" style="margin-bottom:4px"><span class="bc-ico-badge" style="background:#fdf0dc">${ic(P.split,15,'#c07d10')}</span><span class="bc-card-h">Category Breakdown</span><button class="bc-cat-btn" onclick="event.stopPropagation();bcCatToggleFilters()">${ic(P.filter,14,'#008dd5')} Filters${activeCount ? ` (${activeCount})` : ''}</button></div>
+      <div class="bc-cat-sum" title="${summary}">${summary}</div>
+      ${BC_CAT.open ? `<div class="bc-cat-pop" onclick="event.stopPropagation()">
+        <div>
+          <label>Show</label>
+          <select class="bc-cat-sel" onchange="bcCatSet('dir',this.value)">
+            <option value="out"${BC_CAT.dir === 'out' ? ' selected' : ''}>Money Out</option>
+            <option value="in"${BC_CAT.dir === 'in' ? ' selected' : ''}>Money In</option>
+          </select>
+        </div>
+        <div>
+          <label>Date Range</label>
+          <select class="bc-cat-sel" onchange="bcCatSet('range',this.value)">
+            <option value="90"${BC_CAT.range === '90' ? ' selected' : ''}>Last 90 Days</option>
+            <option value="30"${BC_CAT.range === '30' ? ' selected' : ''}>Last 30 Days</option>
+            <option value="jun"${BC_CAT.range === 'jun' ? ' selected' : ''}>This Month</option>
+            <option value="may"${BC_CAT.range === 'may' ? ' selected' : ''}>Last Month</option>
+          </select>
+        </div>
+        <div>
+          <label>Bank Account</label>
+          <select class="bc-cat-sel" onchange="bcCatSet('acct',this.value)">
+            <option value="all"${BC_CAT.acct === 'all' ? ' selected' : ''}>All Bank Accounts</option>
+            ${ACCOUNTS.filter(a => a.kind === 'bank' && a.bankName).map(a => `<option value="${a.id}"${BC_CAT.acct === a.id ? ' selected' : ''}>${a.gl}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <label>Property</label>
+          <select class="bc-cat-sel" onchange="bcCatSet('prop',this.value)">
+            <option value="all"${BC_CAT.prop === 'all' ? ' selected' : ''}>All Properties</option>
+            ${BC_PROPS.map(p => `<option value="${p}"${BC_CAT.prop === p ? ' selected' : ''}>${p}</option>`).join('')}
+          </select>
+        </div>
+      </div>` : ''}
       ${catTop.length === 0 ? `<div style="font-size:12.5px;color:#9aa7b3;padding:6px 0">No transactions match these filters.</div>` : ''}
       <div style="display:flex;flex-direction:column;gap:9px">${catTop.map(([name, val]) => `
         <div title="${name}: ${fmt(val)} \u00b7 ${Math.round(val / catSum * 100)}% of money ${BC_CAT.dir === 'out' ? 'out' : 'in'}">
@@ -1400,7 +1434,8 @@ function renderBC() {
           <div style="height:8px;background:#eef2f7;border-radius:4px;overflow:hidden"><div style="height:8px;width:${Math.max(2, val / catMax * 100)}%;background:#008dd5;border-radius:0 4px 4px 0"></div></div>
         </div>`).join('')}
       </div>
-    </div>`,
+    </div>`;
+    })(),
     connHealth: `<div class="bc-card">
       <div class="bc-card-hrow"><span class="bc-ico-badge pink">${ic(P.refresh,15,'#c93467')}</span><span class="bc-card-h">Connection Health</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="openSettings('institutions')">Manage Connections</button></div>
       <div style="display:flex;align-items:center;gap:8px"><div class="bc-alert-dot err"></div><span style="font-size:16px;font-weight:500;color:#13314c">1 Account Disconnected</span></div>
