@@ -1445,7 +1445,12 @@ function renderBC() {
   const visibleTiles = QA.tilesOrder.filter(k => QA.tiles[k]);
   const sidebarHtml = `<div class="bc-sidebar" id="bc-sidebar">${visibleTiles.map(k => TILE_HTML[k]).join('')}</div>`;
 
+  // Re-rendering replaces the sidebar, which would snap its scroll back to
+  // the top — keep the user's place (e.g. while working the tile filters).
+  const prevScroll = document.getElementById('bc-sidebar')?.scrollTop || 0;
   document.getElementById('bc-body').innerHTML = sidebarHtml + tableHtml;
+  const sb = document.getElementById('bc-sidebar');
+  if (sb && prevScroll) sb.scrollTop = prevScroll;
 }
 
 const _insightCalloutOpen = {};
