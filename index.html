@@ -619,19 +619,26 @@ svg.ico{display:block;flex-shrink:0}
 .sr-seg-btn:last-child{border-radius:0 4px 4px 0}
 .sr-seg-btn.on{background:#ebf1f5;border-color:#008dd5;font-weight:600;position:relative;z-index:1}
 .sr-scroll{flex:1;overflow:auto;padding:0 20px 16px;min-height:0}
-.sr-sec{min-width:1270px}
+.sr-sec{min-width:1340px}
 .sr-sec-hdr{display:flex;align-items:center;gap:8px;margin:16px 0 8px}
 .sr-sec-hdr .chev{background:none;border:none;display:flex;padding:0;cursor:pointer}
 .sr-sec-title{font-size:14px;font-weight:700;color:#13314c}
 .sr-sec-sums{margin-left:auto;display:flex;gap:16px;font-size:13px;color:#666;white-space:nowrap}
 .sr-sec-sums b{color:#13314c;font-variant-numeric:tabular-nums;margin-left:5px}
 .sr-sec-sums b.neg{color:#eb343c}
-.sr-tbl{width:100%;min-width:1270px;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid #cedbe7;table-layout:fixed}
-.sr-tbl tbody td.sr-insight-cell{overflow:visible}
-.sr-insight{position:relative;display:flex;align-items:center;gap:6px;font-size:12.5px;color:#444;min-width:0}
-.sr-insight span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sr-insight[data-tip]:hover::after{content:attr(data-tip);position:absolute;top:calc(100% + 7px);right:0;background:#13314c;color:#fff;font-size:12px;line-height:1.45;padding:8px 10px;border-radius:4px;white-space:normal;width:270px;text-align:left;z-index:80;box-shadow:0 4px 12px rgba(0,0,0,.25)}
-.sr-insight[data-tip]:hover::before{content:'';position:absolute;top:100%;right:14px;border:5px solid transparent;border-bottom-color:#13314c;margin-top:-3px;z-index:80}
+.sr-cols2{display:flex;gap:16px;align-items:flex-start}
+.sr-panel2{flex:1;min-width:0}
+.sr-tbl{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid #cedbe7;table-layout:fixed}
+.sr-tbl2 thead th{height:auto;padding:6px 10px;line-height:1.35}
+.sr-tbl2 thead th .sub{font-weight:400;opacity:.8}
+.sr-tbl2 tbody td{height:auto;padding:7px 10px;vertical-align:top;line-height:1.35}
+.sr2-top{font-size:13px;font-weight:600;color:#13314c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sr2-sub{font-size:12.5px;color:#666;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sr-tbl2 td.r .sr2-top,.sr-tbl2 td.r .sr2-sub{font-variant-numeric:tabular-nums}
+.sr-tbl2 tbody td.sr2-info{overflow:visible}
+.sr-info-tip{position:relative;display:inline-flex;cursor:default}
+.sr-info-tip[data-tip]:hover::after{content:attr(data-tip);position:absolute;top:calc(100% + 7px);right:-6px;background:#13314c;color:#fff;font-size:12px;line-height:1.45;padding:8px 10px;border-radius:4px;white-space:normal;width:260px;text-align:left;z-index:80;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.sr-info-tip[data-tip]:hover::before{content:'';position:absolute;top:100%;right:0;border:5px solid transparent;border-bottom-color:#13314c;margin-top:-3px;z-index:80}
 .sr-tbl thead th{background:#737373;color:#fff;font-size:11.5px;font-weight:500;letter-spacing:.5px;padding:0 10px;height:30px;text-align:left;white-space:nowrap;overflow:hidden}
 .sr-tbl thead th.r{text-align:right}
 .sr-tbl tbody td{padding:0 10px;height:38px;border-bottom:1px solid #eef2f7;color:#13314c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -4543,12 +4550,12 @@ function rmSideForTx(tx) {
   const inflow = tx.deposit != null;
   if (tx.multiMatches) {
     const m = tx.multiMatches[S.multiSel[tx.id] ?? 0] || tx.multiMatches[0];
-    return { ref: regRefCode(m.ref), text: m.ref.replace(':', ' -'), gl: '4100 Rental Income', amount: m.amount };
+    return { ref: regRefCode(m.ref), text: m.ref.replace(':', ' -'), gl: '4100 Rental Income', amount: m.amount, date: m.date };
   }
   const mr = matchRowFromTx(tx);
   if (mr && mr.ref) {
     return { ref: regRefCode(mr.ref), text: mr.comment ? `${mr.ref} - ${mr.comment}` : mr.ref,
-      gl: mr.gl || (inflow ? '4100 Rental Income' : '5400 Operating Expense'), amount: mr.amount };
+      gl: mr.gl || (inflow ? '4100 Rental Income' : '5400 Operating Expense'), amount: mr.amount, date: mr.date };
   }
   const desc = tx.desc || '';
   const amt = inflow ? tx.deposit : tx.payment;
@@ -4569,15 +4576,37 @@ function rmSideForTx(tx) {
 // - Review: records created in / living in Rent Manager with no bank
 //   transaction to match (e.g. a check the vendor hasn't cashed) — bank side
 //   shows "-", status Review, unchecked.
+// Friendly category label for a GL account, shown above it in the tables.
+function glCategory(gl) {
+  const g = String(gl);
+  if (g.includes('Rental Income') || g.includes('Commercial Rent')) return 'Rent';
+  if (g.includes('Management Fee')) return 'Management Fees';
+  if (g.includes('Application Fee')) return 'Application Fees';
+  if (g.includes('Late Fee')) return 'Late Fees';
+  if (g.includes('Interest')) return 'Interest & Fees';
+  if (g.includes('Security Deposit') || g.includes('Pet Deposit')) return 'Security Deposit';
+  if (g.includes('Owner')) return 'Owner Payments';
+  if (g.includes('Repairs')) return 'Maintenance';
+  if (g.includes('Utilities')) return 'Utilities';
+  if (g.includes('Insurance')) return 'Insurance';
+  if (g.includes('Salaries') || g.includes('Payroll Tax')) return 'Payroll';
+  if (g.includes('Payroll Account') || g.includes('Operating Account')) return 'Transfers';
+  if (g.includes('Processing') || g.includes('Service Charge')) return 'Service Charges';
+  if (g.includes('Office')) return 'Office';
+  if (g.includes('Other Income')) return 'Other Income';
+  if (g.includes('CAM')) return 'CAM';
+  return 'Operating';
+}
+
 function recData(acctId) {
   const rows = [];
   acctTxs(acctId).filter(t => S.matchedIds.has(t.id)).forEach(t => {
     const inflow = t.deposit != null;
     const rm = rmSideForTx(t);
     rows.push({
-      id: 'm' + t.id, inflow, date: t.date, bankDesc: t.desc,
+      id: 'm' + t.id, inflow, date: t.date, rmDate: rm.date || t.date, bankDesc: t.desc,
       bankAmt: inflow ? t.deposit : t.payment,
-      ref: rm.ref, rmText: rm.text, account: rm.gl,
+      ref: rm.ref, rmText: rm.text, account: rm.gl, category: glCategory(rm.gl),
       rmAmt: rm.amount != null ? rm.amount : (inflow ? t.deposit : t.payment),
       status: 'Matched',
       insight: `Matched to ${rm.text} in Transaction Review \u2014 cleared and selected automatically.`,
@@ -4588,11 +4617,13 @@ function recData(acctId) {
   // yet (e.g. an uncashed check) show "-" on the bank side and need review.
   (BR_TX[acctId] || []).forEach((r, i) => {
     const amt = r.deposit != null ? r.deposit : (r.payment || 0);
+    const d = r.date.replace(/\/(\d{2})$/, '/20$1');
     rows.push({
-      id: 'o' + i, inflow: r.deposit != null, date: r.date.replace(/\/(\d{2})$/, '/20$1'),
+      id: 'o' + i, inflow: r.deposit != null, date: d, rmDate: d,
       bankDesc: r.cleared ? r.info : null, bankAmt: r.cleared ? amt : null,
-      ref: r.ref, rmText: r.info, account: r.gl, rmAmt: amt,
+      ref: r.ref, rmText: r.info, account: r.gl, category: glCategory(r.gl), rmAmt: amt,
       status: r.cleared ? 'Matched' : 'Review', recType: r.type,
+      insight: r.cleared ? `Bank transaction and Rent Manager record matched on amount and date.` : undefined,
     });
   });
   // Orion insight: a plain-language guess at why each unmatched record has no
@@ -4871,55 +4902,56 @@ function finishReconciliation() {
     </div>`;
 }
 
-function srSection(title, key, rows, acctId) {
+function srPanel(title, key, rows, acctId) {
   const q = REC_STATE.search.trim().toLowerCase();
   let shown = rows;
   if (REC_STATE.filter === 'uncleared') shown = shown.filter(r => !REC_STATE.checked[r.id]);
-  if (q) shown = shown.filter(r => (r.bankDesc || '').toLowerCase().includes(q) || r.rmText.toLowerCase().includes(q) || (r.ref || '').toLowerCase().includes(q));
+  if (q) shown = shown.filter(r => [r.bankDesc, r.rmText, r.ref, r.account, r.category].join(' ').toLowerCase().includes(q));
   const stmtTotal = rows.reduce((s, r) => s + (r.bankAmt || 0), 0);
   const rmTotal = rows.reduce((s, r) => s + r.rmAmt, 0);
-  // Outstanding = what hasn't cleared: RM activity minus the selected rows —
-  // tracks the Difference box as rows are checked and unchecked.
   const selTotal = rows.reduce((s, r) => REC_STATE.checked[r.id] ? s + (r.bankAmt != null ? r.bankAmt : r.rmAmt) : s, 0);
   const outstanding = +(rmTotal - selTotal).toFixed(2);
-  const collapsed = !!REC_STATE.collapsed[key];
   const allChecked = shown.length > 0 && shown.every(r => REC_STATE.checked[r.id]);
+  const acctLabel = key === 'dep' ? 'Income Account' : 'Expense Account';
   const body = shown.map(r => `
     <tr>
-      <td style="text-align:center"><input type="checkbox" ${REC_STATE.checked[r.id] ? 'checked' : ''} onclick="toggleSrRow('${r.id}',this.checked)"></td>
-      <td>${r.date}</td>
-      <td ${r.bankDesc == null ? 'class="muted"' : ''}>${r.bankDesc == null ? '-' : r.bankDesc}</td>
-      <td class="r${r.bankAmt == null ? ' muted' : ''}">${r.bankAmt == null ? '-' : fmtN(r.bankAmt)}</td>
-      <td>${r.ref}</td>
-      <td>${r.rmText}</td>
-      <td>${r.account}</td>
-      <td class="r">${fmtN(r.rmAmt)}</td>
-      <td><span class="sr-pill ${REC_STATE.checked[r.id] ? 'cleared' : 'review'}">${REC_STATE.checked[r.id] ? 'Cleared' : 'Review'}</span></td>
-      <td class="sr-insight-cell">${r.insight ? `<div class="sr-insight" data-tip="${r.insight.replace(/"/g, '&quot;')}">${orionSpark(14)}<span>${r.insight}</span></div>` : ''}</td>
+      <td style="text-align:center;vertical-align:middle"><input type="checkbox" ${REC_STATE.checked[r.id] ? 'checked' : ''} onclick="toggleSrRow('${r.id}',this.checked)"></td>
+      <td><div class="sr2-top">${r.bankAmt != null ? r.date : '-'}</div><div class="sr2-sub">${r.rmDate}</div></td>
+      <td><div class="sr2-top">${r.bankDesc == null ? '-' : r.bankDesc}</div><div class="sr2-sub">${r.rmText}</div></td>
+      <td><div class="sr2-top">${r.category}</div><div class="sr2-sub">${r.account}</div></td>
+      <td class="r"><div class="sr2-top">${r.bankAmt == null ? '-' : fmtN(r.bankAmt)}</div><div class="sr2-sub">${fmtN(r.rmAmt)}</div></td>
+      <td style="text-align:center;vertical-align:middle">${r.bankAmt != null ? SR_CHECK_CIRCLE : ''}</td>
+      <td style="vertical-align:middle"><span class="sr-pill ${REC_STATE.checked[r.id] ? 'cleared' : 'review'}">${REC_STATE.checked[r.id] ? 'Cleared' : 'Review'}</span></td>
+      <td class="sr2-info" style="text-align:center;vertical-align:middle">${r.insight ? `<span class="sr-info-tip" data-tip="${r.insight.replace(/"/g, '&quot;')}">${SR_INFO_ICO}</span>` : ''}</td>
     </tr>`).join('');
   return `
-    <div class="sr-sec-hdr">
-      <button class="chev" onclick="srToggleSection('${key}')">${ic(collapsed ? P.right : P.down, 18, '#13314c')}</button>
-      <span class="sr-sec-title">${title}</span>
-      <div class="sr-sec-sums">
-        <span>Statement<b>${fmt(stmtTotal)}</b></span>
-        <span>Rent Manager<b>${fmt(rmTotal)}</b></span>
-        <span>Outstanding<b class="${outstanding > 0 ? 'neg' : ''}">${outstanding > 0 ? '+' : ''}${fmt(outstanding)}</b></span>
+    <div class="sr-panel2">
+      <div class="sr-sec-hdr" style="margin-top:0">
+        <span class="sr-sec-title">${title}</span>
+        <div class="sr-sec-sums">
+          <span>Statement<b>${fmt(stmtTotal)}</b></span>
+          <span>Rent Manager<b>${fmt(rmTotal)}</b></span>
+          <span>Outstanding<b class="${outstanding > 0 ? 'neg' : ''}">${outstanding > 0 ? '+' : ''}${fmt(outstanding)}</b></span>
+        </div>
       </div>
-    </div>
-    ${collapsed ? '' : `<table class="sr-tbl">
-      <colgroup>
-        <col style="width:36px"><col style="width:92px"><col><col style="width:92px">
-        <col style="width:96px"><col><col style="width:170px"><col style="width:92px"><col style="width:86px"><col style="width:200px">
-      </colgroup>
-      <thead><tr>
-        <th style="text-align:center;padding:0"><input type="checkbox" ${allChecked ? 'checked' : ''} onclick="toggleSrAll('${key}',this.checked)"></th>
-        <th>Date</th><th>Bank Description</th><th class="r">Amount</th>
-        <th>Reference</th><th>Rent Manager Transaction</th><th>Account</th><th class="r">Amount</th><th>Status</th>
-        <th>Transaction Insight</th>
-      </tr></thead>
-      <tbody>${body || `<tr><td colspan="10" style="text-align:center;color:#9aa7b3;padding:20px 0">No transactions</td></tr>`}</tbody>
-    </table>`}`;
+      <table class="sr-tbl sr-tbl2">
+        <colgroup>
+          <col style="width:34px"><col style="width:96px"><col><col style="width:168px">
+          <col style="width:104px"><col style="width:62px"><col style="width:76px"><col style="width:36px">
+        </colgroup>
+        <thead><tr>
+          <th style="text-align:center;padding:0;vertical-align:middle"><input type="checkbox" ${allChecked ? 'checked' : ''} onclick="toggleSrAll('${key}',this.checked)"></th>
+          <th><div>Cleared Date</div><div class="sub">Date</div></th>
+          <th><div>Bank Description</div><div class="sub">RM Transaction</div></th>
+          <th><div>Category</div><div class="sub">${acctLabel}</div></th>
+          <th class="r"><div>Bank Amount</div><div class="sub">RM Amount</div></th>
+          <th style="text-align:center;vertical-align:middle">Matched</th>
+          <th style="vertical-align:middle">Status</th>
+          <th></th>
+        </tr></thead>
+        <tbody>${body || `<tr><td colspan="8" style="text-align:center;color:#9aa7b3;padding:20px 0;vertical-align:middle">No transactions</td></tr>`}</tbody>
+      </table>
+    </div>`;
 }
 
 function renderReconcile() {
@@ -4973,9 +5005,9 @@ function renderReconcile() {
       </div>
     </div>
     <div class="sr-scroll">
-      <div class="sr-sec">
-        ${srSection('Deposits', 'dep', d.deposits, acct.id)}
-        ${srSection('Payments', 'pay', d.payments, acct.id)}
+      <div class="sr-sec sr-cols2">
+        ${srPanel('Deposits', 'dep', d.deposits, acct.id)}
+        ${srPanel('Payments', 'pay', d.payments, acct.id)}
       </div>
     </div>
     <div class="rec-foot">
