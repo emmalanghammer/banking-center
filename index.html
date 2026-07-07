@@ -95,6 +95,7 @@ input[type="checkbox"]:checked::after{content:'';position:absolute;left:6px;top:
 .bc-card.hi::before{content:'';position:absolute;inset:0;border-radius:4px;padding:1px;background:linear-gradient(135deg,#6eb744 0%,#008dd5 50%,#6eb744 100%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
 .bc-card-h{font-size:14px;font-weight:600;color:#13314c;margin-bottom:0;display:flex;align-items:center;gap:6px}
 .bc-card-hrow{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.bc-cat-sel{height:26px;font-size:11.5px;color:#13314c;border:1px solid #cedbe7;border-radius:4px;background:#fff url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 24 24' fill='%23666'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 4px center;padding:0 20px 0 8px;appearance:none;outline:none;font-family:inherit;min-width:0;width:100%;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bc-ico-badge{width:24px;height:24px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
 .bc-ico-badge.purple{background:#ede8fa}
 .bc-ico-badge.teal{background:#d1f0ec}
@@ -1204,6 +1205,17 @@ function visibleOrderedAccounts() {
     .filter(a => a && SETTINGS_STATE.accounts[a.id]?.visible !== false);
 }
 
+// Category Breakdown tile filters: direction, date range, account, property.
+const BC_CAT = { dir: 'out', range: '90', acct: 'all', prop: 'all' };
+function bcCatSet(k, v) { BC_CAT[k] = v; renderBC(); }
+const BC_PROPS = ['Hawthorne Court Apartments', 'Pearl District Lofts', 'Alberta Commons', 'Sellwood Row'];
+// Register rows don't carry a property; assign one deterministically so the
+// property filter behaves consistently across renders.
+function bcCatProp(r) {
+  const h = (r.ref + r.info).split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+  return BC_PROPS[h % BC_PROPS.length];
+}
+
 function renderBC() {
   const qaLabels = {makeDeposit:'Make Deposit',payBills:'Pay Bills',reviewTx:'Review Transactions',bankRegister:'Bank Register',balanceSheet:'Run Balance Sheet Report',eBankRec:'Electronic Bank Reconcile',askOrion:'Ask Orion'};
   const qaActions = {makeDeposit:'',payBills:'',reviewTx:"showScreen('tr')",bankRegister:"openBR('op3487')",balanceSheet:'',eBankRec:'',askOrion:''};
@@ -1303,11 +1315,23 @@ function renderBC() {
   const unAccts = visAccts.filter(a => acctReview(a) > 0).length;
   const unAmt = visAccts.reduce((s,a) => s + acctReviewAmt(a), 0);
 
-  // Money out by category across bank accounts (register data, ~last 90 days).
+  // Category breakdown: register activity filtered by the tile's controls.
   // Single measure -> single hue; top 5 + Other, direct-labeled.
+  const CAT_TODAY = _recDateVal('06/16/2026');
+  const CAT_D30 = CAT_TODAY - 30 * 86400000;
+  const CAT_JUN = _recDateVal('06/01/2026');
+  const CAT_MAY = _recDateVal('05/01/2026');
   const catTotals = {};
-  ACCOUNTS.filter(a => a.kind === 'bank').forEach(a => (BR_TX[a.id] || []).forEach(r => {
-    if (r.payment) { const c = glCategory(r.gl); catTotals[c] = (catTotals[c] || 0) + r.payment; }
+  ACCOUNTS.filter(a => a.kind === 'bank' && (BC_CAT.acct === 'all' || a.id === BC_CAT.acct)).forEach(a => (BR_TX[a.id] || []).forEach(r => {
+    const amt = BC_CAT.dir === 'out' ? r.payment : r.deposit;
+    if (!amt) return;
+    if (BC_CAT.prop !== 'all' && bcCatProp(r) !== BC_CAT.prop) return;
+    const dt = _recDateVal(r.date);
+    if (BC_CAT.range === '30' && dt < CAT_D30) return;
+    if (BC_CAT.range === 'jun' && dt < CAT_JUN) return;
+    if (BC_CAT.range === 'may' && (dt < CAT_MAY || dt >= CAT_JUN)) return;
+    const c = glCategory(r.gl);
+    catTotals[c] = (catTotals[c] || 0) + amt;
   }));
   const catSorted = Object.entries(catTotals).sort((a, b) => b[1] - a[1]);
   const catTop = catSorted.slice(0, 5);
@@ -1348,9 +1372,30 @@ function renderBC() {
       <span class="bc-sub">${fmt(unAmt)} across ${unAccts} account${unAccts===1?'':'s'}</span>
     </div>`,
     categoryBreakdown: `<div class="bc-card">
-      <div class="bc-card-hrow"><span class="bc-ico-badge" style="background:#fdf0dc">${ic(P.split,15,'#c07d10')}</span><span class="bc-card-h">Category Breakdown</span><span class="bc-card-count" style="margin-left:4px">money out \u00b7 90 days</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="showScreen('br')">Bank Register</button></div>
-      <div style="display:flex;flex-direction:column;gap:9px;margin-top:2px">${catTop.map(([name, val]) => `
-        <div title="${name}: ${fmt(val)} \u00b7 ${Math.round(val / catSum * 100)}% of money out">
+      <div class="bc-card-hrow"><span class="bc-ico-badge" style="background:#fdf0dc">${ic(P.split,15,'#c07d10')}</span><span class="bc-card-h">Category Breakdown</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:2px 0 12px">
+        <select class="bc-cat-sel" onchange="bcCatSet('dir',this.value)">
+          <option value="out"${BC_CAT.dir === 'out' ? ' selected' : ''}>Money Out</option>
+          <option value="in"${BC_CAT.dir === 'in' ? ' selected' : ''}>Money In</option>
+        </select>
+        <select class="bc-cat-sel" onchange="bcCatSet('range',this.value)">
+          <option value="90"${BC_CAT.range === '90' ? ' selected' : ''}>Last 90 Days</option>
+          <option value="30"${BC_CAT.range === '30' ? ' selected' : ''}>Last 30 Days</option>
+          <option value="jun"${BC_CAT.range === 'jun' ? ' selected' : ''}>This Month</option>
+          <option value="may"${BC_CAT.range === 'may' ? ' selected' : ''}>Last Month</option>
+        </select>
+        <select class="bc-cat-sel" onchange="bcCatSet('acct',this.value)">
+          <option value="all"${BC_CAT.acct === 'all' ? ' selected' : ''}>All Bank Accounts</option>
+          ${ACCOUNTS.filter(a => a.kind === 'bank' && a.bankName).map(a => `<option value="${a.id}"${BC_CAT.acct === a.id ? ' selected' : ''}>${a.gl}</option>`).join('')}
+        </select>
+        <select class="bc-cat-sel" onchange="bcCatSet('prop',this.value)">
+          <option value="all"${BC_CAT.prop === 'all' ? ' selected' : ''}>All Properties</option>
+          ${BC_PROPS.map(p => `<option value="${p}"${BC_CAT.prop === p ? ' selected' : ''}>${p}</option>`).join('')}
+        </select>
+      </div>
+      ${catTop.length === 0 ? `<div style="font-size:12.5px;color:#9aa7b3;padding:6px 0">No transactions match these filters.</div>` : ''}
+      <div style="display:flex;flex-direction:column;gap:9px">${catTop.map(([name, val]) => `
+        <div title="${name}: ${fmt(val)} \u00b7 ${Math.round(val / catSum * 100)}% of money ${BC_CAT.dir === 'out' ? 'out' : 'in'}">
           <div style="display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;margin-bottom:3px"><span style="color:#13314c">${name}</span><span style="color:#13314c;font-weight:600;font-variant-numeric:tabular-nums">${fmtN(val)}</span></div>
           <div style="height:8px;background:#eef2f7;border-radius:4px;overflow:hidden"><div style="height:8px;width:${Math.max(2, val / catMax * 100)}%;background:#008dd5;border-radius:0 4px 4px 0"></div></div>
         </div>`).join('')}
