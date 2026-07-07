@@ -4624,7 +4624,7 @@ function recData(acctId) {
       bankDesc: r.cleared ? r.info : null, bankAmt: r.cleared ? amt : null,
       ref: r.ref, rmText: r.info, account: r.gl, category: glCategory(r.gl), rmAmt: amt,
       status: r.cleared ? 'Matched' : 'Review', recType: r.type,
-      insight: r.cleared ? `Bank transaction and Rent Manager record matched on amount and date.` : undefined,
+      insight: r.cleared ? `Matched in Transaction Review \u2014 the bank transaction and Rent Manager record agree on amount and date.` : undefined,
     });
   });
   // Orion insight: a plain-language guess at why each unmatched record has no
