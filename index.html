@@ -1303,6 +1303,19 @@ function renderBC() {
   const unAccts = visAccts.filter(a => acctReview(a) > 0).length;
   const unAmt = visAccts.reduce((s,a) => s + acctReviewAmt(a), 0);
 
+  // Money out by category across bank accounts (register data, ~last 90 days).
+  // Single measure -> single hue; top 5 + Other, direct-labeled.
+  const catTotals = {};
+  ACCOUNTS.filter(a => a.kind === 'bank').forEach(a => (BR_TX[a.id] || []).forEach(r => {
+    if (r.payment) { const c = glCategory(r.gl); catTotals[c] = (catTotals[c] || 0) + r.payment; }
+  }));
+  const catSorted = Object.entries(catTotals).sort((a, b) => b[1] - a[1]);
+  const catTop = catSorted.slice(0, 5);
+  const catOther = catSorted.slice(5).reduce((s, [, v]) => s + v, 0);
+  if (catOther > 0) catTop.push(['Other', catOther]);
+  const catMax = Math.max(1, ...catTop.map(([, v]) => v));
+  const catSum = Math.max(1, catSorted.reduce((s, [, v]) => s + v, 0));
+
   const TILE_HTML = {
     orionInsights: `<div class="bc-card hi" style="min-height:unset">
       <div class="bc-card-hrow" style="margin-bottom:8px"><span class="bc-ico-badge" style="background:#e2f1da">${orionSpark(16)}</span><span class="bc-card-h">Banking Insights</span><button id="open-orion-insight" class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="openInsights()">View All Insights</button></div>
@@ -1333,6 +1346,15 @@ function renderBC() {
       <div class="bc-card-hrow"><span class="bc-ico-badge teal">${ic(P.money,15,'#178c7e')}</span><span class="bc-card-h">Unmatched Transactions</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="showScreen('tr')">Review Transactions</button></div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><div class="bc-alert-dot"></div><span class="bc-num">${unTotal}</span></div>
       <span class="bc-sub">${fmt(unAmt)} across ${unAccts} account${unAccts===1?'':'s'}</span>
+    </div>`,
+    categoryBreakdown: `<div class="bc-card">
+      <div class="bc-card-hrow"><span class="bc-ico-badge" style="background:#fdf0dc">${ic(P.split,15,'#c07d10')}</span><span class="bc-card-h">Category Breakdown</span><span class="bc-card-count" style="margin-left:4px">money out \u00b7 90 days</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="showScreen('br')">Bank Register</button></div>
+      <div style="display:flex;flex-direction:column;gap:9px;margin-top:2px">${catTop.map(([name, val]) => `
+        <div title="${name}: ${fmt(val)} \u00b7 ${Math.round(val / catSum * 100)}% of money out">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;margin-bottom:3px"><span style="color:#13314c">${name}</span><span style="color:#13314c;font-weight:600;font-variant-numeric:tabular-nums">${fmtN(val)}</span></div>
+          <div style="height:8px;background:#eef2f7;border-radius:4px;overflow:hidden"><div style="height:8px;width:${Math.max(2, val / catMax * 100)}%;background:#008dd5;border-radius:0 4px 4px 0"></div></div>
+        </div>`).join('')}
+      </div>
     </div>`,
     connHealth: `<div class="bc-card">
       <div class="bc-card-hrow"><span class="bc-ico-badge pink">${ic(P.refresh,15,'#c93467')}</span><span class="bc-card-h">Connection Health</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="openSettings('institutions')">Manage Connections</button></div>
@@ -3526,8 +3548,8 @@ const SETTINGS_STATE = {
   activeNav: 'banking-center',
   quickActions: { makeDeposit:true, payBills:true, reviewTx:true, bankRegister:true, balanceSheet:false, eBankRec:false, askOrion:true },
   quickActionsOrder: ['makeDeposit','payBills','reviewTx','bankRegister','balanceSheet','eBankRec','askOrion'],
-  tiles: { orionInsights:true, bankBalance:true, cardBalance:true, unmatched:true, connHealth:true },
-  tilesOrder: ['orionInsights','bankBalance','cardBalance','unmatched','connHealth'],
+  tiles: { orionInsights:true, bankBalance:true, cardBalance:true, unmatched:true, categoryBreakdown:true, connHealth:true },
+  tilesOrder: ['orionInsights','bankBalance','cardBalance','unmatched','categoryBreakdown','connHealth'],
   accounts: {
     op3487: { sync:true, autoMatch:true, visible:true },
     pr9204: { sync:true, autoMatch:true, visible:true },
@@ -3687,7 +3709,7 @@ function bcSetRow(key, stateKey, label) {
 
 function renderSettingsBankingCenter() {
   const qaLabels = {makeDeposit:'Make Deposit',payBills:'Pay Bills',reviewTx:'Review Transactions',bankRegister:'Bank Register',balanceSheet:'Run Balance Sheet Report',eBankRec:'Electronic Bank Reconcile',askOrion:'Ask Orion'};
-  const tiLabels = {orionInsights:'Predictive Analysis',bankBalance:'Bank Balance',cardBalance:'Credit Card Balance',unmatched:'Unmatched Transactions',connHealth:'Connection Health'};
+  const tiLabels = {orionInsights:'Predictive Analysis',bankBalance:'Bank Balance',cardBalance:'Credit Card Balance',unmatched:'Unmatched Transactions',categoryBreakdown:'Category Breakdown',connHealth:'Connection Health'};
   return `
     <p class="settings-section-desc">Select what Quick Actions and Tiles you want to see on the Banking Center.</p>
     <div class="settings-card">
