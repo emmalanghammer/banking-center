@@ -39,7 +39,7 @@ Portland, OR residential + light-commercial property manager. Demo "today" = mid
   −2,860 (t5 Cascade HVAC) −318.40 (t6 café) −1,150 (t7 NSF Reyes) −389 (t8 Recology dup)
 - Review beats (order fixed for the Useberry study): Match, Select Match (multi), Add New,
   Split (inside Add), Find Matches, Exclude — then NSF Return (t7), Possible Duplicate (t8)
-- Suggested-match confidence tiers shown in a "Confidence" column (lozenge + why-tooltip): t1=rule (High, green), t2/t3/t7=ai (Medium, amber), t8=hint (Low, grey)
+- Suggested-match confidence tiers shown in an unlabeled column of filled lozenges (fixed-position why-tooltip above the row): t1=rule (High, green), t2/t3/t7=ai (Medium, amber), t8=hint (Low, pink)
 
 ## Key data locations (approx line numbers)
 

@@ -85,6 +85,12 @@ input[type="checkbox"]:checked::after{content:'';position:absolute;left:6px;top:
 .loz-dot.ok{background:#6eb744}
 .loz-dot.warn{background:#f5a623}
 .loz-dot.off{background:#b3b3b3}
+.conf-loz{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:4px;font-size:14px;color:#13314c;white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis}
+.conf-loz.high{background:#e2f1da}
+.conf-loz.med{background:#feedd2}
+.conf-loz.low{background:#fbd6d8}
+.conf-tip{position:fixed;z-index:9400;background:#13314c;color:#fff;font-size:12px;line-height:1.45;padding:8px 10px;border-radius:4px;width:230px;box-shadow:0 4px 12px rgba(0,0,0,.25);pointer-events:none}
+.conf-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#13314c}
 .acct-link{background:none;border:none;color:#008dd5;font-size:14px;padding:0;cursor:pointer}
 .acct-link:hover{text-decoration:underline}
 .acct-sub{color:#b3b3b3;font-size:12px;margin-left:4px}
@@ -1857,7 +1863,7 @@ function renderRight() {
       <div class="tx-hdr-cell r">Deposit ${ic(P.down,13,'rgba(255,255,255,.5)')}</div>
       <div class="tx-hdr-cell r">Payment</div>
       <div class="tx-hdr-cell">Rent Manager Transaction ${ic(P.down,13,'rgba(255,255,255,.5)')}</div>
-      <div class="tx-hdr-cell">Confidence</div>
+      <div class="tx-hdr-cell"></div>
       <div class="tx-hdr-cell r">Action</div>
     </div>
     <div class="tx-rows" id="tx-rows"></div>
@@ -1892,15 +1898,36 @@ function renderTxRows() {
 // produced determines the tier — user rule = High, AI-inferred = Medium,
 // provider category hint = Low. Hover explains the why.
 const TIER_CONF = {
-  rule: { label: 'High', dot: 'ok', tip: 'High confidence — matched by your rule for recurring ACH rent deposits. Rule matches are exact.' },
-  ai:   { label: 'Medium', dot: 'warn', tip: 'Medium confidence — Orion inferred this match from the amount, date, and payee. Review before matching.' },
-  hint: { label: 'Low', dot: 'off', tip: "Low confidence — based only on the bank's category for this transaction. Verify the details before acting." },
+  rule: { label: 'High', cls: 'high', tip: 'High confidence — matched by your rule for recurring ACH rent deposits. Rule matches are exact.' },
+  ai:   { label: 'Medium', cls: 'med', tip: 'Medium confidence — Orion inferred this match from the amount, date, and payee. Review before matching.' },
+  hint: { label: 'Low', cls: 'low', tip: "Low confidence — based only on the bank's category for this transaction. Verify the details before acting." },
 };
 function confidenceLoz(tx) {
   if (!tx.tier || !TIER_CONF[tx.tier]) return '';
   const c = TIER_CONF[tx.tier];
-  return `<span class="tt-wrap" data-tip="${c.tip}" style="align-items:center"><span class="loz"><span class="loz-dot ${c.dot}"></span><em>${c.label}</em></span></span>`;
+  return `<span class="conf-loz ${c.cls}" data-conftip="${c.tip}">${c.label}</span>`;
 }
+// The row cells clip (overflow:hidden) and the list scrolls, so the confidence
+// explanation renders as a fixed-position tip floating above the row instead
+// of a CSS ::after tooltip.
+let _confTipEl = null;
+function _confTipHide() { if (_confTipEl) { _confTipEl.remove(); _confTipEl = null; } }
+document.addEventListener('mouseover', e => {
+  const t = e.target.closest && e.target.closest('[data-conftip]');
+  if (!t) { _confTipHide(); return; }
+  if (_confTipEl && _confTipEl._for === t) return;
+  _confTipHide();
+  const d = document.createElement('div');
+  d.className = 'conf-tip';
+  d.textContent = t.dataset.conftip;
+  document.body.appendChild(d);
+  const r = t.getBoundingClientRect();
+  d.style.left = Math.max(8, Math.min(r.left + r.width / 2 - d.offsetWidth / 2, window.innerWidth - d.offsetWidth - 8)) + 'px';
+  d.style.top = Math.max(8, r.top - d.offsetHeight - 8) + 'px';
+  d._for = t;
+  _confTipEl = d;
+});
+window.addEventListener('scroll', () => _confTipHide(), true);
 
 function renderTxRow(tx) {
   const matched = S.matchedIds.has(tx.id);
@@ -1956,7 +1983,7 @@ function renderTxRow(tx) {
       <div class="tx-cell r"><span class="amt">${tx.deposit?fmtN(tx.deposit):''}</span></div>
       <div class="tx-cell r"><span class="amt">${tx.payment?fmtN(tx.payment):''}</span></div>
       <div class="tx-cell" style="overflow:hidden">${rmCell}</div>
-      <div class="tx-cell" style="overflow:hidden">${matched ? '' : confidenceLoz(tx)}</div>
+      <div class="tx-cell">${matched ? '' : confidenceLoz(tx)}</div>
       <div class="tx-cell r">${actionCell}</div>
     </div>`;
 
