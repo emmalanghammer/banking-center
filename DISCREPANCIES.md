@@ -10,6 +10,35 @@ Scope note: overlay/layout differences (single Add Transaction modal vs. separat
 modals) are intentionally out of scope. This list covers content **within** each transaction type.
 Items are ordered most → least user-visible. Do not fix anything not listed.
 
+## Re-audit 07/08/2026 (post-fix, commit `ff8941e`)
+
+Independently re-verified all items in source **and** on the live GitHub Pages build
+(main and mvp both at `ff8941e`): **items 1–22 confirmed fixed**; item 23 (Receipt type)
+correctly left pending BA verification; item 24 verify-list unchanged. Live spot-checks of the
+Add Bill, Write Check, and Add Journal forms rendered correctly with no console errors.
+Three small residuals found during re-audit:
+
+- **R1 — Check form `Balance:` label has no value.** Production shows `Balance: -6.33` next to
+  the Bank field; prototype renders the label with nothing after it. Fix: append the account's
+  demo balance, e.g. `Balance: ${fmtN(acct.inRm)}` in `renderAddTxCheck()` (~line 3004).
+  Done when a number renders after `Balance:`.
+  > ✅ **FIXED & VERIFIED** (07/08/2026) — label renders `Balance: 512,000.00` from `acct.inRm`.
+- **R2 — Bill slideout replica still shows link CTAs.** Item 16 removed
+  `Link Existing Purchase Order` / `Link Work Order Items` from the Add Bill form, but the
+  read-only Bill Details slideout (`billTopCard()`, ~lines 4279–4280) still renders both.
+  Fix the slideout to match (titles only) for consistency — or verify the production Bill
+  details page first, since only the Add form was captured.
+  > ✅ **VERIFIED — NO CHANGE** (07/08/2026) — production evidence exists: the saved-Bill details
+  > screenshot captured in this project (Bill 1615-era audit, `Pay Bill`/`Void` header) shows the
+  > Links section **with** `Link Existing Purchase Order` / `Link Work Order Items`. The details
+  > slideout intentionally keeps them; only the Add Bill modal omits them (item 16).
+- **R3 — RM Transaction link text uses 4-digit years.** Table dates are now `MM/DD/YY` (item 22),
+  but the Rent Manager Transaction column's link strings (e.g. `06/16/2026 Deposit 8842: J. Rivera`,
+  from `TRANSACTIONS[].rmLink`, ~line 999) still embed `MM/DD/YYYY`. Cosmetic; fix by running
+  `fmtD()` over the link label or editing the data strings.
+  > ✅ **FIXED & VERIFIED** (07/08/2026) — new `fmtLinkD()` reformats the leading date at render
+  > in both RM-cell variants (`06/16/26 Deposit 8842: J. Rivera`); data strings untouched.
+
 ---
 
 ## 1. Check — number field label is wrong

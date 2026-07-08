@@ -1132,6 +1132,8 @@ const S = {
 const fmt = n => typeof n==='number' ? n.toLocaleString('en-US',{style:'currency',currency:'USD'}) : n;
 // List/table dates use 2-digit years (production convention); form inputs keep 4-digit.
 const fmtD = d => String(d || '').replace(/\/(\d{2})(\d{2})$/, '/$2');
+// Same, for strings that LEAD with a date (e.g. rmLink "06/16/2026 Deposit 8842: ...").
+const fmtLinkD = t => String(t || '').replace(/^(\d{2}\/\d{2}\/)20(\d{2})\b/, '$1$2');
 const fmtN = n => typeof n==='number' ? n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : n;
 
 function ic(d,size=16,color='currentColor'){
@@ -1908,9 +1910,9 @@ function renderTxRow(tx) {
   /* RM cell */
   let rmCell;
   if (matched) {
-    rmCell = `<div class="tx-rm-matched">${ic(P.check,14,'#6eb744')}<button class="tx-rm-link" onclick="event.stopPropagation();openSlideout('${tx.id}')">${tx.rmLink}</button></div>`;
+    rmCell = `<div class="tx-rm-matched">${ic(P.check,14,'#6eb744')}<button class="tx-rm-link" onclick="event.stopPropagation();openSlideout('${tx.id}')">${fmtLinkD(tx.rmLink)}</button></div>`;
   } else if (tx.matchStatus==='match' && tx.rmLink) {
-    rmCell = `<button class="tx-rm-link" onclick="event.stopPropagation();openSlideout('${tx.id}')">${tx.rmLink}</button>`;
+    rmCell = `<button class="tx-rm-link" onclick="event.stopPropagation();openSlideout('${tx.id}')">${fmtLinkD(tx.rmLink)}</button>`;
   } else if (tx.matchStatus==='multi') {
     rmCell = `<div class="tx-rm-multi"><span style="width:8px;height:8px;border-radius:50%;background:#f5a623;flex-shrink:0;display:inline-block"></span><em style="color:#13314c">2 matches found</em></div>`;
   } else if (tx.nsf) {
@@ -3009,7 +3011,7 @@ function renderAddTxCheck(tx, amt, acct, itemId) {
           <input class="at-input at-input-search" type="text">
         </div>
         <div class="at-field">
-          <label style="display:flex;align-items:center"><span>Bank</span><span style="margin-left:auto;color:#9aa7b3">Balance:</span></label>
+          <label style="display:flex;align-items:center"><span>Bank</span><span style="margin-left:auto;color:#9aa7b3">Balance: ${fmtN(acct ? acct.inRm : 0)}</span></label>
           <select class="at-select"><option>${glName}</option></select>
         </div>
         <div class="at-field">
