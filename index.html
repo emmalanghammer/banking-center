@@ -84,6 +84,7 @@ input[type="checkbox"]:checked::after{content:'';position:absolute;left:6px;top:
 .loz-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .loz-dot.ok{background:#6eb744}
 .loz-dot.warn{background:#f5a623}
+.loz-dot.off{background:#b3b3b3}
 .acct-link{background:none;border:none;color:#008dd5;font-size:14px;padding:0;cursor:pointer}
 .acct-link:hover{text-decoration:underline}
 .acct-sub{color:#b3b3b3;font-size:12px;margin-left:4px}
@@ -1847,13 +1848,14 @@ function renderRight() {
     </div>
   </div>
   <div class="tx-wrap">
-    <div class="tx-hdr" style="grid-template-columns:30px 95px 1fr 80px 80px 1.4fr 120px">
+    <div class="tx-hdr" style="grid-template-columns:30px 95px 1fr 80px 80px 1.4fr 108px 120px">
       <div class="tx-hdr-cell"></div>
       <div class="tx-hdr-cell">Date ${ic(P.down,13,'rgba(255,255,255,.5)')}</div>
       <div class="tx-hdr-cell">Description ${ic(P.down,13,'rgba(255,255,255,.5)')}</div>
       <div class="tx-hdr-cell r">Deposit ${ic(P.down,13,'rgba(255,255,255,.5)')}</div>
       <div class="tx-hdr-cell r">Payment</div>
       <div class="tx-hdr-cell">Rent Manager Transaction ${ic(P.down,13,'rgba(255,255,255,.5)')}</div>
+      <div class="tx-hdr-cell">Confidence</div>
       <div class="tx-hdr-cell r">Action</div>
     </div>
     <div class="tx-rows" id="tx-rows"></div>
@@ -1884,32 +1886,37 @@ function renderTxRows() {
   el.innerHTML = txs.map(tx => renderTxRow(tx)).join('');
 }
 
-// Confidence tier on suggested matches: how the suggestion was produced.
-// green dot = user rule, Orion spark = AI-inferred, grey dot = provider hint.
-function tierDot(tx) {
-  if (!tx.tier) return '';
-  if (tx.tier === 'rule') return `<span class="tt-wrap" data-tip="Rule — matched by your rule for recurring ACH rent deposits." style="flex-shrink:0;align-items:center"><span style="width:8px;height:8px;border-radius:50%;background:#6eb744;display:inline-block"></span></span>`;
-  if (tx.tier === 'ai') return `<span class="tt-wrap" data-tip="AI suggested — Orion inferred this match from the amount, date, and payee." style="flex-shrink:0;align-items:center">${orionSpark(13)}</span>`;
-  return `<span class="tt-wrap" data-tip="Provider hint — based on the bank's category only. Low confidence." style="flex-shrink:0;align-items:center"><span style="width:8px;height:8px;border-radius:50%;background:#b3b3b3;display:inline-block"></span></span>`;
+// Matching-confidence lozenge for suggested matches: how the suggestion was
+// produced determines the tier — user rule = High, AI-inferred = Medium,
+// provider category hint = Low. Hover explains the why.
+const TIER_CONF = {
+  rule: { label: 'High', dot: 'ok', tip: 'High confidence — matched by your rule for recurring ACH rent deposits. Rule matches are exact.' },
+  ai:   { label: 'Medium', dot: 'warn', tip: 'Medium confidence — Orion inferred this match from the amount, date, and payee. Review before matching.' },
+  hint: { label: 'Low', dot: 'off', tip: "Low confidence — based only on the bank's category for this transaction. Verify the details before acting." },
+};
+function confidenceLoz(tx) {
+  if (!tx.tier || !TIER_CONF[tx.tier]) return '';
+  const c = TIER_CONF[tx.tier];
+  return `<span class="tt-wrap" data-tip="${c.tip}" style="align-items:center"><span class="loz"><span class="loz-dot ${c.dot}"></span><em>${c.label}</em></span></span>`;
 }
 
 function renderTxRow(tx) {
   const matched = S.matchedIds.has(tx.id);
   const exp = S.expandedId===tx.id;
-  const GRID = 'grid-template-columns:30px 95px 1fr 80px 80px 1.4fr 120px';
+  const GRID = 'grid-template-columns:30px 95px 1fr 80px 80px 1.4fr 108px 120px';
 
   /* RM cell */
   let rmCell;
   if (matched) {
     rmCell = `<div class="tx-rm-matched">${ic(P.check,14,'#6eb744')}<button class="tx-rm-link" onclick="event.stopPropagation();openSlideout('${tx.id}')">${tx.rmLink}</button></div>`;
   } else if (tx.matchStatus==='match' && tx.rmLink) {
-    rmCell = `<div style="display:flex;align-items:center;gap:6px;min-width:0">${tierDot(tx)}<button class="tx-rm-link" onclick="event.stopPropagation();openSlideout('${tx.id}')">${tx.rmLink}</button></div>`;
+    rmCell = `<button class="tx-rm-link" onclick="event.stopPropagation();openSlideout('${tx.id}')">${tx.rmLink}</button>`;
   } else if (tx.matchStatus==='multi') {
-    rmCell = `<div class="tx-rm-multi">${tierDot(tx)}<span style="width:8px;height:8px;border-radius:50%;background:#f5a623;flex-shrink:0;display:inline-block"></span><em style="color:#13314c">2 matches found</em></div>`;
+    rmCell = `<div class="tx-rm-multi"><span style="width:8px;height:8px;border-radius:50%;background:#f5a623;flex-shrink:0;display:inline-block"></span><em style="color:#13314c">2 matches found</em></div>`;
   } else if (tx.nsf) {
-    rmCell = `<span class="loz">${tierDot(tx)}<span class="loz-dot warn"></span><em>Possible NSF return</em></span>`;
+    rmCell = `<span class="loz"><span class="loz-dot warn"></span><em>Possible NSF return</em></span>`;
   } else if (tx.dup) {
-    rmCell = `<span class="loz">${tierDot(tx)}<span class="loz-dot warn"></span><em>Possible duplicate</em></span>`;
+    rmCell = `<span class="loz"><span class="loz-dot warn"></span><em>Possible duplicate</em></span>`;
   } else {
     rmCell = `<span class="tx-rm-none">No match suggested.</span>`;
   }
@@ -1947,6 +1954,7 @@ function renderTxRow(tx) {
       <div class="tx-cell r"><span class="amt">${tx.deposit?fmtN(tx.deposit):''}</span></div>
       <div class="tx-cell r"><span class="amt">${tx.payment?fmtN(tx.payment):''}</span></div>
       <div class="tx-cell" style="overflow:hidden">${rmCell}</div>
+      <div class="tx-cell" style="overflow:hidden">${matched ? '' : confidenceLoz(tx)}</div>
       <div class="tx-cell r">${actionCell}</div>
     </div>`;
 
