@@ -335,10 +335,10 @@ svg.ico{display:block;flex-shrink:0}
 .so-pmt-title{font-size:14px;font-weight:600;color:#13314c}
 .so-pmt-filters{display:flex;align-items:center;gap:8px}
 .so-search{height:36px;padding:0 8px 0 30px;border:1px solid #cedbe7;border-radius:4px;background:#f5f8fa url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='%23b3b3b3'%3E%3Cpath d='M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3C/svg%3E") no-repeat 8px center;font-size:13px;color:#9aa7b3;font-style:italic;flex:1;min-width:0;outline:none;font-family:inherit}
-.so-reg{border:1px solid #cedbe7;border-radius:4px;overflow:hidden;font-size:14px;box-shadow:0 2px 8px rgba(76,76,76,.06);min-width:880px}
-.so-reg-hdr{display:grid;grid-template-columns:32px 130px 72px 68px 130px 56px 130px 1fr 32px;background:#737373;height:28px;align-items:center}
+.so-reg{border:1px solid #cedbe7;border-radius:4px;overflow:hidden;font-size:14px;box-shadow:0 2px 8px rgba(76,76,76,.06);min-width:960px}
+.so-reg-hdr{display:grid;grid-template-columns:32px 124px 72px 66px 124px 52px 116px 1fr 88px 32px;background:#737373;height:28px;align-items:center}
 .so-reg-hdr span{color:#fff;font-size:12px;font-weight:500;padding:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:.08em}
-.so-reg-row{display:grid;grid-template-columns:32px 130px 72px 68px 130px 56px 130px 1fr 32px;height:36px;align-items:center;border-top:1px solid #e3edf5;background:#fff}
+.so-reg-row{display:grid;grid-template-columns:32px 124px 72px 66px 124px 52px 116px 1fr 88px 32px;height:36px;align-items:center;border-top:1px solid #e3edf5;background:#fff}
 .so-reg-row span{font-size:13px;color:#13314c;padding:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .so-reg-row .so-muted{color:#9aa7b3}
 .so-oi{min-width:900px;border:1px solid #cedbe7;border-radius:4px;overflow:hidden}
@@ -775,6 +775,9 @@ svg.ico{display:block;flex-shrink:0}
 .ta-item b{color:#008dd5;font-weight:600}
 .ta-item:hover,.ta-item.act{background:#eaf4fb}
 .ta-empty{padding:8px 10px;font-size:12.5px;color:#9aa7b3;font-style:italic}
+.br-kebab-menu{position:fixed;z-index:9300;background:#fff;border:1px solid #cedbe7;border-radius:4px;box-shadow:0 6px 20px rgba(19,49,76,.18);min-width:180px;padding:4px}
+.br-kebab-item{display:block;width:100%;text-align:left;height:34px;padding:0 12px;border:none;background:none;font-family:'Roboto',sans-serif;font-size:13.5px;color:#13314c;cursor:pointer;border-radius:4px}
+.br-kebab-item:hover{background:#f1f6fa}
 .at-tbl-total{margin-left:auto;font-size:13px;font-weight:500;color:#13314c}
 .at-footer{height:48px;border-top:1px solid #cedbe7;display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:0 16px;flex-shrink:0;background:#fff}
 .at-cancel{height:36px;padding:0 16px;background:#fff;border:1px solid #008dd5;border-radius:4px;font-size:14px;color:#008dd5;cursor:pointer;font-family:Roboto,sans-serif}
@@ -1126,6 +1129,8 @@ const S = {
 
 /* ── Helpers ──────────────────────────────────────────────── */
 const fmt = n => typeof n==='number' ? n.toLocaleString('en-US',{style:'currency',currency:'USD'}) : n;
+// List/table dates use 2-digit years (production convention); form inputs keep 4-digit.
+const fmtD = d => String(d || '').replace(/\/(\d{2})(\d{2})$/, '/$2');
 const fmtN = n => typeof n==='number' ? n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : n;
 
 function ic(d,size=16,color='currentColor'){
@@ -1937,7 +1942,7 @@ function renderTxRow(tx) {
   let html = `<div class="tx-row-wrap" id="row-${tx.id}">
     <div class="${'tx-main-row'}${exp?' exp':''}" style="${GRID}" onclick="${rowClick}">
       <div class="tx-cell center">${chevronCell}</div>
-      <div class="tx-cell"><span class="date">${tx.date}</span></div>
+      <div class="tx-cell"><span class="date">${fmtD(tx.date)}</span></div>
       <div class="tx-cell" style="overflow:hidden"><span class="desc">${tx.desc}</span></div>
       <div class="tx-cell r"><span class="amt">${tx.deposit?fmtN(tx.deposit):''}</span></div>
       <div class="tx-cell r"><span class="amt">${tx.payment?fmtN(tx.payment):''}</span></div>
@@ -2030,7 +2035,7 @@ function renderExpandedMatch(tx) {
         ${[tx.deposit != null ? 'Deposit Date' : 'Check Date','Reference','Bank Account','Property','Comment','Total Amount'].map((h,i)=>`<div class="sub-tbl-hdr-cell"${i===5?' style="justify-content:flex-end"':''}>${h}</div>`).join('')}
       </div>
       <div class="sub-tbl-row" style="${cols}">
-        <div class="sub-tbl-cell">${mr.date}</div>
+        <div class="sub-tbl-cell">${fmtD(mr.date)}</div>
         <div class="sub-tbl-cell"><button class="tx-rm-link" onclick="openSlideout('${tx.id}')">${regRefCode(mr.ref)}</button></div>
         <div class="sub-tbl-cell">${mr.account}</div>
         <div class="sub-tbl-cell">${mr.property||'—'}</div>
@@ -2047,7 +2052,7 @@ function renderExpandedMulti(tx) {
   const rows = tx.multiMatches.map((r,i) => `
     <div class="sub-tbl-row${sel===i?' sel':''}" style="${cols};cursor:pointer" onclick="setMultiSel('${tx.id}',${i})">
       <div class="sub-tbl-cell" style="display:flex;align-items:center;justify-content:center"><div class="radio-dot${sel===i?' sel':''}"></div></div>
-      <div class="sub-tbl-cell">${r.date}</div>
+      <div class="sub-tbl-cell">${fmtD(r.date)}</div>
       <div class="sub-tbl-cell"><button class="tx-rm-link" onclick="event.stopPropagation();setMultiSel('${tx.id}',${i});openSlideout('${tx.id}')">${regRefCode(r.ref)}</button></div>
       <div class="sub-tbl-cell">${r.account}</div>
       <div class="sub-tbl-cell">${r.property||'—'}</div>
@@ -2198,7 +2203,7 @@ let _addTxMenuBound = false;
 
 // Friendly labels for the "+ Add Transaction" dropdown (Write Check / Add Bill / …).
 function addTxTypeVerb(type) {
-  const m = { 'Check':'Write Check', 'Bill':'Add Bill', 'Journal Entry':'Add Journal Entry',
+  const m = { 'Check':'Write Check', 'Bill':'Add Bill', 'Journal Entry':'Add Journal',
     'Deposit':'Make Deposit', 'Receipt':'Add Receipt',
     'Credit Card Charge':'Add Credit Card Transaction', 'Credit Card Credit':'Add Credit Card Transaction' };
   return m[type] || ('Add ' + type);
@@ -2496,6 +2501,10 @@ function recalcAddTxAlloc() {
   _addTxItems.filter(i=>i.type==='Deposit').forEach(i => {
     const el = document.getElementById('atdep-breakdown-'+i.id);
     if (el) el.innerHTML = _atDepBreakdownHtml(i);
+    const cnt = document.getElementById('dep-selcount-'+i.id);
+    if (cnt) cnt.textContent = i.depSel ? i.depSel.size : 0;
+    const tot = document.getElementById('dep-seltotal-'+i.id);
+    if (tot) tot.textContent = fmtN(addTxItemAmount(i));
   });
   _addTxItems.filter(i=>i.type==='Service Charge'||i.type==='Interest Income').forEach(i => {
     const el = document.getElementById('sc-total-'+i.id);
@@ -2607,7 +2616,7 @@ function renderAddTx() {
       ${progRow}
       <div class="at-body" style="display:flex;flex-direction:column;padding-top:0">${bodyInner}</div>
       <div class="at-footer">
-        <button id="save-transaction" class="btn-primary addtx-save" style="height:36px;padding:0 20px" onclick="confirmAddTx()"${balanced?'':' disabled'}>Add</button>
+        <button id="save-transaction" class="btn-primary addtx-save" style="height:36px;padding:0 20px" onclick="confirmAddTx()"${balanced?'':' disabled'}>Save</button>
         <button class="at-cancel" onclick="closeAddTx()">Cancel</button>
       </div>
     </div>
@@ -2831,7 +2840,7 @@ function renderAddTxBill(tx, amt, acct, itemId) {
       <div class="at-field-grid" style="grid-template-columns:1fr 1fr;margin-bottom:12px">
         <div class="at-field">
           <label>Default Bank</label>
-          <select class="at-select"><option>${glName}</option></select>
+          <select class="at-select"><option>&lt; None &gt;</option><option>${glName}</option></select>
         </div>
         <div class="at-field">
           <label>Payment Method</label>
@@ -2850,14 +2859,13 @@ function renderAddTxBill(tx, amt, acct, itemId) {
       <div class="at-field">
         <label>Links</label>
         <div class="at-links-grid">
-          <div class="at-link-tile"><div style="padding-bottom:8px;border-bottom:1px solid #e3edf5;margin-bottom:8px">Purchase Order</div><a class="at-fill-link" href="#" onclick="return false" style="font-size:12.5px">Link Existing Purchase Order</a></div>
-          <div class="at-link-tile"><div style="padding-bottom:8px;border-bottom:1px solid #e3edf5;margin-bottom:8px">Work Order Items</div><a class="at-fill-link" href="#" onclick="return false" style="font-size:12.5px">Link Work Order Items</a></div>
+          <div class="at-link-tile"><div style="padding-bottom:8px;border-bottom:1px solid #e3edf5;margin-bottom:8px">Purchase Order</div><div style="min-height:18px"></div></div>
+          <div class="at-link-tile"><div style="padding-bottom:8px;border-bottom:1px solid #e3edf5;margin-bottom:8px">Work Order Items</div><div style="min-height:18px"></div></div>
         </div>
       </div>
     </div>
   </div>
-  <div class="at-sub-heading">Expenses</div>
-  ${renderDetailTable(tx, amt, { ten99: true, billable: true, billableTo: 'Owner', markup: '0.00' })}`;
+  ${renderDetailTable(tx, amt, { ten99: true, billable: true, billableTo: 'Owner', markup: '0.00', createInvoices: true })}`;
 }
 
 function renderAddTxServiceCharge(tx, amt, acct, itemId, kind) {
@@ -2865,7 +2873,7 @@ function renderAddTxServiceCharge(tx, amt, acct, itemId, kind) {
   scEnsureLines(it, kind);
   const date = tx.date || '';
   const glName = acct ? acct.gl : '1001 Checking Account';
-  const glLabel = kind === 'Interest Income' ? 'Income Account' : 'GL Account';
+  const glLabel = kind === 'Interest Income' ? 'Income Account' : 'Expense Account';
   const target = scItemTarget(it);
   const lineTotal = (it.scLines || []).reduce((s, l) => s + (parseFloat(l.amount) || 0), 0);
   const rows = it.scLines.map((r, i) => `
@@ -2874,6 +2882,7 @@ function renderAddTxServiceCharge(tx, amt, acct, itemId, kind) {
       <td><input class="at-tbl-input search" type="text" value="${r.unit||''}" oninput="setScLine(${itemId},${i},'unit',this.value)"></td>
       <td><input class="at-tbl-input search" type="text" value="${r.gl||''}" oninput="setScLine(${itemId},${i},'gl',this.value)"></td>
       <td><input class="at-tbl-input" type="text" value="${r.memo||''}" oninput="setScLine(${itemId},${i},'memo',this.value)"></td>
+      <td><input class="at-tbl-input" type="text" value="${r.date||date}" oninput="setScLine(${itemId},${i},'date',this.value)"></td>
       <td class="r"><input class="at-tbl-input" ${i === it.scLines.length-1 ? `id="sc-last-${itemId}"` : ''} type="text" value="${(parseFloat(r.amount)||0).toFixed(2)}" style="text-align:right" oninput="setScLine(${itemId},${i},'amount',this.value)"></td>
       <td style="color:#9aa7b3;text-align:center;cursor:pointer" onclick="removeScLine(${itemId},${i})">${ic(P.trash,15,'#9aa7b3')}</td>
     </tr>`).join('');
@@ -2910,14 +2919,14 @@ function renderAddTxServiceCharge(tx, amt, acct, itemId, kind) {
       <table class="at-detail-tbl">
         <thead>
           <tr>
-            <th style="width:180px">Property</th><th style="width:90px">Unit</th><th>${glLabel}</th><th>Memo</th><th class="r" style="width:110px">Amount</th><th style="width:24px"></th>
+            <th style="width:170px">Property</th><th style="width:80px">Unit</th><th>${glLabel}</th><th>Memo</th><th style="width:100px">Date</th><th class="r" style="width:105px">Amount</th><th style="width:24px"></th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
       </table>
       <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
         <div style="display:flex;align-items:center;gap:22px">
-          <button class="at-add-link" onclick="addScLine(${itemId})">${ic(P.add,15,'#008dd5')} Add Detail</button>
+          <button class="at-add-link" onclick="addScLine(${itemId})">${ic(P.add,15,'#008dd5')} Add ${kind}</button>
         </div>
         <span style="font-size:13px;color:#13314c"><b>Total:</b>&nbsp;&nbsp;<span id="sc-total-${itemId}">${fmtN(lineTotal)}</span> of <span id="sc-target-${itemId}">${fmtN(target)}</span></span>
       </div>
@@ -2986,7 +2995,11 @@ function renderAddTxCheck(tx, amt, acct, itemId) {
   <div class="at-cols">
     <div class="at-card" style="flex:2.2">
       <div class="at-card-title">Check Information</div>
-      <div class="at-field-grid" style="grid-template-columns:2.6fr 2.6fr 1.7fr;margin-bottom:12px">
+      <div class="at-field-grid" style="grid-template-columns:1.6fr 2fr 1.2fr 1fr;margin-bottom:12px">
+        <div class="at-field">
+          <label>Property</label>
+          <input class="at-input at-input-search" type="text">
+        </div>
         <div class="at-field">
           <label style="display:flex;align-items:center"><span>Bank</span><span style="margin-left:auto;color:#9aa7b3">Balance:</span></label>
           <select class="at-select"><option>${glName}</option></select>
@@ -2996,13 +3009,13 @@ function renderAddTxCheck(tx, amt, acct, itemId) {
           <input class="at-input at-input-date" type="text" value="${date}">
         </div>
         <div class="at-field">
-          <label style="display:flex;align-items:center;gap:5px">Check # <span class="tt-wrap" data-tip="Sequential check numbers are enforced. Override requires the 'Override sequential check number enforcement' privilege." style="align-items:center;cursor:default">${LOCK_ICO}</span></label>
+          <label style="display:flex;align-items:center;gap:5px">No. <span class="tt-wrap" data-tip="Sequential check numbers are enforced. Override requires the 'Override sequential check number enforcement' privilege." style="align-items:center;cursor:default">${LOCK_ICO}</span></label>
           <input class="at-input" type="text" value="${nextCheckNo(acct ? acct.id : '')}" readonly style="background:#eef2f7;color:#666">
         </div>
       </div>
       <div class="at-field-grid" style="grid-template-columns:2.54fr 1fr;margin-bottom:12px">
         <div class="at-field">
-          <label style="display:flex;align-items:center"><span style="display:inline-flex;align-items:center;gap:2px">Vendor / Owner / Tenant / Prospect <span style="color:#9aa7b3;font-size:11px">▾</span></span><a class="at-fill-link" href="#" onclick="return false" style="margin-left:auto">Fill from history</a></label>
+          <label style="display:flex;align-items:center"><span style="display:inline-flex;align-items:center;gap:2px">Vendor <span style="color:#9aa7b3;font-size:11px">▾</span></span><a class="at-fill-link" href="#" onclick="return false" style="margin-left:auto">Fill from history</a></label>
           <div class="at-amount-wrap"><input class="at-input" type="text" value="${payee}" style="padding-right:30px"><span class="at-amount-refresh">${PERSON_ICO}</span></div>
         </div>
         <div class="at-field">
@@ -3012,8 +3025,11 @@ function renderAddTxCheck(tx, amt, acct, itemId) {
       </div>
       <div class="at-field-grid" style="grid-template-columns:1fr 1fr">
         <div class="at-field">
-          <label>Address</label>
-          <input class="at-input" type="text">
+          <label style="display:flex;align-items:center;gap:6px">Payee Information <svg width="12" height="12" viewBox="0 0 24 24" fill="#008dd5"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></label>
+          <div style="border:1px solid #cedbe7;border-radius:4px;background:#f5f8fa;padding:8px 10px;font-size:13px;color:#13314c;line-height:1.5">
+            <div style="font-weight:500">${payee ? payee.toLowerCase().replace(/\b[a-z]/g, c => c.toUpperCase()) : 'Payee'}</div>
+            <div style="color:#666">${vendorAddr(payee)}</div>
+          </div>
         </div>
         <div class="at-field">
           <label>Memo</label>
@@ -3022,10 +3038,7 @@ function renderAddTxCheck(tx, amt, acct, itemId) {
       </div>
     </div>
     <div class="at-card" style="flex:1">
-      <div class="at-card-title">Payments &amp; Attachments</div>
       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px;margin-bottom:16px">
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#13314c;cursor:pointer"><input type="checkbox"> Process through ePay</label>
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#13314c;cursor:pointer"><input type="checkbox"> eChecks</label>
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#13314c;cursor:pointer"><input type="checkbox"> Check will be printed</label>
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#13314c;cursor:pointer"><input type="checkbox"> Avid Pay</label>
       </div>
@@ -3040,7 +3053,6 @@ function renderAddTxCheck(tx, amt, acct, itemId) {
       </div>
     </div>
   </div>
-  <div class="at-sub-heading">Expenses</div>
   ${renderDetailTable(tx, amt)}`;
 }
 
@@ -3111,13 +3123,13 @@ function renderAddTxDeposit(tx, amt, acct, itemId) {
       <td style="width:32px;padding:0 0 0 12px;color:#9aa7b3;font-size:15px">›</td>
       <td style="width:36px;padding:0 8px"><input type="checkbox" class="dep-cb dep-row-cb" data-i="${i}" ${sel.has(i)?'checked':''} onclick="toggleDepRow(${itemId},${i},this.checked)"></td>
       <td>${p.tenant}</td>
-      <td style="color:#9aa7b3">${p.address}</td>
+      <td style="width:76px">${p.date}</td>
+      <td style="width:72px">${p.check}</td>
       <td style="width:148px">${p.property}${p.multiProp?chip:''}</td>
       <td style="width:100px">${p.unit}${p.multiUnit?chip:''}</td>
-      <td style="width:76px">${p.date}</td>
-      <td class="r" style="width:100px">${fmtN(p.amount)}</td>
-      <td style="width:72px">${p.check}</td>
       <td style="width:130px">${p.comment}</td>
+      <td class="r" style="width:100px">${fmtN(p.amount)}</td>
+      <td style="color:#9aa7b3">${p.address}</td>
       <td style="width:32px"></td>
     </tr>`).join('');
   const oiRows = oi.map((r,i) => `
@@ -3221,18 +3233,22 @@ function renderAddTxDeposit(tx, amt, acct, itemId) {
               <th style="width:32px;padding:0"></th>
               <th style="width:36px;padding:0 8px"><input type="checkbox" class="dep-cb dep-all-cb" ${allChecked?'checked':''} onclick="toggleDepAll(${itemId},this.checked)"></th>
               <th>${ic(P.down,12,'rgba(255,255,255,.6)')} Tenant</th>
-              <th>Address</th>
+              <th style="width:76px">Date</th>
+              <th style="width:72px">Check #</th>
               <th style="width:148px">Property</th>
               <th style="width:100px">Unit</th>
-              <th style="width:76px">Date</th>
-              <th class="r" style="width:100px">Amount</th>
-              <th style="width:72px">Check #</th>
               <th style="width:130px">Comment</th>
+              <th class="r" style="width:100px">Amount</th>
+              <th>Address</th>
               <th style="width:32px;padding:0 8px">${ic(P.cols,14,'rgba(255,255,255,.6)')}</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
         </table>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:flex-end;gap:24px;padding:10px 4px 0;font-size:13px;color:#13314c;border-top:1px solid #eef2f7;flex-shrink:0">
+        <span>Payments Selected: <b id="dep-selcount-${itemId}">${sel.size}</b></span>
+        <span style="color:#008dd5;font-weight:600">Deposit Total: <span id="dep-seltotal-${itemId}">${fmtN(it ? addTxItemAmount(it) : 0)}</span></span>
       </div>
     </div>
 `;
@@ -3260,11 +3276,18 @@ function renderAddTxJournal(tx, amt, acct, itemId) {
   return `
   <div class="at-cols">
     <div class="at-card">
-      <div class="at-card-title">Journal Entry Information</div>
+      <div class="at-card-title" style="display:flex;align-items:center;justify-content:space-between">
+        <span>Journal Entry Information</span>
+        <button class="btn-outline" style="height:30px;padding:0 12px;font-size:12.5px" onclick="showToast('No memorized journals yet')">Load Memorized</button>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:12px;padding:8px 12px;background:#f5f8fa;border:1px solid #e3edf5;border-radius:4px">
+        <span style="font-size:13.5px;font-weight:700;color:#426e29">In Balance</span>
+        <span style="font-size:12.5px;color:#13314c;text-align:right;line-height:1.6">Total Debit: <b>${((it && it.nsfLines) ? it.nsfLines.reduce((t,r)=>t+(parseFloat(String(r.debit).replace(/,/g,''))||0),0) : amt).toFixed(2)}</b><br>Total Credit: <b>${((it && it.nsfLines) ? it.nsfLines.reduce((t,r)=>t+(parseFloat(String(r.credit).replace(/,/g,''))||0),0) : amt).toFixed(2)}</b></span>
+      </div>
       <div class="at-field-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;margin-bottom:10px">
         <div class="at-field">
           <label>Journal</label>
-          <input class="at-input" type="text" value="&lt;NEW&gt;" disabled style="color:#9aa7b3">
+          <input class="at-input" type="text" value="&lt; NEW &gt;" disabled style="color:#9aa7b3">
         </div>
         <div class="at-field">
           <label>Reference</label>
@@ -3276,7 +3299,7 @@ function renderAddTxJournal(tx, amt, acct, itemId) {
         </div>
         <div class="at-field">
           <label>Basis</label>
-          <select class="at-select"><option>Accrual</option><option>Cash</option><option>Both</option></select>
+          <select class="at-select"><option>Both</option><option>Accrual</option><option>Cash</option></select>
         </div>
       </div>
       <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#13314c;margin-bottom:12px"><input type="checkbox"> Period Adjustment</label>
@@ -3287,7 +3310,6 @@ function renderAddTxJournal(tx, amt, acct, itemId) {
     </div>
     ${atAttachCard()}
   </div>
-  <div class="at-sub-heading">Journal Details</div>
   ${renderJournalDetailTable(amt, it && it.nsfLines)}`;
 }
 function renderJournalDetailTable(amt, prefill) {
@@ -3298,9 +3320,9 @@ function renderJournalDetailTable(amt, prefill) {
         <td><input class="at-tbl-input search" type="text" value="${r.account}"></td>
         <td><input class="at-tbl-input search" type="text" value="${r.property}"></td>
         <td><input class="at-tbl-input search" type="text" value="${r.unit}"></td>
+        <td><input class="at-tbl-input search" type="text"></td>
         <td class="r"><input class="at-tbl-input" type="text" value="${r.debit}" style="text-align:right"></td>
         <td class="r"><input class="at-tbl-input" type="text" value="${r.credit}" style="text-align:right"></td>
-        <td><input class="at-tbl-input search" type="text"></td>
         <td><input class="at-tbl-input" type="text" value="${r.memo}"></td>
         <td style="color:#9aa7b3;text-align:center;cursor:pointer">⋮</td>
       </tr>`).join('');
@@ -3314,9 +3336,9 @@ function renderJournalDetailTable(amt, prefill) {
         <th>Account</th>
         <th>Property</th>
         <th style="width:120px">Unit</th>
+        <th>Job</th>
         <th class="r" style="width:100px">Debit</th>
         <th class="r" style="width:100px">Credit</th>
-        <th>Job</th>
         <th>Memo</th>
         <th style="width:24px"></th>
       </tr>
@@ -3324,9 +3346,8 @@ function renderJournalDetailTable(amt, prefill) {
     <tbody>${rows}</tbody>
   </table>
   <div class="at-tbl-foot">
-    <button class="at-tbl-foot-btn">+ Add Detail</button>
-    <button class="at-tbl-foot-btn">≡ Load Memorized</button>
-    <span class="at-tbl-total">Debits: &nbsp;${tot.toFixed(2)} &nbsp;&nbsp; Credits: &nbsp;${tot.toFixed(2)}</span>
+    <button class="at-tbl-foot-btn">+ Add Item</button>
+    <span class="at-tbl-total">Total Debit: &nbsp;${tot.toFixed(2)} &nbsp;&nbsp; Total Credit: &nbsp;${tot.toFixed(2)}</span>
   </div>
   </div>`;
   }
@@ -3342,9 +3363,9 @@ function renderJournalDetailTableDefault(amt) {
         <th>Account</th>
         <th>Property</th>
         <th style="width:120px">Unit</th>
+        <th>Job</th>
         <th class="r" style="width:100px">Debit</th>
         <th class="r" style="width:100px">Credit</th>
-        <th>Job</th>
         <th>Memo</th>
         <th style="width:24px"></th>
       </tr>
@@ -3355,9 +3376,9 @@ function renderJournalDetailTableDefault(amt) {
         <td><input class="at-tbl-input search" type="text"></td>
         <td><input class="at-tbl-input search" type="text"></td>
         <td><input class="at-tbl-input search" type="text"></td>
+        <td><input class="at-tbl-input search" type="text"></td>
         <td class="r"><input class="at-tbl-input" type="text" value="${amt.toFixed(2)}" style="text-align:right"></td>
         <td class="r"><input class="at-tbl-input" type="text" style="text-align:right"></td>
-        <td><input class="at-tbl-input search" type="text"></td>
         <td><input class="at-tbl-input" type="text"></td>
         <td style="color:#9aa7b3;text-align:center;cursor:pointer">⋮</td>
       </tr>
@@ -3366,18 +3387,17 @@ function renderJournalDetailTableDefault(amt) {
         <td><input class="at-tbl-input search" type="text"></td>
         <td><input class="at-tbl-input search" type="text"></td>
         <td><input class="at-tbl-input search" type="text"></td>
+        <td><input class="at-tbl-input search" type="text"></td>
         <td class="r"><input class="at-tbl-input" type="text" style="text-align:right"></td>
         <td class="r"><input class="at-tbl-input" type="text" value="${amt.toFixed(2)}" style="text-align:right"></td>
-        <td><input class="at-tbl-input search" type="text"></td>
         <td><input class="at-tbl-input" type="text"></td>
         <td style="color:#9aa7b3;text-align:center;cursor:pointer">⋮</td>
       </tr>
     </tbody>
   </table>
   <div class="at-tbl-foot">
-    <button class="at-tbl-foot-btn">+ Add Detail</button>
-    <button class="at-tbl-foot-btn">≡ Load Memorized</button>
-    <span class="at-tbl-total">Debits: &nbsp;${amt.toFixed(2)} &nbsp;&nbsp; Credits: &nbsp;${amt.toFixed(2)}</span>
+    <button class="at-tbl-foot-btn">+ Add Item</button>
+    <span class="at-tbl-total">Total Debit: &nbsp;${amt.toFixed(2)} &nbsp;&nbsp; Total Credit: &nbsp;${amt.toFixed(2)}</span>
   </div>
   </div>`;
 }
@@ -3466,7 +3486,6 @@ function renderAddTxCCTransaction(tx, amt, acct, itemId, mode) {
     </div>
     ${atAttachCard()}
   </div>
-  <div class="at-sub-heading">Expenses</div>
   ${renderDetailTable(tx, amt)}`;
 }
 
@@ -3514,7 +3533,7 @@ function renderDetailTable(tx, amt, pre = {}) {
     <button class="at-tbl-foot-btn">+ Add Detail</button>
     <button class="at-tbl-foot-btn">$ Disburse Amount</button>
     <button class="at-tbl-foot-btn">≡ Clear Allocations</button>
-    <button class="at-tbl-foot-btn muted">$ Create Invoices</button>
+    ${pre.createInvoices ? '<button class="at-tbl-foot-btn muted">$ Create Invoices</button>' : ''}
     <span class="at-tbl-total">Total: &nbsp;${amt.toFixed(2)}</span>
   </div>
   </div>`;
@@ -3866,7 +3885,7 @@ function renderFindMatch() {
   const rowsHtml = shown.map(c=>`
     <tr class="${_findMatchSel.has(c._i)?'sel':''}" onclick="toggleFmRow(${c._i})" style="cursor:pointer">
       <td style="width:36px"><input class="fm-cb" type="checkbox" ${_findMatchSel.has(c._i)?'checked':''} onclick="event.stopPropagation();toggleFmRow(${c._i})"></td>
-      <td>${c.date}</td>
+      <td>${fmtD(c.date)}</td>
       <td>${c.type}</td>
       <td>${regRefCode(c.ref)}</td>
       <td>${c.property}</td>
@@ -4132,6 +4151,7 @@ function depositPaymentsCard(v) {
       <span class="so-muted">${p.unit||''}</span>
       <span class="so-muted">${p.comment||''}</span>
       <span class="so-muted">${p.address||''}</span>
+      <span style="text-align:right">${fmtN(p.amount)}</span>
       <span style="display:flex;align-items:center;justify-content:center">${ic(P.kebab,16,'#b3b3b3')}</span>
     </div>`).join('');
   return `
@@ -4144,7 +4164,7 @@ function depositPaymentsCard(v) {
       </div>
       ${v.payments.length ? `<div style="overflow-x:auto"><div class="so-reg">
         <div class="so-reg-hdr">
-          <span></span><span>Tenant</span><span>Date</span><span>Check #</span><span>Property</span><span>Unit</span><span>Comment</span><span>Address</span><span></span>
+          <span></span><span>Tenant</span><span>Date</span><span>Check #</span><span>Property</span><span>Unit</span><span>Comment</span><span>Address</span><span style="text-align:right">Amount</span><span></span>
         </div>
         ${pmtRows}
       </div></div>` : ''}
@@ -4168,7 +4188,7 @@ function journalTopCard(v) {
       </div>
       <div class="so-field">
         <label>Amount</label>
-        <div class="so-input"><span>${fmt(v.amount)}</span></div>
+        <div class="so-input"><span>${fmtN(v.amount)}</span></div>
       </div>
       <div class="so-field">
         <label>Memo</label>
@@ -4204,7 +4224,7 @@ function checkTopCard(v) {
       </div>` : ''}
       <div class="so-field">
         <label>Amount</label>
-        <div class="so-input"><span>${fmt(v.amount)}</span></div>
+        <div class="so-input"><span>${fmtN(v.amount)}</span></div>
       </div>
       ${v.vendor && v.comment ? `<div class="so-field">
         <label>Memo</label>
@@ -4319,7 +4339,7 @@ function genericTopCard(v) {
       </div>
       <div class="so-field">
         <label>Amount</label>
-        <div class="so-input"><span>${fmt(v.amount)}</span></div>
+        <div class="so-input"><span>${fmtN(v.amount)}</span></div>
       </div>
       <div class="so-field">
         <label>Comment</label>
@@ -5376,7 +5396,7 @@ function renderBR() {
     accounts: ACCOUNTS.filter(a=>a.kind==='bank'),
     bankInfoNoLink:'No bank account linked',
     balLabel:'Bank Balance', depositLabel:'Deposit', paymentLabel:'Payment',
-    reconcileLabel:'Reconcile', reconcileIcon:P.bank,
+    reconcileLabel:'Reconcile', reconcileIcon:P.bank, addCheck:true,
   });
 }
 
@@ -5868,7 +5888,7 @@ function srPanel(title, key, rows, acctId) {
   const body = shown.map(r => `
     <tr>
       <td style="text-align:center;vertical-align:middle"><input type="checkbox" ${REC_STATE.checked[r.id] ? 'checked' : ''} onclick="toggleSrRow('${r.id}',this.checked)"></td>
-      <td><div class="sr2-top">${r.bankAmt != null ? r.date : '-'}</div><div class="sr2-sub">${r.rmDate}</div></td>
+      <td><div class="sr2-top">${r.bankAmt != null ? fmtD(r.date) : '-'}</div><div class="sr2-sub">${fmtD(r.rmDate)}</div></td>
       <td><div class="sr2-top">${r.bankDesc == null ? '-' : r.bankDesc}</div><div class="sr2-sub">${r.rmText}</div></td>
       <td><div class="sr2-top">${r.category}</div><div class="sr2-sub">${r.account}</div></td>
       <td class="r"><div class="sr2-top">${r.bankAmt == null ? '-' : fmtN(r.bankAmt)}</div><div class="sr2-sub">${fmtN(r.rmAmt)}</div></td>
@@ -5986,6 +6006,69 @@ function renderReconcile() {
   }
 }
 
+/* Register row kebab menu — the six production actions; Details opens a
+   read-only slideout for the row, the rest are prototype no-ops. */
+let _brMenu = null;
+function brKebabClose() { if (_brMenu) { _brMenu.remove(); _brMenu = null; } }
+function brKebabToggle(ev, svar, idx) {
+  ev.stopPropagation();
+  const wasOpen = !!_brMenu;
+  brKebabClose();
+  if (wasOpen) return;
+  const m = document.createElement('div');
+  m.className = 'br-kebab-menu';
+  m.innerHTML = ['Details', 'Delete', 'Void', 'Mark as reconciled', 'Print Check', 'Check Worksheet']
+    .map(t => `<button class="br-kebab-item" data-act="${t}">${t}</button>`).join('');
+  document.body.appendChild(m);
+  const r = ev.currentTarget.getBoundingClientRect();
+  m.style.top = Math.min(r.bottom + 4, window.innerHeight - m.offsetHeight - 8) + 'px';
+  m.style.left = Math.min(r.left - 140, window.innerWidth - 190) + 'px';
+  m.addEventListener('click', e => {
+    const act = e.target.closest('.br-kebab-item')?.dataset.act;
+    brKebabClose();
+    if (act === 'Details') openBrDetails(svar, idx);
+  });
+  _brMenu = m;
+  if (!window._brMenuBound) {
+    window._brMenuBound = true;
+    document.addEventListener('click', brKebabClose);
+    window.addEventListener('scroll', e => { if (_brMenu && !_brMenu.contains(e.target)) brKebabClose(); }, true);
+  }
+}
+function openBrDetails(svar, idx) {
+  const STATE = svar === 'CR_STATE' ? CR_STATE : BR_STATE;
+  const r = STATE._rows && STATE._rows[idx];
+  if (!r) return;
+  const acct = ACCOUNTS.find(a => a.id === STATE.acctId);
+  const title = { Deposit: 'Deposit Details', Journal: 'Journal Details', Check: 'Check Details', Bill: 'Bill Details', Credit: 'Credit Details', Charge: 'Charge Details' }[r.type] || 'Transaction Details';
+  const amt = r.deposit != null ? r.deposit : (r.payment || 0);
+  document.getElementById('slideout-root').innerHTML = `
+    <div class="slideout-bg" onclick="closeBrDetails()"></div>
+    <div class="slideout">
+      <div class="slideout-hdr">
+        <div style="font-size:16px;font-weight:400;color:#13314c">${title}</div>
+        <button onclick="closeBrDetails()" style="background:none;border:none;display:flex;padding:4px;cursor:pointer">${ic(P.close,20,'#666')}</button>
+      </div>
+      <div class="slideout-body">
+        <div class="so-card">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 16px">
+            <div class="so-field"><label>Reference</label><div class="so-input"><span>${r.ref}</span></div></div>
+            <div class="so-field"><label>Date</label><div class="so-input"><span>${String(r.date).replace(/\/(\d{2})$/, '/20$1')}</span>${ic(P.cal,18,'#9aa7b3')}</div></div>
+            <div class="so-field"><label>Bank Account</label><div class="so-input"><span>${acct ? acct.gl : ''}</span>${ic(P.down,18,'#9aa7b3')}</div></div>
+            <div class="so-field"><label>Account</label><div class="so-input"><span>${r.gl}</span></div></div>
+            <div class="so-field"><label>Amount</label><div class="so-input"><span>${fmtN(amt)}</span></div></div>
+            <div class="so-field"><label>Status</label><div class="so-input"><span class="sr-pill ${r.cleared ? 'cleared' : 'review'}" style="flex:0 0 auto">${r.cleared ? 'Cleared' : 'Uncleared'}</span></div></div>
+          </div>
+          <div class="so-field"><label>Memo</label><textarea class="so-textarea" style="min-height:56px" readonly>${r.info}</textarea></div>
+        </div>
+      </div>
+      <div class="slideout-foot">
+        <button class="btn-ghost" style="height:34px" onclick="closeBrDetails()">Close</button>
+      </div>
+    </div>`;
+}
+function closeBrDetails() { document.getElementById('slideout-root').innerHTML = ''; }
+
 function _renderRegister(STATE, opts) {
   const acct = ACCOUNTS.find(a=>a.id===STATE.acctId);
   if (!acct) return;
@@ -6013,7 +6096,12 @@ function _renderRegister(STATE, opts) {
   const actualBal = acct.inRm;
   const clearedBal = acct.cleared;
 
-  const rowsHtml = rowsWithBal.map(r => `
+  // Intentional divergence from production's register columns (Date | Vendor |
+  // Reference | Information | Cleared | Payee Name): the Banking Center register
+  // keeps Type / Account / Deposit / Payment / Balance as prototype enhancements
+  // (vendor names live inside the Information strings). See DISCREPANCIES.md #20.
+  STATE._rows = rowsWithBal;
+  const rowsHtml = rowsWithBal.map((r, _i) => `
     <tr>
       <td>${r.date}</td>
       <td>${r.ref}</td>
@@ -6024,7 +6112,7 @@ function _renderRegister(STATE, opts) {
       <td class="r">${r.deposit ? fmtN(r.deposit) : ''}</td>
       <td class="r">${r.payment ? fmtN(r.payment) : ''}</td>
       <td class="r">${fmtN(r.balance)}</td>
-      <td style="text-align:center"><button class="br-kebab" title="More">${ic(P.kebab, 17, '#008dd5')}</button></td>
+      <td style="text-align:center"><button class="br-kebab" title="More" onclick="brKebabToggle(event,'${opts.svar}',${_i})">${ic(P.kebab, 17, '#008dd5')}</button></td>
     </tr>`).join('');
 
   document.getElementById(opts.mount).innerHTML = `
@@ -6054,6 +6142,7 @@ function _renderRegister(STATE, opts) {
           `}
         </div>
         <div class="br-top-right">
+          ${opts.addCheck ? `<button class="btn-outline" style="height:32px;padding:0 14px;font-size:13px" onclick="showToast('Write Check opens from Transaction Review in this prototype')">Add Check</button>` : ''}
           <span class="tt-wrap"${unmatchedCount>0?` data-tip="${unmatchedCount} bank transaction${unmatchedCount!==1?'s are':' is'} still in review, and this account cannot be reconciled."`:''}>
             <button class="btn-primary" style="height:32px;padding:0 16px;font-size:13px"${unmatchedCount>0?' disabled':''} onclick="openReconcile('${acct.id}')">${opts.reconcileLabel}</button>
           </span>
