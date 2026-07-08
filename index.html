@@ -349,6 +349,13 @@ svg.ico{display:block;flex-shrink:0}
 .so-oi-row>span.r{text-align:right}
 .so-oi-box{height:30px;border:1px solid #cedbe7;border-radius:4px;background:#fff;display:flex;align-items:center;gap:6px;padding:0 8px;font-size:12.5px;color:#9aa7b3;overflow:hidden;white-space:nowrap}
 .so-oi-links{display:flex;align-items:center;gap:20px}
+.so-bx{min-width:1010px;border:1px solid #cedbe7;border-radius:4px;overflow:hidden}
+.so-bx-hdr{display:grid;grid-template-columns:140px 70px 160px 46px 110px 130px 64px 110px 70px 90px;background:#737373;height:28px;align-items:center}
+.so-bx-hdr span{color:#fff;font-size:12px;font-weight:500;padding:0 8px;white-space:nowrap;letter-spacing:.08em}
+.so-bx-row{display:grid;grid-template-columns:140px 70px 160px 46px 110px 130px 64px 110px 70px 90px;align-items:center;border-top:1px solid #e3edf5;background:#fff;min-height:36px}
+.so-bx-row>span{padding:0 8px;min-width:0;font-size:13px;color:#13314c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.so-bx-row>span.c{text-align:center}
+.so-bx-row>span.r{text-align:right}
 .so-add-link{display:flex;align-items:center;gap:4px;font-size:14px;color:#008dd5;background:none;border:none;cursor:pointer;padding:4px 0 0}
 .field-lbl{font-size:12px;color:#008dd5;display:block;margin-bottom:3px}
 .field-box{height:34px;border:1px solid #cedbe7;border-radius:4px;padding:0 10px;display:flex;align-items:center;justify-content:space-between;background:#fff;font-size:13px;color:#13314c}
@@ -2407,6 +2414,25 @@ function atAttachCard(title='Attachments') {
     </div>`;
 }
 
+const VENDOR_ADDR = {
+  'Rose City Plumbing': '3814 SE Powell Blvd, Portland, OR 97202',
+  'Cascade HVAC': '9640 N Whitaker Rd, Portland, OR 97217',
+  'Portland General Electric': '121 SW Salmon St, Portland, OR 97204',
+  'NW Natural': '250 SW Taylor St, Portland, OR 97204',
+  'Stumptown Landscaping': '7420 SE 82nd Ave, Portland, OR 97266',
+  'Recology': '3491 N Columbia Blvd, Portland, OR 97217',
+  'CenturyLink': '921 SW Washington St, Portland, OR 97205',
+  'Standard Insurance': '1100 SW 6th Ave, Portland, OR 97204',
+  'City of Portland': '1120 SW 5th Ave, Portland, OR 97204',
+  'Multnomah County': '501 SE Hawthorne Blvd, Portland, OR 97214',
+};
+function vendorAddr(name) {
+  const n = (name || '').trim().toLowerCase();
+  if (!n) return '';
+  for (const [k, a] of Object.entries(VENDOR_ADDR))
+    if (n.includes(k.toLowerCase()) || k.toLowerCase().includes(n)) return a;
+  return '4210 SE Division St, Portland, OR 97206';
+}
 function renderAddTxBill(tx, amt, acct, itemId) {
   const date = tx.date || '';
   const vendor = tx.desc ? tx.desc.split(' ').slice(2).join(' ') : '';
@@ -2421,8 +2447,9 @@ function renderAddTxBill(tx, amt, acct, itemId) {
           <input class="at-input at-input-search" type="text">
         </div>
         <div class="at-field">
-          <label style="display:flex;align-items:center;gap:4px;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:2px">Vendor / Owner / Tenant / Prospect <span style="color:#9aa7b3;font-size:11px">▾</span></span> <a class="at-fill-link" href="#" onclick="return false" style="margin-left:auto;font-size:11px">Fill from bill history</a></label>
+          <label style="display:flex;align-items:center;gap:4px;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:2px">Vendor <span style="color:#9aa7b3;font-size:11px">▾</span></span> <a class="at-fill-link" href="#" onclick="return false" style="margin-left:auto;font-size:11px">Fill from bill history</a></label>
           <input class="at-input at-input-search" type="text" value="${vendor}">
+          ${vendor ? `<div style="font-size:12px;color:#666;padding:2px 0 0 2px">${vendorAddr(vendor)}</div>` : ''}
         </div>
         <div class="at-field">
           <label>Amount</label>
@@ -2430,7 +2457,7 @@ function renderAddTxBill(tx, amt, acct, itemId) {
         </div>
         <div class="at-field">
           <label>Terms</label>
-          <select class="at-select"><option>— None —</option><option>Net 15</option><option>Net 30</option><option>Due on receipt</option></select>
+          <select class="at-select"><option>Immediately</option><option>Net 15</option><option>Net 30</option><option>Due on receipt</option></select>
         </div>
       </div>
       <div class="at-field-grid" style="grid-template-columns:1fr 1fr 1fr 1fr;margin-bottom:10px">
@@ -2457,8 +2484,7 @@ function renderAddTxBill(tx, amt, acct, itemId) {
       </div>
     </div>
     <div class="at-card" style="flex:1">
-      <div class="at-card-title">Payments &amp; Attachments</div>
-      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#13314c;margin-bottom:12px"><input type="checkbox"> Approve</label>
+      <div class="at-card-title">Payment &amp; Attachments</div>
       <div class="at-field-grid" style="grid-template-columns:1fr 1fr;margin-bottom:12px">
         <div class="at-field">
           <label>Default Bank</label>
@@ -2481,14 +2507,14 @@ function renderAddTxBill(tx, amt, acct, itemId) {
       <div class="at-field">
         <label>Links</label>
         <div class="at-links-grid">
-          <div class="at-link-tile">Purchase Order</div>
-          <div class="at-link-tile">Work Order Items</div>
+          <div class="at-link-tile"><div style="padding-bottom:8px;border-bottom:1px solid #e3edf5;margin-bottom:8px">Purchase Order</div><a class="at-fill-link" href="#" onclick="return false" style="font-size:12.5px">Link Existing Purchase Order</a></div>
+          <div class="at-link-tile"><div style="padding-bottom:8px;border-bottom:1px solid #e3edf5;margin-bottom:8px">Work Order Items</div><a class="at-fill-link" href="#" onclick="return false" style="font-size:12.5px">Link Work Order Items</a></div>
         </div>
       </div>
     </div>
   </div>
   <div class="at-sub-heading">Expenses</div>
-  ${renderDetailTable(tx, amt)}`;
+  ${renderDetailTable(tx, amt, { ten99: true, billable: true, billableTo: 'Owner', markup: '0.00' })}`;
 }
 
 function renderAddTxCheck(tx, amt, acct, itemId) {
@@ -2925,7 +2951,9 @@ function renderAddTxCCTransaction(tx, amt, acct, itemId, mode) {
 }
 
 
-function renderDetailTable(tx, amt) {
+function renderDetailTable(tx, amt, pre = {}) {
+  const billableToOpts = ['', 'Owner', 'Tenant', 'Hawthorne Holdings LLC', 'Pearl District Partners', 'Alberta Commons Group']
+    .map(o => `<option${o === (pre.billableTo || '') ? ' selected' : ''}>${o}</option>`).join('');
   return `
   <div class="at-detail-wrap">
   <table class="at-detail-tbl">
@@ -2948,15 +2976,15 @@ function renderDetailTable(tx, amt) {
     <tbody>
       <tr>
         <td style="padding:0 4px;color:#9aa7b3">›</td>
-        <td><input class="at-tbl-input search" type="text"></td>
-        <td><input class="at-tbl-input search" type="text"></td>
-        <td><input class="at-tbl-input search" type="text"></td>
-        <td style="text-align:center"><input type="checkbox"></td>
-        <td><input class="at-tbl-input search" type="text"></td>
-        <td><input class="at-tbl-input" type="text"></td>
-        <td style="text-align:center"><input type="checkbox"></td>
-        <td><input class="at-tbl-input" type="text"></td>
-        <td><input class="at-tbl-input" type="text"></td>
+        <td><input class="at-tbl-input search" type="text" value="${pre.property||''}"></td>
+        <td><input class="at-tbl-input search" type="text" value="${pre.unit||''}"></td>
+        <td><input class="at-tbl-input search" type="text" value="${pre.account||''}"></td>
+        <td style="text-align:center"><input type="checkbox" ${pre.ten99?'checked':''} style="accent-color:#F58220"></td>
+        <td><input class="at-tbl-input search" type="text" placeholder="<Unassigned>" value="${pre.job||''}"></td>
+        <td><input class="at-tbl-input" type="text" value="${pre.memo||''}"></td>
+        <td style="text-align:center;white-space:nowrap"><input type="checkbox" ${pre.billable?'checked':''} style="accent-color:#F58220"> <b style="color:#F58220">$</b></td>
+        <td><select class="at-select" style="height:30px;font-size:12.5px">${billableToOpts}</select></td>
+        <td><input class="at-tbl-input" type="text" value="${pre.markup||'0.00'}"></td>
         <td class="r"><input class="at-tbl-input" type="text" value="${amt.toFixed(2)}" style="text-align:right"></td>
         <td style="color:#9aa7b3;text-align:center;cursor:pointer">⋮</td>
       </tr>
@@ -3267,6 +3295,25 @@ function fmToggleAll(checked, visibleIds) {
 }
 function confirmFindMatch() {
   const id = _findMatchTxId;
+  // Record the chosen ledger row on the transaction so its details slideout
+  // shows the real Rent Manager record (with full bill details for Bills).
+  const tx = findTxGlobal(id);
+  if (tx && !tx.matchRow && _findMatchSel.size === 1) {
+    const rows = fmRows(tx);
+    const r = rows.find(x => x._i === [..._findMatchSel][0]);
+    if (r) {
+      const acct = ACCOUNTS.find(a => a.id === txAcctId(id));
+      tx.matchRow = { date: r.date, ref: r.ref, account: acct ? acct.gl : '', property: r.property, vendor: r.info, comment: r.comment, amount: r.amount };
+      if (/^Bill\b/.test(r.ref)) {
+        tx.matchRow.billDetails = {
+          property: r.property, vendor: r.info, address: vendorAddr(r.info), terms: 'Immediately',
+          billDate: r.date, invoice: 'INV-' + (r.ref.replace(/\D/g, '') || '1042'), postDate: r.date, dueDate: r.date,
+          memo: r.comment, bank: acct ? acct.gl : '', method: 'ACH',
+          expense: [{ property: r.property, unit: '\u2014', account: '5402 Repairs & Maintenance', ten99: true, job: '&lt;Unassigned&gt;', memo: r.comment, billable: true, billableTo: 'Owner', markup: '0.00', amount: r.amount }],
+        };
+      }
+    }
+  }
   closeFindMatch();
   if (!id) return;
   S.matchedIds.add(id); S.expandedId = null;
@@ -3442,6 +3489,7 @@ function slideoutView(tx) {
     return { ref: tx.matchRow.ref, date: tx.matchRow.date, amount: tx.matchRow.amount,
       bankAccount: d.bankAccount || (acct?acct.gl:''), comment: d.comment || tx.matchRow.comment || tx.desc,
       payments: d.payments || [], otherIncome: d.otherIncome || [], type: matchedRecordType(tx.matchRow.ref, isInflow),
+      property: tx.matchRow.property, billDetails: tx.matchRow.billDetails,
       vendor: tx.matchRow.vendor, bill: tx.matchRow.bill };
   }
   if (tx.multiMatches) {
@@ -3644,6 +3692,96 @@ function checkTopCard(v) {
       </div>` : ''}
     </div>`;
 }
+// Read-only replica of the full Bill screen: Bill Information and
+// Payment & Attachments cards, plus the expense allocation grid below.
+function billTopCard(v) {
+  const d = v.billDetails || {};
+  const vendor = d.vendor || v.vendor || '';
+  return `
+    <div class="so-card">
+      <div class="so-pmt-hdr-row"><div class="so-pmt-title">Bill Information</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 16px">
+        <div class="so-field">
+          <label>Property</label>
+          <div class="so-input"><span style="display:flex;align-items:center;gap:6px">${ic(P.search,14,'#008dd5')} ${d.property||v.property||''}</span></div>
+        </div>
+        <div class="so-field">
+          <label style="display:flex;align-items:center;justify-content:space-between">Vendor <span class="at-fill-link" style="font-size:11px">Fill from bill history</span></label>
+          <div class="so-input"><span style="display:flex;align-items:center;gap:6px">${ic(P.search,14,'#008dd5')} ${vendor}</span></div>
+          ${d.address ? `<div style="font-size:12px;color:#666;padding:2px 0 0 2px">${d.address}</div>` : ''}
+        </div>
+        <div class="so-field"><label>Amount</label><div class="so-input"><span>${fmtN(v.amount)}</span>${REFRESH_ICO}</div></div>
+        <div class="so-field"><label>Terms</label><div class="so-input"><span>${d.terms||'Immediately'}</span>${ic(P.down,18,'#9aa7b3')}</div></div>
+        <div class="so-field"><label>Bill Date</label><div class="so-input"><span>${d.billDate||v.date}</span>${ic(P.cal,18,'#9aa7b3')}</div></div>
+        <div class="so-field"><label>Invoice #</label><div class="so-input"><span>${d.invoice||''}</span></div></div>
+        <div class="so-field"><label>Post Date</label><div class="so-input"><span>${d.postDate||v.date}</span>${ic(P.cal,18,'#9aa7b3')}</div></div>
+        <div class="so-field"><label>Due Date</label><div class="so-input"><span>${d.dueDate||v.date}</span>${ic(P.cal,18,'#9aa7b3')}</div></div>
+      </div>
+      <div class="so-field"><label>Memo</label><textarea class="so-textarea" style="min-height:56px" readonly>${d.memo||v.comment||''}</textarea></div>
+    </div>
+    <div class="so-card">
+      <div class="so-pmt-hdr-row"><div class="so-pmt-title">Payment &amp; Attachments</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 16px">
+        <div class="so-field"><label>Default Bank</label><div class="so-input"><span>${d.bank||v.bankAccount}</span>${ic(P.down,18,'#9aa7b3')}</div></div>
+        <div class="so-field"><label>Payment Method</label><div class="so-input"><span>${d.method||'Check'}</span>${ic(P.down,18,'#9aa7b3')}</div></div>
+      </div>
+      <div class="so-field">
+        <label>Attachments</label>
+        <div class="so-att-center">
+          <div class="so-att-left">${UPLOAD_ICO} <span>Upload</span></div>
+          <div class="so-att-center-div"></div>
+          <div class="so-att-left">${PASTE_ICO} <span>Paste</span></div>
+        </div>
+      </div>
+      <div class="so-field">
+        <label>Links</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div class="at-link-tile"><div style="padding-bottom:8px;border-bottom:1px solid #e3edf5;margin-bottom:8px">Purchase Order</div><span class="at-fill-link" style="font-size:12.5px">Link Existing Purchase Order</span></div>
+          <div class="at-link-tile"><div style="padding-bottom:8px;border-bottom:1px solid #e3edf5;margin-bottom:8px">Work Order Items</div><span class="at-fill-link" style="font-size:12.5px">Link Work Order Items</span></div>
+        </div>
+      </div>
+    </div>`;
+}
+function billExpenseCard(v) {
+  const d = v.billDetails || {};
+  const rows = d.expense && d.expense.length ? d.expense
+    : [{ property: d.property||v.property||'', unit: '\u2014', account: '5402 Repairs & Maintenance', ten99: true, job: '&lt;Unassigned&gt;', memo: d.memo||v.comment||'', billable: true, billableTo: 'Owner', markup: '0.00', amount: v.amount }];
+  const total = rows.reduce((t,r)=> t + (parseFloat(r.amount)||0), 0);
+  const rowHtml = rows.map(r=>`
+    <div class="so-bx-row">
+      <span>${r.property||''}</span>
+      <span>${r.unit||''}</span>
+      <span>${r.account||''}</span>
+      <span class="c"><input type="checkbox" ${r.ten99?'checked':''} style="accent-color:#F58220" onclick="return false"></span>
+      <span>${r.job||''}</span>
+      <span>${r.memo||''}</span>
+      <span class="c"><input type="checkbox" ${r.billable?'checked':''} style="accent-color:#F58220" onclick="return false"> <b style="color:#F58220">$</b></span>
+      <span>${r.billableTo||''}</span>
+      <span class="r">${r.markup||'0.00'}</span>
+      <span class="r">${fmtN(parseFloat(r.amount)||0)}</span>
+    </div>`).join('');
+  return `
+    <div class="so-card">
+      <div class="so-pmt-hdr-row"><div class="so-pmt-title">Expenses</div></div>
+      <div style="overflow-x:auto">
+        <div class="so-bx">
+          <div class="so-bx-hdr">
+            <span>Property</span><span>Unit</span><span>Expense Account</span><span>1099</span><span>Job</span><span>Memo</span><span>Billable</span><span>Billable To</span><span style="text-align:right">Markup</span><span style="text-align:right">Amount</span>
+          </div>
+          ${rowHtml}
+        </div>
+      </div>
+      <div class="so-oi-links" style="justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:20px">
+          <button class="at-add-link">${ic(P.add,14,'#008dd5')} Add Detail</button>
+          <button class="at-add-link"><b>$</b>&nbsp;Disburse Amount</button>
+          <button class="at-add-link"><b>≡</b>&nbsp;Clear Allocations</button>
+          <button class="at-add-link"><b>$</b>&nbsp;Create Invoices</button>
+        </div>
+        <span style="font-size:13px;color:#13314c"><b>Total:</b>&nbsp;&nbsp;${fmtN(total)}</span>
+      </div>
+    </div>`;
+}
 function genericTopCard(v) {
   return `
     <div class="so-card">
@@ -3678,7 +3816,7 @@ function renderSlideout() {
   const isMatched = S.matchedIds.has(tx.id);
   const titles = { Deposit: 'Deposit Details', 'Journal Entry': 'Journal Details', Check: 'Check Details', Bill: 'Bill Details' };
   const title = titles[v.type] || 'Transaction Details';
-  const topCardFns = { Deposit: depositTopCard, 'Journal Entry': journalTopCard, Check: checkTopCard };
+  const topCardFns = { Deposit: depositTopCard, 'Journal Entry': journalTopCard, Check: checkTopCard, Bill: billTopCard };
   const topCard = (topCardFns[v.type] || genericTopCard)(v);
   el.innerHTML = `
     <div class="slideout-bg" onclick="closeSlideout()"></div>
@@ -3691,6 +3829,7 @@ function renderSlideout() {
         ${isMatched ? `<div class="matched-banner">${ic(P.check,16,'#6eb744')} This bank transaction is matched to the Rent Manager record below.</div>` : ''}
         ${topCard}
         ${v.type === 'Deposit' ? depositOtherIncomeCard(v) + depositPaymentsCard(v) : ''}
+        ${v.type === 'Bill' ? billExpenseCard(v) : ''}
       </div>
       <div class="slideout-foot">
         <button class="btn-ghost" style="height:34px" onclick="closeSlideout()">Close</button>
