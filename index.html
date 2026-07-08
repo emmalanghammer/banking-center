@@ -335,12 +335,20 @@ svg.ico{display:block;flex-shrink:0}
 .so-pmt-title{font-size:14px;font-weight:600;color:#13314c}
 .so-pmt-filters{display:flex;align-items:center;gap:8px}
 .so-search{height:36px;padding:0 8px 0 30px;border:1px solid #cedbe7;border-radius:4px;background:#f5f8fa url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 24 24' fill='%23b3b3b3'%3E%3Cpath d='M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z'/%3E%3C/svg%3E") no-repeat 8px center;font-size:13px;color:#9aa7b3;font-style:italic;flex:1;min-width:0;outline:none;font-family:inherit}
-.so-reg{border:1px solid #cedbe7;border-radius:4px;overflow:hidden;font-size:14px;box-shadow:0 2px 8px rgba(76,76,76,.06)}
-.so-reg-hdr{display:grid;grid-template-columns:32px 1fr 72px 60px 1fr 48px 32px;background:#737373;height:28px;align-items:center}
+.so-reg{border:1px solid #cedbe7;border-radius:4px;overflow:hidden;font-size:14px;box-shadow:0 2px 8px rgba(76,76,76,.06);min-width:880px}
+.so-reg-hdr{display:grid;grid-template-columns:32px 130px 72px 68px 130px 56px 130px 1fr 32px;background:#737373;height:28px;align-items:center}
 .so-reg-hdr span{color:#fff;font-size:12px;font-weight:500;padding:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:.08em}
-.so-reg-row{display:grid;grid-template-columns:32px 1fr 72px 60px 1fr 48px 32px;height:36px;align-items:center;border-top:1px solid #e3edf5;background:#fff}
+.so-reg-row{display:grid;grid-template-columns:32px 130px 72px 68px 130px 56px 130px 1fr 32px;height:36px;align-items:center;border-top:1px solid #e3edf5;background:#fff}
 .so-reg-row span{font-size:13px;color:#13314c;padding:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .so-reg-row .so-muted{color:#9aa7b3}
+.so-oi{min-width:900px;border:1px solid #cedbe7;border-radius:4px;overflow:hidden}
+.so-oi-hdr{display:grid;grid-template-columns:150px 110px 70px 118px 130px 120px 100px 92px;background:#737373;height:28px;align-items:center}
+.so-oi-hdr span{color:#fff;font-size:12px;font-weight:500;padding:0 8px;white-space:nowrap;letter-spacing:.08em}
+.so-oi-row{display:grid;grid-template-columns:150px 110px 70px 118px 130px 120px 100px 92px;align-items:center;border-top:1px solid #e3edf5;background:#fff;padding:6px 0}
+.so-oi-row>span{padding:0 5px;min-width:0;font-size:13px;color:#13314c;overflow:hidden;white-space:nowrap}
+.so-oi-row>span.r{text-align:right}
+.so-oi-box{height:30px;border:1px solid #cedbe7;border-radius:4px;background:#fff;display:flex;align-items:center;gap:6px;padding:0 8px;font-size:12.5px;color:#9aa7b3;overflow:hidden;white-space:nowrap}
+.so-oi-links{display:flex;align-items:center;gap:20px}
 .so-add-link{display:flex;align-items:center;gap:4px;font-size:14px;color:#008dd5;background:none;border:none;cursor:pointer;padding:4px 0 0}
 .field-lbl{font-size:12px;color:#008dd5;display:block;margin-bottom:3px}
 .field-box{height:34px;border:1px solid #cedbe7;border-radius:4px;padding:0 10px;display:flex;align-items:center;justify-content:space-between;background:#fff;font-size:13px;color:#13314c}
@@ -970,7 +978,7 @@ const ACCOUNTS = [
 
 const TRANSACTIONS = [
   // [MATCH] clean 1:1 tenant ACH — one confident Orion suggestion
-  {id:'t1',date:'06/16/2026',desc:'ACH DEPOSIT RIVERA 0616',deposit:1850.00,matchStatus:'match',rmLink:'06/16/2026 Deposit 8842: J. Rivera',orion:'1 deposit found matching $1,850.00 on 6/16/2026.',matchRow:{date:'06/16/2026',ref:'Deposit 8842',account:'1001 Operating Account',property:'Hawthorne Court Apartments',comment:'Rivera June Rent',amount:1850.00,depositDetails:{bankAccount:'1001 Operating Account',depositDate:'06/16/2026',comment:'Rivera June Rent',payments:[{tenant:'J. Rivera',date:'06/16/26',checkNo:'ACH',property:'Hawthorne Court',unit:'311',amount:1850.00}]}}},
+  {id:'t1',date:'06/16/2026',desc:'ACH DEPOSIT RIVERA 0616',deposit:1850.00,matchStatus:'match',rmLink:'06/16/2026 Deposit 8842: J. Rivera',orion:'1 deposit found matching $1,850.00 on 6/16/2026.',matchRow:{date:'06/16/2026',ref:'Deposit 8842',account:'1001 Operating Account',property:'Hawthorne Court Apartments',comment:'Rivera June Rent',amount:1850.00,depositDetails:{bankAccount:'1001 Operating Account',depositDate:'06/16/2026',comment:'Rivera June Rent',payments:[{tenant:'J. Rivera',date:'06/16/26',checkNo:'ACH',property:'Hawthorne Court',unit:'311',comment:'June Rent - ACH',address:'4517 SE Hawthorne Blvd # 311',amount:1850.00}]}}},
   // [SELECT MATCH] two candidate records for the same deposit
   {id:'t2',date:'06/15/2026',desc:'ACH DEPOSIT OKAFOR 0615',deposit:2100.00,matchStatus:'multi',orion:'2 deposits found matching $2,100.00 around 6/15/2026.',multiOrion:'2 deposits found matching $2,100.00 on 06/14/2026 and 06/15/2026. Select the correct match.',multiMatches:[{date:'06/14/2026',ref:'Deposit 8838: D. Okafor',account:'1001 Operating Account',property:'Pearl District Lofts',comment:'June rent',amount:2100.00},{date:'06/15/2026',ref:'Deposit 8840: D. Okafor',account:'1001 Operating Account',property:'Pearl District Lofts',comment:'June rent payment',amount:2100.00}]},
   // [ADD] vendor check, no match — Add overlay pre-fills payee/amount/check #
@@ -2188,7 +2196,7 @@ function addOtherIncomeRow(itemId) {
   const it = _addTxItems.find(i=>i.id===itemId);
   if (!it) return;
   if (!it.otherIncome) it.otherIncome = [];
-  it.otherIncome.push({ property:'', unit:'', account:'', reference:'', memo:'', party:'', amount:'0.00' });
+  it.otherIncome.push({ party:'', property:'', unit:'', reference:'', account:'', job:'', memo:'', amount:'0.00' });
   renderAddTx();
 }
 function removeOtherIncomeRow(itemId, idx) {
@@ -2202,6 +2210,31 @@ function setOtherIncomeField(itemId, idx, field, val) {
   if (!it || !it.otherIncome || !it.otherIncome[idx]) return;
   it.otherIncome[idx][field] = val;
   if (field === 'amount') recalcAddTxAlloc();
+}
+// Spread the deposit's unallocated remainder evenly across the Other Income lines.
+function disburseOtherIncome(itemId) {
+  const it = _addTxItems.find(i=>i.id===itemId);
+  if (!it || !it.otherIncome || !it.otherIncome.length) return;
+  const selTotal = it.depSel ? [...it.depSel].reduce((s,idx)=> s + (DEP_PAYMENTS[idx]?.amount||0), 0) : 0;
+  const others = _addTxItems.filter(i=>i.id!==itemId).reduce((s,i)=> s + addTxItemAmount(i), 0);
+  const each = Math.max(0, addTxTotal() - others - selTotal) / it.otherIncome.length;
+  it.otherIncome.forEach(r => { r.amount = each.toFixed(2); });
+  renderAddTx();
+}
+function clearOtherIncomeAlloc(itemId) {
+  const it = _addTxItems.find(i=>i.id===itemId);
+  if (!it || !it.otherIncome) return;
+  it.otherIncome.forEach(r => { r.amount = '0.00'; });
+  renderAddTx();
+}
+// Cash/Check/Money Orders/Other rollup for a Deposit item, from the selected
+// tenant payments plus any Other Income lines (which always count as Other).
+function _atDepBreakdownHtml(it) {
+  const selPmts = (it && it.depSel) ? [...it.depSel].map(i=>DEP_PAYMENTS[i]).filter(Boolean).map(p=>({checkNo:p.check, amount:p.amount})) : [];
+  const oiPmts = ((it && it.otherIncome) || []).filter(r=>parseFloat(r.amount)).map(r=>({checkNo:'OTHER', amount:parseFloat(r.amount)||0}));
+  const mb = paymentMethodBreakdown([...selPmts, ...oiPmts]);
+  const rows = mb.buckets.map(([label,count,total])=>`<div class="so-pmtmethod-row"><span>${label} (${count})</span><span>${fmtN(total)}</span></div>`).join('');
+  return rows + `<div class="so-pmtmethod-row total"><span>Total (${mb.totalCount})</span><span>${fmtN(mb.totalAmt)}</span></div>`;
 }
 
 function openAddTx(txId) {
@@ -2253,6 +2286,10 @@ function recalcAddTxAlloc() {
     fill.classList.toggle('done', balanced && allocated >= total - 0.005);
   }
   document.querySelectorAll('.addtx-save').forEach(b => { b.disabled = !balanced; });
+  _addTxItems.filter(i=>i.type==='Deposit').forEach(i => {
+    const el = document.getElementById('atdep-breakdown-'+i.id);
+    if (el) el.innerHTML = _atDepBreakdownHtml(i);
+  });
 }
 function confirmAddTx() {
   if (!addTxBalanced()) return;
@@ -2599,49 +2636,74 @@ function renderAddTxDeposit(tx, amt, acct, itemId) {
     </tr>`).join('');
   const oiRows = oi.map((r,i) => `
     <tr>
+      <td><input class="at-tbl-input search" type="text" value="${r.party||''}" oninput="setOtherIncomeField(${itemId},${i},'party',this.value)"></td>
       <td><input class="at-tbl-input search" type="text" value="${r.property||''}" oninput="setOtherIncomeField(${itemId},${i},'property',this.value)"></td>
       <td><input class="at-tbl-input search" type="text" value="${r.unit||''}" oninput="setOtherIncomeField(${itemId},${i},'unit',this.value)"></td>
+      <td><input class="at-tbl-input" type="text" placeholder="Type or select" value="${r.reference||''}" oninput="setOtherIncomeField(${itemId},${i},'reference',this.value)"></td>
       <td><input class="at-tbl-input search" type="text" value="${r.account||''}" oninput="setOtherIncomeField(${itemId},${i},'account',this.value)"></td>
-      <td><input class="at-tbl-input" type="text" value="${r.reference||''}" oninput="setOtherIncomeField(${itemId},${i},'reference',this.value)"></td>
+      <td><input class="at-tbl-input search" type="text" placeholder="<Unassigned>" value="${r.job||''}" oninput="setOtherIncomeField(${itemId},${i},'job',this.value)"></td>
       <td><input class="at-tbl-input" type="text" value="${r.memo||''}" oninput="setOtherIncomeField(${itemId},${i},'memo',this.value)"></td>
-      <td><input class="at-tbl-input search" type="text" value="${r.party||''}" oninput="setOtherIncomeField(${itemId},${i},'party',this.value)"></td>
       <td class="r"><input class="at-tbl-input" type="text" value="${(parseFloat(r.amount)||0).toFixed(2)}" style="text-align:right" oninput="setOtherIncomeField(${itemId},${i},'amount',this.value)"></td>
       <td style="color:#9aa7b3;text-align:center;cursor:pointer" onclick="removeOtherIncomeRow(${itemId},${i})">${ic(P.trash,15,'#9aa7b3')}</td>
     </tr>`).join('');
   return `
     <div class="at-card">
       <div class="at-card-title">Deposit Information</div>
-      <div class="at-field-grid" style="grid-template-columns:1.4fr 1fr 1.2fr;margin-bottom:0">
-        <div class="at-field">
-          <label>Bank Account</label>
-          <select class="at-select">
-            <option>${glName}</option>
-            <option>&lt;Use Charge Type Banks&gt;</option>
-            <option>&lt;Use Property Default&gt;</option>
-          </select>
-        </div>
-        <div class="at-field">
-          <label>Deposit Date</label>
-          <input class="at-input at-input-date" type="text" value="${date}">
-        </div>
-        <div class="at-field" style="justify-content:flex-end">
-          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;height:36px"><input type="checkbox"> Print Deposit Ticket</label>
-        </div>
-      </div>
-      <div class="at-field-grid" style="grid-template-columns:2fr 1fr;margin-top:10px">
-        <div class="at-field">
-          <label>Comments</label>
-          <textarea class="at-textarea" style="min-height:36px"></textarea>
-        </div>
-        <div class="at-field">
-          <label>Attachments</label>
-          <div class="at-attachments" style="min-height:36px;flex-direction:row;gap:12px">
-            <div class="at-attach-actions" style="margin:0">
-              <button class="at-attach-btn">${UPLOAD_ICO} Upload</button>
-              <button class="at-attach-btn">${PASTE_ICO} Paste</button>
+      <div style="display:flex;gap:24px;align-items:stretch">
+        <div style="flex:1;min-width:0">
+          <div class="at-field-grid" style="grid-template-columns:1.4fr 1fr 1.2fr;margin-bottom:0">
+            <div class="at-field">
+              <label>Bank Account</label>
+              <select class="at-select">
+                <option>${glName}</option>
+                <option>&lt;Use Charge Type Banks&gt;</option>
+                <option>&lt;Use Property Default&gt;</option>
+              </select>
+            </div>
+            <div class="at-field">
+              <label>Deposit Date</label>
+              <input class="at-input at-input-date" type="text" value="${date}">
+            </div>
+            <div class="at-field" style="justify-content:flex-end">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;height:36px"><input type="checkbox"> Print Deposit Ticket</label>
+            </div>
+          </div>
+          <div class="at-field-grid" style="grid-template-columns:2fr 1fr;margin-top:10px">
+            <div class="at-field">
+              <label>Comments</label>
+              <textarea class="at-textarea" style="min-height:36px"></textarea>
+            </div>
+            <div class="at-field">
+              <label>Attachments</label>
+              <div class="at-attachments" style="min-height:36px;flex-direction:row;gap:12px">
+                <div class="at-attach-actions" style="margin:0">
+                  <button class="at-attach-btn">${UPLOAD_ICO} Upload</button>
+                  <button class="at-attach-btn">${PASTE_ICO} Paste</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+        <div style="width:280px;flex-shrink:0;padding-left:24px;border-left:1px solid #eef2f7">
+          <div class="so-pmtmethod" id="atdep-breakdown-${itemId}">${_atDepBreakdownHtml(it)}</div>
+        </div>
+      </div>
+    </div>
+    <div class="at-card">
+      <div class="at-card-title">Other Income</div>
+      <table class="at-detail-tbl">
+        <thead>
+          <tr>
+            <th style="width:150px">Vendor/Owner</th><th>Property</th><th style="width:80px">Unit</th><th style="width:130px">Reference</th><th>Income Account</th><th style="width:130px">Job</th><th>Memo</th><th class="r" style="width:100px">Amount</th><th style="width:24px"></th>
+          </tr>
+        </thead>
+        <tbody>${oiRows}</tbody>
+      </table>
+      ${oi.length ? '' : `<div style="font-size:13px;color:#9aa7b3;padding:2px 0 0">No other income lines added.</div>`}
+      <div style="display:flex;align-items:center;gap:22px;margin-top:4px">
+        <button class="at-add-link" onclick="addOtherIncomeRow(${itemId})">${ic(P.add,15,'#008dd5')} Add Item</button>
+        <button class="at-add-link" onclick="disburseOtherIncome(${itemId})"><b>$</b>&nbsp;Disburse Amount</button>
+        <button class="at-add-link" onclick="clearOtherIncomeAlloc(${itemId})"><b>≡</b>&nbsp;Clear Allocations</button>
       </div>
     </div>
     <div class="at-card dep-card">
@@ -2686,20 +2748,7 @@ function renderAddTxDeposit(tx, amt, acct, itemId) {
         </table>
       </div>
     </div>
-    <div class="at-card">
-      <div class="at-card-title" style="display:flex;align-items:center;justify-content:space-between">
-        <span>Other Income</span>
-        <button class="at-add-link" style="border:none;background:none;cursor:pointer" onclick="addOtherIncomeRow(${itemId})">${ic(P.add,15,'#008dd5')} Add Other Income</button>
-      </div>
-      ${oi.length ? `<table class="at-detail-tbl">
-        <thead>
-          <tr>
-            <th>Property</th><th style="width:100px">Unit</th><th>Income Account</th><th style="width:120px">Reference</th><th>Memo</th><th style="width:140px">Vendor/Owner</th><th class="r" style="width:100px">Amount</th><th style="width:24px"></th>
-          </tr>
-        </thead>
-        <tbody>${oiRows}</tbody>
-      </table>` : `<div style="font-size:13px;color:#9aa7b3;padding:8px 0">No other income lines added.</div>`}
-    </div>`;
+`;
 }
 
 function renderAddTxJournal(tx, amt, acct, itemId) {
@@ -3392,7 +3441,7 @@ function slideoutView(tx) {
     const d = tx.matchRow.depositDetails || {};
     return { ref: tx.matchRow.ref, date: tx.matchRow.date, amount: tx.matchRow.amount,
       bankAccount: d.bankAccount || (acct?acct.gl:''), comment: d.comment || tx.matchRow.comment || tx.desc,
-      payments: d.payments || [], type: matchedRecordType(tx.matchRow.ref, isInflow),
+      payments: d.payments || [], otherIncome: d.otherIncome || [], type: matchedRecordType(tx.matchRow.ref, isInflow),
       vendor: tx.matchRow.vendor, bill: tx.matchRow.bill };
   }
   if (tx.multiMatches) {
@@ -3430,29 +3479,77 @@ function depositTopCard(v) {
     <div class="so-pmtmethod-row"><span>${label} (${count})</span><span>${fmtN(total)}</span></div>`).join('');
   return `
     <div class="so-card">
-      <div class="so-field">
-        <label>Bank Account</label>
-        <div class="so-input"><span>${v.bankAccount}</span>${ic(P.down,18,'#9aa7b3')}</div>
-      </div>
-      <div class="so-field">
-        <label>Comments</label>
-        <textarea class="so-textarea" readonly>${v.comment||''}</textarea>
-      </div>
-      <div class="so-field">
-        <label>Deposit Date</label>
-        <div class="so-input"><span>${v.date}</span>${ic(P.cal,18,'#9aa7b3')}</div>
-      </div>
-      <div class="so-field">
-        <label>Attachments</label>
-        <div class="so-att-center">
-          <div class="so-att-left">${UPLOAD_ICO} <span>Upload</span></div>
-          <div class="so-att-center-div"></div>
-          <div class="so-att-left">${PASTE_ICO} <span>Paste</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px 16px">
+        <div class="so-field">
+          <label>Bank Account</label>
+          <div class="so-input"><span>${v.bankAccount}</span>${ic(P.down,18,'#9aa7b3')}</div>
+        </div>
+        <div class="so-field">
+          <label>Deposit Date</label>
+          <div class="so-input"><span>${v.date}</span>${ic(P.cal,18,'#9aa7b3')}</div>
+        </div>
+        <div class="so-field">
+          <label>Comments</label>
+          <textarea class="so-textarea" style="min-height:72px" readonly>${v.comment||''}</textarea>
+        </div>
+        <div class="so-field">
+          <label>Attachments</label>
+          <div class="so-att-center">
+            <div class="so-att-left">${UPLOAD_ICO} <span>Upload</span></div>
+            <div class="so-att-center-div"></div>
+            <div class="so-att-left">${PASTE_ICO} <span>Paste</span></div>
+          </div>
         </div>
       </div>
       <div class="so-pmtmethod">
         ${mbRows}
         <div class="so-pmtmethod-row total"><span>Total (${mb.totalCount})</span><span>${fmtN(mb.totalAmt)}</span></div>
+      </div>
+    </div>`;
+}
+// Read-only replica of the deposit's Other Income allocation grid: one entry
+// row (Vendor/Owner, Property, Unit, Reference, Income Account, Job, Memo,
+// Amount) shown blank when the deposit carries no other-income lines.
+function depositOtherIncomeCard(v) {
+  const oi = v.otherIncome || [];
+  const oiRows = oi.length ? oi.map(r=>`
+    <div class="so-oi-row">
+      <span>${r.party||''}</span>
+      <span>${r.property||''}</span>
+      <span>${r.unit||''}</span>
+      <span>${r.reference||''}</span>
+      <span>${r.account||''}</span>
+      <span>${r.job||''}</span>
+      <span>${r.memo||''}</span>
+      <span class="r">${fmtN(parseFloat(r.amount)||0)}</span>
+    </div>`).join('') : `
+    <div class="so-oi-row">
+      <span><span class="so-oi-box" style="justify-content:space-between"><span style="display:flex;align-items:center;gap:6px">Vendor ${ic(P.down,12,'#9aa7b3')}</span>${ic(P.search,13,'#008dd5')}</span></span>
+      <span><span class="so-oi-box">${ic(P.search,13,'#008dd5')}</span></span>
+      <span><span class="so-oi-box">${ic(P.search,13,'#008dd5')}</span></span>
+      <span><span class="so-oi-box" style="justify-content:space-between"><span style="font-style:italic">Type or sele…</span>${ic(P.down,12,'#9aa7b3')}</span></span>
+      <span><span class="so-oi-box" style="justify-content:flex-end">${ic(P.down,12,'#9aa7b3')}</span></span>
+      <span><span class="so-oi-box">${ic(P.search,13,'#008dd5')} &lt;Unassign…&gt;</span></span>
+      <span><span class="so-oi-box"></span></span>
+      <span><span class="so-oi-box" style="justify-content:flex-end;color:#13314c">0.00</span></span>
+    </div>`;
+  return `
+    <div class="so-card">
+      <div class="so-pmt-hdr-row">
+        <div class="so-pmt-title">Other Income</div>
+      </div>
+      <div style="overflow-x:auto">
+        <div class="so-oi">
+          <div class="so-oi-hdr">
+            <span>Vendor/Owner</span><span>Property</span><span>Unit</span><span>Reference</span><span>Income Account</span><span>Job</span><span>Memo</span><span style="text-align:right">Amount</span>
+          </div>
+          ${oiRows}
+        </div>
+      </div>
+      <div class="so-oi-links">
+        <button class="at-add-link">${ic(P.add,14,'#008dd5')} Add Item</button>
+        <button class="at-add-link"><b>$</b>&nbsp;Disburse Amount</button>
+        <button class="at-add-link"><b>≡</b>&nbsp;Clear Allocations</button>
       </div>
     </div>`;
 }
@@ -3465,6 +3562,8 @@ function depositPaymentsCard(v) {
       <span class="so-muted">${p.checkNo||'—'}</span>
       <span class="so-muted">${p.property||''}</span>
       <span class="so-muted">${p.unit||''}</span>
+      <span class="so-muted">${p.comment||''}</span>
+      <span class="so-muted">${p.address||''}</span>
       <span style="display:flex;align-items:center;justify-content:center">${ic(P.kebab,16,'#b3b3b3')}</span>
     </div>`).join('');
   return `
@@ -3474,14 +3573,13 @@ function depositPaymentsCard(v) {
       </div>
       <div class="so-pmt-filters">
         <input class="so-search" placeholder="Find a payment..." />
-        <button class="btn-outline" style="height:36px;padding:0 12px;display:inline-flex;align-items:center;gap:6px;flex-shrink:0">${ic(P.add,14,'#008dd5')} Add Other Income</button>
       </div>
-      ${v.payments.length ? `<div class="so-reg">
+      ${v.payments.length ? `<div style="overflow-x:auto"><div class="so-reg">
         <div class="so-reg-hdr">
-          <span></span><span>Tenant</span><span>Date</span><span>Check #</span><span>Property</span><span>Unit</span><span></span>
+          <span></span><span>Tenant</span><span>Date</span><span>Check #</span><span>Property</span><span>Unit</span><span>Comment</span><span>Address</span><span></span>
         </div>
         ${pmtRows}
-      </div>` : ''}
+      </div></div>` : ''}
       <button class="so-add-link">${ic(P.add,14,'#008dd5')} Add Payments</button>
     </div>`;
 }
@@ -3592,7 +3690,7 @@ function renderSlideout() {
       <div class="slideout-body">
         ${isMatched ? `<div class="matched-banner">${ic(P.check,16,'#6eb744')} This bank transaction is matched to the Rent Manager record below.</div>` : ''}
         ${topCard}
-        ${v.type === 'Deposit' ? depositPaymentsCard(v) : ''}
+        ${v.type === 'Deposit' ? depositOtherIncomeCard(v) + depositPaymentsCard(v) : ''}
       </div>
       <div class="slideout-foot">
         <button class="btn-ghost" style="height:34px" onclick="closeSlideout()">Close</button>
