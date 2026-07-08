@@ -34,19 +34,23 @@ Portland, OR residential + light-commercial property manager. Demo "today" = mid
 
 **1001 Operating (`op3487`)** — Chase ••3847  
 - Bank Balance: $516,931.60 | In RM: $512,000.00 | Difference: −$4,931.60  
-- 6 review items whose net = +$4,931.60 (drives difference to $0 when all cleared)  
-- Review beats: Match, Select Match (multi), Add New, Split (inside Add), Find Matches, Exclude
+- 8 review items whose net = +$4,931.60 (drives difference to $0 when all cleared):
+  +1,850 (t1 Rivera) +2,100 (t2 Okafor) −1,240 (t3 Rose City) +6,939 (t4 Zego batch)
+  −2,860 (t5 Cascade HVAC) −318.40 (t6 café) −1,150 (t7 NSF Reyes) −389 (t8 Recology dup)
+- Review beats (order fixed for the Useberry study): Match, Select Match (multi), Add New,
+  Split (inside Add), Find Matches, Exclude — then NSF Return (t7), Possible Duplicate (t8)
+- Suggested-match confidence tiers: t1=rule (green dot), t2/t3/t7=ai (Orion spark), t8=hint (grey dot)
 
 ## Key data locations (approx line numbers)
 
 | Data | ~Line |
 |------|-------|
-| `ACCOUNTS` array | 731 |
-| `TRANSACTIONS` (hero feed) | 747 |
-| `TRANSACTIONS_BY_ACCT` | 767 |
-| `INSIGHTS` | 690 |
-| `BR_TX` (Bank Register rows) | 3347 |
-| `recData` (Smart Reconciliation rows: matched bank txs + RM-only Review items) | ~4250 |
+| `INSIGHTS` | 937 |
+| `ACCOUNTS` array | 976 |
+| `TRANSACTIONS` (hero feed) | 992 |
+| `TRANSACTIONS_BY_ACCT` | 1012 |
+| `BR_TX` (Bank Register rows) | 5162 |
+| `recData` (Smart Reconciliation rows: matched bank txs + RM-only Review items) | ~5466 |
 
 ## Key render functions
 

@@ -991,17 +991,21 @@ const ACCOUNTS = [
 
 const TRANSACTIONS = [
   // [MATCH] clean 1:1 tenant ACH — one confident Orion suggestion
-  {id:'t1',date:'06/16/2026',desc:'ACH DEPOSIT RIVERA 0616',deposit:1850.00,matchStatus:'match',rmLink:'06/16/2026 Deposit 8842: J. Rivera',orion:'1 deposit found matching $1,850.00 on 6/16/2026.',matchRow:{date:'06/16/2026',ref:'Deposit 8842',account:'1001 Operating Account',property:'Hawthorne Court Apartments',comment:'Rivera June Rent',amount:1850.00,depositDetails:{bankAccount:'1001 Operating Account',depositDate:'06/16/2026',comment:'Rivera June Rent',payments:[{tenant:'J. Rivera',date:'06/16/26',checkNo:'ACH',property:'Hawthorne Court',unit:'311',comment:'June Rent - ACH',address:'4517 SE Hawthorne Blvd # 311',amount:1850.00}]}}},
+  {id:'t1',date:'06/16/2026',desc:'ACH DEPOSIT RIVERA 0616',deposit:1850.00,matchStatus:'match',tier:'rule',rmLink:'06/16/2026 Deposit 8842: J. Rivera',orion:'1 deposit found matching $1,850.00 on 6/16/2026.',matchRow:{date:'06/16/2026',ref:'Deposit 8842',account:'1001 Operating Account',property:'Hawthorne Court Apartments',comment:'Rivera June Rent',amount:1850.00,depositDetails:{bankAccount:'1001 Operating Account',depositDate:'06/16/2026',comment:'Rivera June Rent',payments:[{tenant:'J. Rivera',date:'06/16/26',checkNo:'ACH',property:'Hawthorne Court',unit:'311',comment:'June Rent - ACH',address:'4517 SE Hawthorne Blvd # 311',amount:1850.00}]}}},
   // [SELECT MATCH] two candidate records for the same deposit
-  {id:'t2',date:'06/15/2026',desc:'ACH DEPOSIT OKAFOR 0615',deposit:2100.00,matchStatus:'multi',orion:'2 deposits found matching $2,100.00 around 6/15/2026.',multiOrion:'2 deposits found matching $2,100.00 on 06/14/2026 and 06/15/2026. Select the correct match.',multiMatches:[{date:'06/14/2026',ref:'Deposit 8838: D. Okafor',account:'1001 Operating Account',property:'Pearl District Lofts',comment:'June rent',amount:2100.00},{date:'06/15/2026',ref:'Deposit 8840: D. Okafor',account:'1001 Operating Account',property:'Pearl District Lofts',comment:'June rent payment',amount:2100.00}]},
+  {id:'t2',date:'06/15/2026',desc:'ACH DEPOSIT OKAFOR 0615',deposit:2100.00,matchStatus:'multi',tier:'ai',orion:'2 deposits found matching $2,100.00 around 6/15/2026.',multiOrion:'2 deposits found matching $2,100.00 on 06/14/2026 and 06/15/2026. Select the correct match.',multiMatches:[{date:'06/14/2026',ref:'Deposit 8838: D. Okafor',account:'1001 Operating Account',property:'Pearl District Lofts',comment:'June rent',amount:2100.00},{date:'06/15/2026',ref:'Deposit 8840: D. Okafor',account:'1001 Operating Account',property:'Pearl District Lofts',comment:'June rent payment',amount:2100.00}]},
   // [ADD] vendor check, no match — Add overlay pre-fills payee/amount/check #
-  {id:'t3',date:'06/12/2026',desc:'CHECK 2209 ROSE CITY PLUMBING',payment:1240.00,matchStatus:'match',rmLink:'06/12/2026 Check 2209: Rose City Plumbing',orion:'1 check found matching $1,240.00 \u2014 Check #2209 pays Bill B1167 from Rose City Plumbing.',matchRow:{date:'06/12/2026',ref:'Check 2209',account:'1001 Operating Account',property:'Sellwood Row',vendor:'Rose City Plumbing',comment:'Drain repair \u2014 Unit 4',amount:1240.00,gl:'5402 Repairs & Maintenance',bill:{ref:'Bill B1167',invoice:'#RCP-1138',status:'Paid'}}},
+  {id:'t3',date:'06/12/2026',desc:'CHECK 2209 ROSE CITY PLUMBING',payment:1240.00,matchStatus:'match',tier:'ai',rmLink:'06/12/2026 Check 2209: Rose City Plumbing',orion:'1 check found matching $1,240.00 \u2014 Check #2209 pays Bill B1167 from Rose City Plumbing.',matchRow:{date:'06/12/2026',ref:'Check 2209',account:'1001 Operating Account',property:'Sellwood Row',vendor:'Rose City Plumbing',comment:'Drain repair \u2014 Unit 4',amount:1240.00,gl:'5402 Repairs & Maintenance',bill:{ref:'Bill B1167',invoice:'#RCP-1138',status:'Paid'}}},
   // [SPLIT] one batch deposit covering multiple residents — split to match
-  {id:'t4',date:'06/11/2026',desc:'ZEGO BATCH DEPOSIT 0611',deposit:5400.00,matchStatus:'none',rmLink:null,orion:'Batch deposit of $5,400.00 likely covers multiple resident payments. Split across tenants to match.'},
+  {id:'t4',date:'06/11/2026',desc:'ZEGO BATCH DEPOSIT 0611',deposit:6939.00,matchStatus:'none',rmLink:null,orion:'Batch deposit of $6,939.00 likely covers multiple resident payments. Split across tenants to match.'},
   // [FIND MATCH] vendor ACH — search the ledger for the matching record
   {id:'t5',date:'06/09/2026',desc:'ACH DEBIT CASCADE HVAC 0609',payment:2860.00,matchStatus:'none',rmLink:null},
   // [EXCLUDE] personal / mis-posted charge — exclude without recording
   {id:'t6',date:'06/05/2026',desc:'POS DEBIT — RIVERPLACE CAFE',payment:318.40,matchStatus:'none',rmLink:null,orion:'No property association found. If this is a personal or mis-posted charge, you can exclude it.'},
+  // [NSF RETURN] ACH return of a tenant rent payment — resolve with a pre-filled NSF adjustment journal
+  {id:'t7',date:'06/04/2026',desc:'ACH RETURN NSF — RENT PAYMENT REYES',payment:1150.00,matchStatus:'none',nsf:true,tier:'ai',rmLink:null,orion:"This looks like an NSF return for Reyes' 6/03 rent payment (Deposit 8836). Create an NSF adjustment?"},
+  // [POSSIBLE DUPLICATE] provider re-sync near-duplicate of an already-matched register payment
+  {id:'t8',date:'06/07/2026',desc:'RECOLOGY WASTE SVC 0607',payment:389.00,matchStatus:'none',tier:'hint',rmLink:null,dup:{date:'06/06/2026',ref:'Check 2198',vendor:'Recology',property:'Pearl District Lofts',comment:'Waste service — June',amount:389.00,status:'Matched 06/07/2026'},orion:'A matched payment with the same amount, date, and vendor already exists in the register. This may be a duplicate from a provider re-sync.'},
 ];
 
 /* ── Per-account transactions ──────────────────────────────── */
@@ -1875,6 +1879,15 @@ function renderTxRows() {
   el.innerHTML = txs.map(tx => renderTxRow(tx)).join('');
 }
 
+// Confidence tier on suggested matches: how the suggestion was produced.
+// green dot = user rule, Orion spark = AI-inferred, grey dot = provider hint.
+function tierDot(tx) {
+  if (!tx.tier) return '';
+  if (tx.tier === 'rule') return `<span class="tt-wrap" data-tip="Rule — matched by your rule for recurring ACH rent deposits." style="flex-shrink:0;align-items:center"><span style="width:8px;height:8px;border-radius:50%;background:#6eb744;display:inline-block"></span></span>`;
+  if (tx.tier === 'ai') return `<span class="tt-wrap" data-tip="AI suggested — Orion inferred this match from the amount, date, and payee." style="flex-shrink:0;align-items:center">${orionSpark(13)}</span>`;
+  return `<span class="tt-wrap" data-tip="Provider hint — based on the bank's category only. Low confidence." style="flex-shrink:0;align-items:center"><span style="width:8px;height:8px;border-radius:50%;background:#b3b3b3;display:inline-block"></span></span>`;
+}
+
 function renderTxRow(tx) {
   const matched = S.matchedIds.has(tx.id);
   const exp = S.expandedId===tx.id;
@@ -1885,9 +1898,13 @@ function renderTxRow(tx) {
   if (matched) {
     rmCell = `<div class="tx-rm-matched">${ic(P.check,14,'#6eb744')}<button class="tx-rm-link" onclick="event.stopPropagation();openSlideout('${tx.id}')">${tx.rmLink}</button></div>`;
   } else if (tx.matchStatus==='match' && tx.rmLink) {
-    rmCell = `<button class="tx-rm-link" onclick="event.stopPropagation();openSlideout('${tx.id}')">${tx.rmLink}</button>`;
+    rmCell = `<div style="display:flex;align-items:center;gap:6px;min-width:0">${tierDot(tx)}<button class="tx-rm-link" onclick="event.stopPropagation();openSlideout('${tx.id}')">${tx.rmLink}</button></div>`;
   } else if (tx.matchStatus==='multi') {
-    rmCell = `<div class="tx-rm-multi"><span style="width:8px;height:8px;border-radius:50%;background:#f5a623;flex-shrink:0;display:inline-block"></span><em style="color:#13314c">2 matches found</em></div>`;
+    rmCell = `<div class="tx-rm-multi">${tierDot(tx)}<span style="width:8px;height:8px;border-radius:50%;background:#f5a623;flex-shrink:0;display:inline-block"></span><em style="color:#13314c">2 matches found</em></div>`;
+  } else if (tx.nsf) {
+    rmCell = `<span class="loz">${tierDot(tx)}<span class="loz-dot warn"></span><em>Possible NSF return</em></span>`;
+  } else if (tx.dup) {
+    rmCell = `<span class="loz">${tierDot(tx)}<span class="loz-dot warn"></span><em>Possible duplicate</em></span>`;
   } else {
     rmCell = `<span class="tx-rm-none">No match suggested.</span>`;
   }
@@ -1932,6 +1949,10 @@ function renderTxRow(tx) {
     html += `<div class="tx-exp-wrap"><div class="tx-tab-body">`;
     if (matched) {
       html += `<div class="matched-banner">${ic(P.check,16,'#6eb744')} Matched to ${tx.rmLink}</div>`;
+    } else if (tx.nsf) {
+      html += renderExpandedNsf(tx);
+    } else if (tx.dup) {
+      html += renderExpandedDup(tx);
     } else if (tx.matchStatus==='match') {
       html += renderExpandedMatch(tx);
     } else if (tx.matchStatus==='multi') {
@@ -2048,6 +2069,67 @@ function renderExpandedMulti(tx) {
     ${expActionRow(tx)}`;
 }
 
+// NSF return beat: Orion proposes a pre-filled reversal journal.
+function renderExpandedNsf(tx) {
+  return `
+    <div class="exp-top">
+      <div class="orion-msg">${orionSpark(16)}<span>${tx.orion}</span></div>
+      ${renderHelpful(tx.id)}
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div class="act-btns">
+        <button class="btn-primary" style="height:36px" onclick="openNsfAdjustment('${tx.id}')">${ic(CIRCLE_PLUS,16,'#fff')} Create NSF Adjustment</button>
+        <button class="btn-outline" style="height:36px" onclick="openFindMatch('${tx.id}')">${ic(P.search,14,'#008dd5')} Find Matches</button>
+      </div>
+      <div class="exp-links">
+        <button class="link-btn" onclick="doExclude('${tx.id}')">Exclude</button>
+      </div>
+    </div>`;
+}
+
+// Possible-duplicate beat: the incoming bank transaction next to the already-
+// matched register record it collides with.
+function renderExpandedDup(tx) {
+  const d = tx.dup;
+  const card = (title, pill, rows) => `
+    <div style="flex:1;border:1px solid #cedbe7;border-radius:4px;background:#fff;padding:14px 16px;min-width:0">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">
+        <span style="font-size:13px;font-weight:600;color:#13314c">${title}</span>${pill}
+      </div>
+      ${rows.map(([l,v])=>`<div style="display:flex;justify-content:space-between;gap:12px;padding:3px 0;font-size:13px"><span style="color:#666">${l}</span><span style="color:#13314c;text-align:right">${v}</span></div>`).join('')}
+    </div>`;
+  return `
+    <div class="exp-top">
+      <div class="orion-msg">${orionSpark(16)}<span>${tx.orion}</span></div>
+      ${renderHelpful(tx.id)}
+    </div>
+    <div style="display:flex;gap:12px;margin:2px 0 4px">
+      ${card('Incoming bank transaction', `<span class="loz"><span class="loz-dot warn"></span><em style="font-size:12px">New from bank feed</em></span>`, [
+        ['Date', tx.date], ['Description', tx.desc], ['Amount', fmtN(tx.payment)]
+      ])}
+      ${card('Already matched in register', `<span class="loz"><span class="loz-dot ok"></span><em style="font-size:12px">${d.status}</em></span>`, [
+        ['Date', d.date], ['Reference', d.ref], ['Vendor', d.vendor], ['Property', d.property], ['Comment', d.comment], ['Amount', fmtN(d.amount)]
+      ])}
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div class="act-btns">
+        <button class="btn-primary" style="height:36px" onclick="doExcludeDup('${tx.id}')">Exclude as Duplicate</button>
+        <button class="btn-outline" style="height:36px" onclick="doKeepBoth('${tx.id}')">Keep Both</button>
+      </div>
+    </div>`;
+}
+function doExcludeDup(id) {
+  S.excludedIds.add(id); S.matchedIds.delete(id); S.expandedId=null;
+  showToast('Excluded as duplicate');
+  renderRight(); renderSidebar();
+}
+function doKeepBoth(id) {
+  const tx = findTxGlobal(id);
+  if (tx) { tx.dup = null; tx.tier = null; }
+  showToast('Keeping both — record the bank transaction in Rent Manager');
+  renderTxRows();
+}
+
 function renderExpandedNone(tx) {
   return `
     <div class="exp-none-card">
@@ -2129,7 +2211,9 @@ function toggleAddTxMenu() {
 function addAddTxItemType(type) {
   const remaining = Math.max(0, addTxTotal() - addTxAllocated());
   _addTxItems.forEach(it => it.collapsed = true);
-  _addTxItems.push({ id: ++_addTxSeq, type, amount: remaining, collapsed: false });
+  const item = { id: ++_addTxSeq, type, amount: remaining, collapsed: false };
+  if (type === 'Service Charge' || type === 'Interest Income') scEnsureLines(item, type);
+  _addTxItems.push(item);
   _addTxMenuOpen = false;
   renderAddTx();
 }
@@ -2156,8 +2240,8 @@ function getTxTypes(acct, tx) {
   }
   // bank account
   return isPayment
-    ? ['Bill', 'Check', 'Journal Entry']
-    : ['Deposit', 'Journal Entry'];
+    ? ['Bill', 'Check', 'Journal Entry', 'Service Charge']
+    : ['Deposit', 'Journal Entry', 'Interest Income'];
 }
 
 function _addTx() { return acctTxs().find(t=>t.id===_addTxId); }
@@ -2167,6 +2251,9 @@ function addTxTotal() {
   return tx.payment != null ? tx.payment : (tx.deposit != null ? tx.deposit : 0);
 }
 function addTxItemAmount(i) {
+  if (i.type === 'Service Charge' || i.type === 'Interest Income') {
+    return (i.scLines || []).reduce((s, l) => s + (parseFloat(l.amount) || 0), 0);
+  }
   if (i.type === 'Deposit') {
     const selTotal = i.depSel ? [...i.depSel].reduce((s,idx)=> s + (DEP_PAYMENTS[idx]?.amount||0), 0) : 0;
     const oiTotal = (i.otherIncome||[]).reduce((s,r)=> s + (parseFloat(r.amount)||0), 0);
@@ -2178,7 +2265,7 @@ function addTxAllocated() {
   return _addTxItems.reduce((s,i)=> s + addTxItemAmount(i), 0);
 }
 function addTxBalanced() {
-  const hasDeposit = _addTxItems.some(i=>i.type==='Deposit');
+  const hasDeposit = _addTxItems.some(i=>['Deposit','Service Charge','Interest Income'].includes(i.type));
   if (_addTxItems.length <= 1 && !hasDeposit) return true;
   return Math.abs(addTxTotal() - addTxAllocated()) < 0.005;
 }
@@ -2224,6 +2311,93 @@ function setOtherIncomeField(itemId, idx, field, val) {
   it.otherIncome[idx][field] = val;
   if (field === 'amount') recalcAddTxAlloc();
 }
+/* ── Service Charge / Interest Income allocation lines ──
+   Line items (Property | Unit | GL | Memo | Amount) must sum exactly to the
+   bank amount. "Disburse Amount" splits the total proportionally across a
+   multi-selected set of properties, units, or GL accounts. */
+function scItemTarget(it) {
+  const others = _addTxItems.filter(i => i.id !== it.id).reduce((s, i) => s + addTxItemAmount(i), 0);
+  return Math.max(0, +(addTxTotal() - others).toFixed(2));
+}
+function scDefaultGl(kind) { return kind === 'Interest Income' ? '4500 Interest Income' : '5490 Bank Service Charges'; }
+function scEnsureLines(it, kind) {
+  if (!it.scLines) it.scLines = [{ property: '', unit: '', gl: scDefaultGl(kind), memo: '', amount: scItemTarget(it).toFixed(2) }];
+}
+function addScLine(itemId) {
+  const it = _addTxItems.find(i => i.id === itemId);
+  if (!it) return;
+  const used = (it.scLines || []).reduce((s, l) => s + (parseFloat(l.amount) || 0), 0);
+  it.scLines.push({ property: '', unit: '', gl: scDefaultGl(it.type), memo: '', amount: Math.max(0, scItemTarget(it) - used).toFixed(2) });
+  renderAddTx();
+}
+function removeScLine(itemId, idx) {
+  const it = _addTxItems.find(i => i.id === itemId);
+  if (!it || !it.scLines) return;
+  it.scLines.splice(idx, 1);
+  renderAddTx();
+}
+function setScLine(itemId, idx, field, val) {
+  const it = _addTxItems.find(i => i.id === itemId);
+  if (!it || !it.scLines || !it.scLines[idx]) return;
+  it.scLines[idx][field] = val;
+  if (field === 'amount') {
+    // Auto-fill the remaining unallocated amount on the last line.
+    const last = it.scLines.length - 1;
+    if (idx !== last) {
+      const others = it.scLines.reduce((s, l, i) => i === last ? s : s + (parseFloat(l.amount) || 0), 0);
+      it.scLines[last].amount = Math.max(0, +(scItemTarget(it) - others).toFixed(2)).toFixed(2);
+      const el = document.getElementById(`sc-last-${itemId}`);
+      if (el) el.value = it.scLines[last].amount;
+    }
+    recalcAddTxAlloc();
+  }
+}
+function scOpenDisburse(itemId) {
+  const it = _addTxItems.find(i => i.id === itemId);
+  if (!it) return;
+  it.disb = { open: true, type: 'Property', total: scItemTarget(it).toFixed(2), sel: new Set() };
+  renderAddTx();
+}
+function scCloseDisburse(itemId) {
+  const it = _addTxItems.find(i => i.id === itemId);
+  if (it) it.disb = null;
+  renderAddTx();
+}
+function scDisbType(itemId, type) {
+  const it = _addTxItems.find(i => i.id === itemId);
+  if (!it || !it.disb) return;
+  it.disb.type = type; it.disb.sel = new Set();
+  renderAddTx();
+}
+function scDisbToggle(itemId, idx) {
+  const it = _addTxItems.find(i => i.id === itemId);
+  if (!it || !it.disb) return;
+  if (it.disb.sel.has(idx)) it.disb.sel.delete(idx); else it.disb.sel.add(idx);
+  renderAddTx();
+}
+function scDisbTargets(it) {
+  if (it.disb.type === 'Unit') return SEARCH_DATA.unit.slice(0, 8);
+  if (it.disb.type === 'GL Account') return it.type === 'Interest Income' ? SEARCH_DATA.incomeAccount : SEARCH_DATA.expenseAccount;
+  return SEARCH_DATA.property;
+}
+function scDisburse(itemId) {
+  const it = _addTxItems.find(i => i.id === itemId);
+  if (!it || !it.disb || !it.disb.sel.size) return;
+  const total = parseFloat(it.disb.total) || 0;
+  const targets = scDisbTargets(it).filter((_, i) => it.disb.sel.has(i));
+  const n = targets.length;
+  const each = Math.floor(total / n * 100) / 100;
+  it.scLines = targets.map((t, i) => ({
+    property: it.disb.type === 'Property' ? t : '',
+    unit: it.disb.type === 'Unit' ? t : '',
+    gl: it.disb.type === 'GL Account' ? t : scDefaultGl(it.type),
+    memo: `Disbursed by ${it.disb.type.toLowerCase()}`,
+    amount: (i === n - 1 ? +(total - each * (n - 1)).toFixed(2) : each).toFixed(2),
+  }));
+  it.disb = null;
+  renderAddTx();
+}
+
 // The Other Income tile starts hidden; the "Add Other Income" button in the
 // Payments picker reveals it (seeding one blank line), and its X removes it
 // along with any lines so hidden amounts never count toward the allocation.
@@ -2296,7 +2470,7 @@ function removeAddTxItem(id) {
   if (_addTxItems.length && !_addTxItems.some(i=>!i.collapsed)) _addTxItems[_addTxItems.length-1].collapsed = false;
   renderAddTx();
 }
-function setAddTxItemType(id, type) { const it=_addTxItems.find(i=>i.id===id); if(it) it.type=type; renderAddTx(); }
+function setAddTxItemType(id, type) { const it=_addTxItems.find(i=>i.id===id); if(it){ it.type=type; if(type==='Service Charge'||type==='Interest Income'){ it.scLines=null; scEnsureLines(it, type); } } renderAddTx(); }
 function toggleAddTxItem(id) { const it=_addTxItems.find(i=>i.id===id); if(it) it.collapsed=!it.collapsed; renderAddTx(); }
 function setAddTxItemAmount(id, val) {
   const it = _addTxItems.find(i=>i.id===id);
@@ -2320,10 +2494,23 @@ function recalcAddTxAlloc() {
     const el = document.getElementById('atdep-breakdown-'+i.id);
     if (el) el.innerHTML = _atDepBreakdownHtml(i);
   });
+  _addTxItems.filter(i=>i.type==='Service Charge'||i.type==='Interest Income').forEach(i => {
+    const el = document.getElementById('sc-total-'+i.id);
+    if (el) el.textContent = fmtN((i.scLines||[]).reduce((s,l)=>s+(parseFloat(l.amount)||0),0));
+  });
 }
+const SC_CREATED = []; // service charges / interest recorded this session (shown on the reconcile sign-off)
 function confirmAddTx() {
   if (!addTxBalanced()) return;
   const txId = _addTxId;
+  _addTxItems.filter(i => i.type === 'Service Charge' || i.type === 'Interest Income').forEach(i => {
+    SC_CREATED.push({
+      type: i.type,
+      total: addTxItemAmount(i),
+      props: new Set((i.scLines || []).map(l => l.property).filter(Boolean)).size || 1,
+      lines: (i.scLines || []).length,
+    });
+  });
   closeAddTx();
   const tx = findTxGlobal(txId);
   if (!tx) return;
@@ -2339,6 +2526,7 @@ function addTxFormBody(type, tx, amt, acct, itemId) {
   if (type === 'Check') return renderAddTxCheck(tx, amt, acct, itemId);
   if (type === 'Receipt') return renderAddTxReceipt(tx, amt, acct, itemId);
   if (type === 'Deposit') return renderAddTxDeposit(tx, amt, acct, itemId);
+  if (type === 'Service Charge' || type === 'Interest Income') return renderAddTxServiceCharge(tx, amt, acct, itemId, type);
   if (type === 'Journal Entry') return renderAddTxJournal(tx, amt, acct, itemId);
   if (type === 'Credit Card Charge') return renderAddTxCCCharge(tx, amt, acct, itemId);
   if (type === 'Credit Card Credit') return renderAddTxCCCredit(tx, amt, acct, itemId);
@@ -2655,11 +2843,126 @@ function renderAddTxBill(tx, amt, acct, itemId) {
   ${renderDetailTable(tx, amt, { ten99: true, billable: true, billableTo: 'Owner', markup: '0.00' })}`;
 }
 
+function renderAddTxServiceCharge(tx, amt, acct, itemId, kind) {
+  const it = _addTxItems.find(i => i.id === itemId);
+  scEnsureLines(it, kind);
+  const date = tx.date || '';
+  const glName = acct ? acct.gl : '1001 Checking Account';
+  const glLabel = kind === 'Interest Income' ? 'Income Account' : 'GL Account';
+  const target = scItemTarget(it);
+  const lineTotal = (it.scLines || []).reduce((s, l) => s + (parseFloat(l.amount) || 0), 0);
+  const rows = it.scLines.map((r, i) => `
+    <tr>
+      <td><input class="at-tbl-input search" type="text" value="${r.property||''}" oninput="setScLine(${itemId},${i},'property',this.value)"></td>
+      <td><input class="at-tbl-input search" type="text" value="${r.unit||''}" oninput="setScLine(${itemId},${i},'unit',this.value)"></td>
+      <td><input class="at-tbl-input search" type="text" value="${r.gl||''}" oninput="setScLine(${itemId},${i},'gl',this.value)"></td>
+      <td><input class="at-tbl-input" type="text" value="${r.memo||''}" oninput="setScLine(${itemId},${i},'memo',this.value)"></td>
+      <td class="r"><input class="at-tbl-input" ${i === it.scLines.length-1 ? `id="sc-last-${itemId}"` : ''} type="text" value="${(parseFloat(r.amount)||0).toFixed(2)}" style="text-align:right" oninput="setScLine(${itemId},${i},'amount',this.value)"></td>
+      <td style="color:#9aa7b3;text-align:center;cursor:pointer" onclick="removeScLine(${itemId},${i})">${ic(P.trash,15,'#9aa7b3')}</td>
+    </tr>`).join('');
+  const disb = it.disb && it.disb.open ? renderScDisbursePopup(it, itemId) : '';
+  return `
+    <div class="at-card">
+      <div class="at-card-title">${kind} Information</div>
+      <div class="at-field-grid" style="grid-template-columns:1.6fr 1fr 1fr;margin-bottom:10px">
+        <div class="at-field">
+          <label>Bank Account</label>
+          <select class="at-select"><option>${glName}</option></select>
+        </div>
+        <div class="at-field">
+          <label>Date</label>
+          <input class="at-input at-input-date" type="text" value="${date}">
+        </div>
+        <div class="at-field">
+          <label>Amount</label>
+          <div class="at-amount-wrap"><input class="at-input" type="text" value="${target.toFixed(2)}" readonly style="background:#eef2f7;color:#666"><span class="at-amount-refresh">${REFRESH_ICO}</span></div>
+        </div>
+      </div>
+      <div class="at-field">
+        <label>Memo</label>
+        <textarea class="at-textarea" style="min-height:36px">${tx.desc||''}</textarea>
+      </div>
+    </div>
+    <div class="at-card">
+      <div class="at-card-title" style="display:flex;align-items:center;justify-content:space-between">
+        <span>Allocations</span>
+        <button class="at-add-link" style="font-size:13px" onclick="scOpenDisburse(${itemId})"><b>$</b>&nbsp;Disburse Amount</button>
+      </div>
+      <table class="at-detail-tbl">
+        <thead>
+          <tr>
+            <th style="width:180px">Property</th><th style="width:90px">Unit</th><th>${glLabel}</th><th>Memo</th><th class="r" style="width:110px">Amount</th><th style="width:24px"></th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
+        <div style="display:flex;align-items:center;gap:22px">
+          <button class="at-add-link" onclick="addScLine(${itemId})">${ic(P.add,15,'#008dd5')} Add Detail</button>
+        </div>
+        <span style="font-size:13px;color:#13314c"><b>Total:</b>&nbsp;&nbsp;<span id="sc-total-${itemId}">${fmtN(lineTotal)}</span> of ${fmtN(target)}</span>
+      </div>
+    </div>
+    ${disb}`;
+}
+// Disburse Amount popup: split the total proportionally across a multi-selected
+// set of properties, units, or GL accounts — one allocation line per target.
+function renderScDisbursePopup(it, itemId) {
+  const targets = scDisbTargets(it);
+  const n = it.disb.sel.size;
+  const total = parseFloat(it.disb.total) || 0;
+  const each = n ? Math.floor(total / n * 100) / 100 : 0;
+  return `
+    <div style="position:fixed;inset:0;z-index:9100;background:rgba(19,49,76,.35);display:flex;align-items:center;justify-content:center" onclick="if(event.target===this)scCloseDisburse(${itemId})">
+      <div style="width:440px;background:#fff;border-radius:6px;box-shadow:0 12px 40px rgba(19,49,76,.3);overflow:hidden">
+        <div class="at-hdr" style="padding:14px 18px">
+          <span class="at-hdr-title" style="font-size:16px;font-weight:600">Disburse Amount</span>
+          <button class="at-hdr-ico" onclick="scCloseDisburse(${itemId})" title="Close">${AT_X_ICO}</button>
+        </div>
+        <div style="padding:16px 18px;display:flex;flex-direction:column;gap:14px">
+          <div class="at-field-grid" style="grid-template-columns:1fr 1fr">
+            <div class="at-field">
+              <label>Disburse by</label>
+              <select class="at-select" onchange="scDisbType(${itemId},this.value)">
+                ${['Property','Unit','GL Account'].map(t=>`<option${it.disb.type===t?' selected':''}>${t}</option>`).join('')}
+              </select>
+            </div>
+            <div class="at-field">
+              <label>Total to disburse</label>
+              <input class="at-input" type="text" value="${it.disb.total}" oninput="_addTxItems.find(i=>i.id===${itemId}).disb.total=this.value" style="text-align:right">
+            </div>
+          </div>
+          <div>
+            <div style="font-size:13px;color:#666;margin-bottom:6px">Select ${it.disb.type === 'GL Account' ? 'accounts' : it.disb.type.toLowerCase() + 's'} to disburse across</div>
+            <div style="border:1px solid #cedbe7;border-radius:4px;max-height:190px;overflow-y:auto">
+              ${targets.map((t, i) => `
+                <label style="display:flex;align-items:center;gap:8px;padding:8px 12px;font-size:13.5px;color:#13314c;cursor:pointer;border-top:${i ? '1px solid #eef2f7' : 'none'}">
+                  <input type="checkbox" ${it.disb.sel.has(i) ? 'checked' : ''} onclick="scDisbToggle(${itemId},${i})"> ${t}
+                </label>`).join('')}
+            </div>
+          </div>
+          <div style="font-size:12.5px;color:#9aa7b3">${n ? `${n} selected — about ${fmtN(each)} per line, remainder on the last line.` : 'Select at least one target.'}</div>
+        </div>
+        <div class="sr-foot" style="padding:12px 18px">
+          <button class="btn-primary" style="height:34px;padding:0 16px" ${n ? '' : 'disabled'} onclick="scDisburse(${itemId})">Disburse</button>
+          <button class="at-cancel" style="height:34px" onclick="scCloseDisburse(${itemId})">Cancel</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+const LOCK_ICO = `<svg width="13" height="13" viewBox="0 0 24 24" fill="#9aa7b3"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>`;
+// Next sequential check number for an account, from its register's check refs.
+function nextCheckNo(acctId) {
+  const rows = ((typeof BR_TX !== 'undefined' && BR_TX[acctId]) || []).filter(r => r.type === 'Check' && /^\d+$/.test(r.ref));
+  const max = rows.reduce((m, r) => Math.max(m, +r.ref), 2209);
+  return String(max + 1);
+}
 function renderAddTxCheck(tx, amt, acct, itemId) {
   const date = tx.date || '';
   const payee = tx.desc ? tx.desc.split(' ').slice(2).join(' ') : '';
   const glName = acct ? acct.gl : '1001 Checking Account';
-  const checkNo = tx.desc.match(/\d{4,}/)?.[0] || '564';
+  const checkNo = tx.desc.match(/\d{4,}/)?.[0] || nextCheckNo(acct ? acct.id : '');
   return `
   <div class="at-cols">
     <div class="at-card" style="flex:2.2">
@@ -2674,8 +2977,8 @@ function renderAddTxCheck(tx, amt, acct, itemId) {
           <input class="at-input at-input-date" type="text" value="${date}">
         </div>
         <div class="at-field">
-          <label>No.</label>
-          <input class="at-input" type="text" value="${checkNo}">
+          <label style="display:flex;align-items:center;gap:5px">Check # <span class="tt-wrap" data-tip="Sequential check numbers are enforced. Override requires the 'Override sequential check number enforcement' privilege." style="align-items:center;cursor:default">${LOCK_ICO}</span></label>
+          <input class="at-input" type="text" value="${nextCheckNo(acct ? acct.id : '')}" readonly style="background:#eef2f7;color:#666">
         </div>
       </div>
       <div class="at-field-grid" style="grid-template-columns:2.54fr 1fr;margin-bottom:12px">
@@ -2916,7 +3219,24 @@ function renderAddTxDeposit(tx, amt, acct, itemId) {
 `;
 }
 
+// Create NSF Adjustment: opens the Add overlay as a Journal Entry pre-filled
+// with the reversal lines (re-establish the receivable, credit cash) plus the
+// NSF fee charged back to the tenant.
+function openNsfAdjustment(txId) {
+  openAddTx(txId);
+  const it = _addTxItems[0];
+  it.type = 'Journal Entry';
+  it.nsfLines = [
+    { account: '1120 Accounts Receivable', property: 'Alberta Commons', unit: '204', debit: '1,150.00', credit: '', memo: "Reverse Reyes rent payment (Deposit 8836)" },
+    { account: '1001 Operating Account',   property: '',                unit: '',    debit: '', credit: '1,150.00', memo: 'ACH return — NSF' },
+    { account: '1120 Accounts Receivable', property: 'Alberta Commons', unit: '204', debit: '25.00', credit: '', memo: 'NSF fee — charged back to tenant' },
+    { account: '4300 Late Fee Income',     property: 'Alberta Commons', unit: '204', debit: '', credit: '25.00', memo: 'NSF fee income' },
+  ];
+  it.nsfMemo = 'NSF adjustment — Reyes rent payment returned';
+  renderAddTx();
+}
 function renderAddTxJournal(tx, amt, acct, itemId) {
+  const it = _addTxItems.find(i => i.id === itemId);
   const date = tx.date || '';
   return `
   <div class="at-cols">
@@ -2943,15 +3263,57 @@ function renderAddTxJournal(tx, amt, acct, itemId) {
       <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:#13314c;margin-bottom:12px"><input type="checkbox"> Period Adjustment</label>
       <div class="at-field">
         <label>Memo</label>
-        <textarea class="at-textarea">${tx.desc}</textarea>
+        <textarea class="at-textarea">${(it && it.nsfMemo) || tx.desc}</textarea>
       </div>
     </div>
     ${atAttachCard()}
   </div>
   <div class="at-sub-heading">Journal Details</div>
-  ${renderJournalDetailTable(amt)}`;
+  ${renderJournalDetailTable(amt, it && it.nsfLines)}`;
 }
-function renderJournalDetailTable(amt) {
+function renderJournalDetailTable(amt, prefill) {
+  if (prefill) {
+    const rows = prefill.map(r => `
+      <tr>
+        <td style="padding:0 4px;color:#9aa7b3">›</td>
+        <td><input class="at-tbl-input search" type="text" value="${r.account}"></td>
+        <td><input class="at-tbl-input search" type="text" value="${r.property}"></td>
+        <td><input class="at-tbl-input search" type="text" value="${r.unit}"></td>
+        <td class="r"><input class="at-tbl-input" type="text" value="${r.debit}" style="text-align:right"></td>
+        <td class="r"><input class="at-tbl-input" type="text" value="${r.credit}" style="text-align:right"></td>
+        <td><input class="at-tbl-input search" type="text"></td>
+        <td><input class="at-tbl-input" type="text" value="${r.memo}"></td>
+        <td style="color:#9aa7b3;text-align:center;cursor:pointer">⋮</td>
+      </tr>`).join('');
+    const tot = prefill.reduce((s, r) => s + (parseFloat(String(r.debit).replace(/,/g, '')) || 0), 0);
+    return `
+  <div class="at-detail-wrap">
+  <table class="at-detail-tbl">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Account</th>
+        <th>Property</th>
+        <th style="width:120px">Unit</th>
+        <th class="r" style="width:100px">Debit</th>
+        <th class="r" style="width:100px">Credit</th>
+        <th>Job</th>
+        <th>Memo</th>
+        <th style="width:24px"></th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="at-tbl-foot">
+    <button class="at-tbl-foot-btn">+ Add Detail</button>
+    <button class="at-tbl-foot-btn">≡ Load Memorized</button>
+    <span class="at-tbl-total">Debits: &nbsp;${tot.toFixed(2)} &nbsp;&nbsp; Credits: &nbsp;${tot.toFixed(2)}</span>
+  </div>
+  </div>`;
+  }
+  return renderJournalDetailTableDefault(amt);
+}
+function renderJournalDetailTableDefault(amt) {
   return `
   <div class="at-detail-wrap">
   <table class="at-detail-tbl">
@@ -4051,6 +4413,7 @@ const NAV_ITEMS = [
   { id:'institutions',   label:'Institutions' },
   { id:'rules',          label:'Rules' },
   { id:'categories',     label:'Categories' },
+  { id:'permissions',    label:'Permissions' },
 ];
 
 function openSettings(navId) {
@@ -4077,6 +4440,7 @@ function renderSettings() {
   else if (nav === 'institutions') content = renderSettingsConnections();
   else if (nav === 'rules') content = renderSettingsMatching();
   else if (nav === 'categories') content = renderSettingsCategories();
+  else if (nav === 'permissions') content = renderSettingsPermissions();
 
   el.innerHTML = `
   <div class="settings-backdrop" onclick="if(event.target===this)closeSettings()">
@@ -4097,6 +4461,31 @@ function renderSettings() {
       </div>
     </div>
   </div>`;
+}
+
+// Read-only banking privileges for the current role — managed in User Setup.
+function renderSettingsPermissions() {
+  const privs = [
+    ['Manage Bank Sync Setup', true, 'Connect institutions and configure account sync.'],
+    ['Reconciled Transactions (Add/Edit)', false, 'Modify transactions in a reconciled period.'],
+    ['Bank Account Access', true, 'Which bank accounts this role can view and act on.'],
+    ['Property Access', true, 'Which properties this role can post against.'],
+    ['Override Sequential Check Numbers', false, 'Issue a check outside the enforced sequence.'],
+  ];
+  return `
+    <p class="settings-section-desc">Banking privileges assigned to your role. These are read-only here — Managed in User Setup.</p>
+    <div class="settings-card">
+      <div class="settings-section-title">Permissions</div>
+      ${privs.map(([label, on, sub]) => `
+      <div class="settings-group-row" style="opacity:.6">
+        <div style="flex:1">
+          <div style="font-size:14px;color:#13314c">${label}</div>
+          <div style="font-size:12px;color:#9aa7b3;margin-top:1px">${sub}</div>
+        </div>
+        <div class="tog${on ? ' on' : ''}" style="pointer-events:none"></div>
+      </div>`).join('')}
+      <div style="font-size:12px;color:#9aa7b3;padding:12px 2px 2px;display:flex;align-items:center;gap:6px">${LOCK_ICO} Managed in User Setup.</div>
+    </div>`;
 }
 
 function chk(key, stateKey, label, sub) {
@@ -4765,28 +5154,6 @@ function renderSettingsNotifications() {
     </div>`;
 }
 
-function renderSettingsPermissions() {
-  return `
-    <h2 style="font-size:16px;font-weight:600;color:#13314c;margin-bottom:6px">Permissions</h2>
-    <p class="settings-section-desc">Control which users and roles can access Banking Center features.</p>
-    <div class="settings-group">
-      <div class="settings-section-title">Role Access</div>
-      <div class="settings-group-box">
-        ${[
-          {role:'Administrator',perms:'Full access'},
-          {role:'Accountant',perms:'View, match, and add transactions'},
-          {role:'Property Manager',perms:'View only'},
-          {role:'Owner',perms:'No access'},
-        ].map(r => `<div class="settings-group-row">
-          <div style="flex:1"><div style="font-size:14px;color:#13314c">${r.role}</div></div>
-          <select style="height:30px;border:1px solid #cedbe7;border-radius:4px;padding:0 8px;font-size:13px;color:#13314c;background:#fff;outline:none">
-            <option>No access</option><option>View only</option><option>View, match, and add transactions</option><option${r.perms==='Full access'?' selected':''}>Full access</option>
-          </select>
-        </div>`).join('')}
-      </div>
-    </div>`;
-}
-
 /* ── Bank Register ────────────────────────────────────────── */
 const BR_STATE = { acctId: null, search: '', typeFilter: 'all' };
 
@@ -5347,23 +5714,40 @@ function srDifference() {
 // get a confirmation overlay so finishing with a difference is deliberate.
 function srTryFinish() {
   const diff = srDifference();
-  if (Math.abs(diff) < 0.005) { finishReconciliation(); return; }
+  const balanced = Math.abs(diff) < 0.005;
   document.getElementById('rec-start-root').innerHTML = `
     <div class="at-overlay" onclick="if(event.target===this)srCloseWarn()">
       <div class="sr-modal" style="width:480px">
         <div class="at-hdr">
-          <span class="at-hdr-title" style="font-size:17px;font-weight:600">Finish with a difference?</span>
+          <span class="at-hdr-title" style="font-size:17px;font-weight:600">${balanced ? 'Finish reconciliation' : 'Finish with a difference?'}</span>
           <button class="at-hdr-ico" onclick="srCloseWarn()" title="Close">${AT_X_ICO}</button>
         </div>
-        <div class="sr-body" style="gap:10px">
+        <div class="sr-body" style="gap:14px">
+          ${balanced ? `
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            ${ic(P.check, 20, '#6eb744')}
+            <div style="font-size:14px;color:#13314c;line-height:1.5">This account is balanced — the difference is <b>$0.00</b>. Finishing saves the reconciliation snapshot to the account's history.</div>
+          </div>` : `
           <div style="display:flex;gap:10px;align-items:flex-start">
             ${SR_ALERT_ICO}
             <div style="font-size:14px;color:#13314c;line-height:1.5">This account is out of balance by <b>${fmt(Math.abs(diff))}</b>. Finishing now will record the reconciliation with an unresolved difference.</div>
           </div>
-          <div style="font-size:13px;color:#666;line-height:1.5">You can go back to clear the remaining transactions, or confirm the statement ending balance, before finishing.</div>
+          <div style="font-size:13px;color:#666;line-height:1.5;margin-top:-6px">You can go back to clear the remaining transactions, or confirm the statement ending balance, before finishing.</div>`}
+          <div class="so-field">
+            <label style="font-size:13px;color:#666">Comment <span style="color:#9aa7b3">(optional)</span></label>
+            <textarea class="at-textarea" style="min-height:52px" placeholder="Add a note for the reconciliation history..." oninput="REC_STATE.finishComment=this.value">${REC_STATE.finishComment || ''}</textarea>
+          </div>
+          <div class="so-field">
+            <label style="font-size:13px;color:#666">Attach statement <span style="color:#9aa7b3">(optional)</span></label>
+            <div class="so-att-center" style="height:56px">
+              <div class="so-att-left">${UPLOAD_ICO} <span>Upload</span></div>
+              <div class="so-att-center-div"></div>
+              <div class="so-att-left">${PASTE_ICO} <span>Paste</span></div>
+            </div>
+          </div>
         </div>
         <div class="sr-foot">
-          <button class="btn-primary" style="height:34px;padding:0 16px" onclick="srConfirmFinish()">Finish Anyway</button>
+          <button class="btn-primary" style="height:34px;padding:0 16px" onclick="srConfirmFinish()">${balanced ? 'Save & Finish' : 'Finish Anyway'}</button>
           <button class="at-cancel" style="height:34px" onclick="srCloseWarn()">Go Back</button>
         </div>
       </div>
@@ -5381,18 +5765,30 @@ function finishReconciliation() {
   const selNet = all.reduce((s, r) => REC_STATE.checked[r.id]
     ? s + (r.inflow ? 1 : -1) * (r.bankAmt != null ? r.bankAmt : r.rmAmt) : s, 0);
   const cleared = recBeginningBalance(acct.id) + selNet;
+  const clearedCount = all.filter(r => REC_STATE.checked[r.id]).length;
+  const scItems = SC_CREATED.filter(c => c.type === 'Service Charge');
+  const iiItems = SC_CREATED.filter(c => c.type === 'Interest Income');
+  const scParts = [];
+  if (scItems.length) scParts.push(`${scItems.length} service charge${scItems.length > 1 ? 's' : ''} disbursed across ${scItems.reduce((s, c) => s + c.props, 0)} propert${scItems.reduce((s, c) => s + c.props, 0) > 1 ? 'ies' : 'y'}`);
+  if (iiItems.length) scParts.push(`${iiItems.length} interest income entr${iiItems.length > 1 ? 'ies' : 'y'}`);
+  const scTotal = SC_CREATED.reduce((s, c) => s + c.total, 0);
   document.getElementById('rec-inner').innerHTML = `
     <div class="rec-done-wrap">
       <div class="rec-done-panel">
         ${ic(P.check, 48, '#6eb744')}
         <div class="rec-done-title">Reconciliation complete.</div>
+        <div style="font-size:13px;color:#9aa7b3;margin:-8px 0 2px">This snapshot is saved to the account's reconciliation history.</div>
         <div class="rec-done-card">
-          <div class="rec-done-row"><span>Closing balance</span><span>${fmt(REC_STATE.statementBalance)}</span></div>
+          <div class="rec-done-row"><span>Reconciled on</span><span>06/16/2026</span></div>
+          <div class="rec-done-row"><span>Statement ending balance</span><span>${fmt(REC_STATE.statementBalance)}</span></div>
           <div class="rec-done-row"><span>Book balance in RM</span><span>${fmt(cleared)}</span></div>
           <div class="rec-done-row"><span>Period end date</span><span>${REC_STATE.statementDate || '\u2014'}</span></div>
+          <div class="rec-done-row"><span>Cleared transactions</span><span>${clearedCount}</span></div>
           <div class="rec-done-row"><span>Transactions matched</span><span>${matchedCount}</span></div>
           ${Math.abs(srDifference()) >= 0.005 ? `<div class="rec-done-row"><span>Unresolved difference</span><span style="color:#eb343c">${fmt(Math.abs(srDifference()))}</span></div>` : ''}
+          ${REC_STATE.finishComment ? `<div class="rec-done-row"><span>Comment</span><span style="max-width:260px;text-align:right">${REC_STATE.finishComment}</span></div>` : ''}
         </div>
+        ${scParts.length ? `<div style="font-size:13px;color:#13314c;background:#f0f7fc;border:1px solid #cfe6f5;border-radius:4px;padding:9px 14px;display:flex;align-items:center;gap:8px">${orionSpark(14)}<span>${scParts.join(' and ')} — <b>${fmtN(scTotal)}</b></span><button class="link-btn" style="font-size:13px" onclick="showToast('Allocation detail opens in the register')">View</button></div>` : ''}
         <div style="display:flex;gap:10px">
           <button class="btn-primary" style="height:36px;padding:0 18px" onclick="showToast('Reconciliation report sent to printer')">${ic(P.print,15,'#fff')} Print Report</button>
           <button class="btn-outline" style="height:36px;padding:0 18px" onclick="openReconcile()">Start New Reconciliation</button>
