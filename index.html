@@ -2190,6 +2190,7 @@ function doExclude(id) {
 /* ── Add Transaction overlay (single or multi-line) ── */
 let _addTxOpen = false;
 let _addTxId = null;
+let _addTxStandalone = null; // pseudo-transaction when adding from reconciliation (no bank feed tx)
 let _addTxItems = [];
 let _addTxSeq = 0;
 let _addTxMenuOpen = false;
@@ -2238,13 +2239,14 @@ function getTxTypes(acct, tx) {
       ? ['Credit Card Charge']
       : ['Credit Card Credit', 'Check'];
   }
-  // bank account
+  // bank account. Service charges are only added from within a reconciliation.
+  if (tx && tx.id === 'rec-sc') return ['Service Charge'];
   return isPayment
-    ? ['Bill', 'Check', 'Journal Entry', 'Service Charge']
+    ? ['Bill', 'Check', 'Journal Entry']
     : ['Deposit', 'Journal Entry', 'Interest Income'];
 }
 
-function _addTx() { return acctTxs().find(t=>t.id===_addTxId); }
+function _addTx() { return _addTxStandalone || acctTxs().find(t=>t.id===_addTxId); }
 function addTxTotal() {
   const tx = _addTx();
   if (!tx) return 0;
@@ -2454,6 +2456,7 @@ function openAddTx(txId) {
 }
 function closeAddTx() {
   _addTxOpen = false;
+  _addTxStandalone = null;
   document.getElementById('add-tx-root').innerHTML = '';
   _ubCloseOverlaySignal();
 }
@@ -2497,6 +2500,8 @@ function recalcAddTxAlloc() {
   _addTxItems.filter(i=>i.type==='Service Charge'||i.type==='Interest Income').forEach(i => {
     const el = document.getElementById('sc-total-'+i.id);
     if (el) el.textContent = fmtN((i.scLines||[]).reduce((s,l)=>s+(parseFloat(l.amount)||0),0));
+    const tg = document.getElementById('sc-target-'+i.id);
+    if (tg) tg.textContent = fmtN(scItemTarget(i));
   });
 }
 const SC_CREATED = []; // service charges / interest recorded this session (shown on the reconcile sign-off)
@@ -2511,6 +2516,18 @@ function confirmAddTx() {
       lines: (i.scLines || []).length,
     });
   });
+  if (_addTxStandalone) {
+    const it = _addTxItems[0];
+    REC_EXTRA.push({
+      date: _addTxStandalone.date, desc: _addTxStandalone.desc,
+      amount: addTxItemAmount(it), gl: (it.scLines && it.scLines[0] && it.scLines[0].gl) || '5490 Bank Service Charges',
+    });
+    REC_STATE.checked['x' + (REC_EXTRA.length - 1)] = true;
+    closeAddTx();
+    renderReconcile();
+    showToast('Service charge recorded');
+    return;
+  }
   closeAddTx();
   const tx = findTxGlobal(txId);
   if (!tx) return;
@@ -2541,10 +2558,10 @@ function renderAddTx() {
   const root = document.getElementById('add-tx-root');
   if (!_addTxOpen) { root.innerHTML=''; return; }
   const txs = acctTxs();
-  const tx = txs.find(t=>t.id===_addTxId);
+  const tx = _addTxStandalone || txs.find(t=>t.id===_addTxId);
   if (!tx) { root.innerHTML=''; return; }
 
-  const acct = ACCOUNTS.find(a=>a.id===txAcctId(_addTxId));
+  const acct = ACCOUNTS.find(a=>a.id===(_addTxStandalone ? REC_STATE.acctId : txAcctId(_addTxId)));
   const availableTypes = getTxTypes(acct, tx);
   const total = addTxTotal();
   const allocated = addTxAllocated();
@@ -2875,7 +2892,9 @@ function renderAddTxServiceCharge(tx, amt, acct, itemId, kind) {
         </div>
         <div class="at-field">
           <label>Amount</label>
-          <div class="at-amount-wrap"><input class="at-input" type="text" value="${target.toFixed(2)}" readonly style="background:#eef2f7;color:#666"><span class="at-amount-refresh">${REFRESH_ICO}</span></div>
+          ${_addTxStandalone
+            ? `<div class="at-amount-wrap"><input class="at-input" type="text" value="${target.toFixed(2)}" oninput="recScAmount(this.value,${itemId})"><span class="at-amount-refresh">${REFRESH_ICO}</span></div>`
+            : `<div class="at-amount-wrap"><input class="at-input" type="text" value="${target.toFixed(2)}" readonly style="background:#eef2f7;color:#666"><span class="at-amount-refresh">${REFRESH_ICO}</span></div>`}
         </div>
       </div>
       <div class="at-field">
@@ -2900,7 +2919,7 @@ function renderAddTxServiceCharge(tx, amt, acct, itemId, kind) {
         <div style="display:flex;align-items:center;gap:22px">
           <button class="at-add-link" onclick="addScLine(${itemId})">${ic(P.add,15,'#008dd5')} Add Detail</button>
         </div>
-        <span style="font-size:13px;color:#13314c"><b>Total:</b>&nbsp;&nbsp;<span id="sc-total-${itemId}">${fmtN(lineTotal)}</span> of ${fmtN(target)}</span>
+        <span style="font-size:13px;color:#13314c"><b>Total:</b>&nbsp;&nbsp;<span id="sc-total-${itemId}">${fmtN(lineTotal)}</span> of <span id="sc-target-${itemId}">${fmtN(target)}</span></span>
       </div>
     </div>
     ${disb}`;
@@ -5392,6 +5411,32 @@ function recHasInReview(acctId) {
 // Beginning balance = book balance as of the last reconciliation. Excluded
 // feed activity is folded in so the demo still proves out to $0 regardless of
 // how each review item was resolved (matched vs excluded).
+// Service charges added during this reconciliation (statement fees the books
+// were missing). They render as cleared matched rows and are folded into the
+// beginning-balance derivation so the difference math stays self-consistent.
+let REC_EXTRA = [];
+function openRecServiceCharge() {
+  _addTxStandalone = { id: 'rec-sc', date: REC_STATE.statementDate || '06/30/2026', desc: 'Monthly account service charge', payment: 45.00 };
+  _addTxOpen = true;
+  _addTxId = 'rec-sc';
+  _addTxItems = [];
+  const item = { id: ++_addTxSeq, type: 'Service Charge', amount: 45, collapsed: false };
+  scEnsureLines(item, 'Service Charge');
+  _addTxItems = [item];
+  renderAddTx();
+}
+// Editable amount for a rec-added service charge (feed-linked ones are fixed).
+function recScAmount(val, itemId) {
+  if (!_addTxStandalone) return;
+  _addTxStandalone.payment = parseFloat(val) || 0;
+  const it = _addTxItems.find(i => i.id === itemId);
+  if (it && it.scLines && it.scLines.length === 1) {
+    it.scLines[0].amount = scItemTarget(it).toFixed(2);
+    const inp = document.getElementById(`sc-last-${itemId}`);
+    if (inp) inp.value = it.scLines[0].amount;
+  }
+  recalcAddTxAlloc();
+}
 function recBeginningBalance(acctId) {
   // Last statement's ending balance: the live bank balance minus everything
   // that cleared this period (matched feed transactions + RM records already
@@ -5402,7 +5447,8 @@ function recBeginningBalance(acctId) {
     ? s + (t.deposit != null ? t.deposit : -(t.payment || 0)) : s, 0);
   const clearedNet = (BR_TX[acctId] || []).reduce((s, r) => r.cleared
     ? s + (r.deposit != null ? r.deposit : -(r.payment || 0)) : s, 0);
-  return acct.bankBalance - matchedNet - clearedNet;
+  const extraNet = REC_EXTRA.reduce((s, r) => s - r.amount, 0);
+  return acct.bankBalance - matchedNet - clearedNet - extraNet;
 }
 
 const _recDateVal = s => { let [m, d, y] = s.split('/').map(Number); if (y < 100) y += 2000; return new Date(y, m - 1, d).getTime(); };
@@ -5491,6 +5537,15 @@ function recData(acctId) {
       insight: r.cleared ? `Matched in Transaction Review \u2014 the bank transaction and Rent Manager record agree on amount and date.` : undefined,
     });
   });
+  REC_EXTRA.forEach((r, i) => {
+    rows.push({
+      id: 'x' + i, inflow: false, date: r.date, rmDate: r.date,
+      bankDesc: r.desc.toUpperCase(), bankAmt: r.amount,
+      ref: 'SC' + (110 + i), rmText: `Service Charge — ${r.desc}`, account: r.gl,
+      category: glCategory(r.gl), rmAmt: r.amount, status: 'Matched',
+      insight: 'Added during this reconciliation as a service charge — cleared automatically.',
+    });
+  });
   // Orion insight: a plain-language guess at why each unmatched record has no
   // bank transaction yet — a likely duplicate, an uncashed check, or activity
   // the bank simply hasn't posted yet.
@@ -5508,6 +5563,7 @@ function recData(acctId) {
 function seedReconcile(acctId, dateOverride, balanceOverride) {
   const acct = ACCOUNTS.find(a => a.id === acctId);
   if (!acct) return;
+  REC_EXTRA = [];
   REC_STATE.acctId = acctId;
   REC_STATE.statementDate = dateOverride || REC_STMT_DATE;
   REC_STATE.statementBalance = balanceOverride != null ? balanceOverride : acct.bankBalance;
@@ -5901,9 +5957,12 @@ function renderReconcile() {
           Separate transactions by deposits and payments
         </label>
       </div>
-      <div class="sr-seg">
-        <button class="sr-seg-btn${REC_STATE.filter === 'uncleared' ? ' on' : ''}" onclick="REC_STATE.filter='uncleared';renderReconcile()">Uncleared</button>
-        <button class="sr-seg-btn${REC_STATE.filter === 'all' ? ' on' : ''}" onclick="REC_STATE.filter='all';renderReconcile()">All</button>
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="btn-outline" style="height:32px;padding:0 12px;display:inline-flex;align-items:center;gap:6px;font-size:12.5px" onclick="openRecServiceCharge()">${ic(P.add,14,'#008dd5')} Add Service Charge</button>
+        <div class="sr-seg">
+          <button class="sr-seg-btn${REC_STATE.filter === 'uncleared' ? ' on' : ''}" onclick="REC_STATE.filter='uncleared';renderReconcile()">Uncleared</button>
+          <button class="sr-seg-btn${REC_STATE.filter === 'all' ? ' on' : ''}" onclick="REC_STATE.filter='all';renderReconcile()">All</button>
+        </div>
       </div>
     </div>
     <div class="sr-scroll">
