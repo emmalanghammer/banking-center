@@ -1219,6 +1219,18 @@ function bcCatToggleFilters() {
 }
 let _bcCatBound = false;
 const BC_PROPS = ['Hawthorne Court Apartments', 'Pearl District Lofts', 'Alberta Commons', 'Sellwood Row'];
+// Validated categorical palette (dataviz six-checks, light surface). Colors
+// key to the category name so a filter change never repaints a survivor;
+// hue reuse only pairs categories that can't appear in the same view.
+const BC_CAT_COLORS = {
+  'Rent': '#008dd5', 'Transfers': '#6eb744', 'Owner Payments': '#6b53be',
+  'Payroll': '#0aa88e', 'Maintenance': '#F58220', 'Operating': '#c25e1e',
+  'Utilities': '#c93467', 'Insurance': '#c07d10',
+  'Management Fees': '#0aa88e', 'Security Deposit': '#F58220', 'CAM': '#c07d10',
+  'Application Fees': '#6b53be', 'Late Fees': '#c93467', 'Interest & Fees': '#c25e1e',
+  'Office': '#c07d10', 'Service Charges': '#c93467',
+};
+const bcCatColor = name => BC_CAT_COLORS[name] || '#9aa7b3';
 // Register rows don't carry a property; assign one deterministically so the
 // property filter behaves consistently across renders.
 function bcCatProp(r) {
@@ -1431,7 +1443,7 @@ function renderBC() {
       <div style="display:flex;flex-direction:column;gap:9px">${catTop.map(([name, val]) => `
         <div title="${name}: ${fmt(val)} \u00b7 ${Math.round(val / catSum * 100)}% of money ${BC_CAT.dir === 'out' ? 'out' : 'in'}">
           <div style="display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;margin-bottom:3px"><span style="color:#13314c">${name}</span><span style="color:#13314c;font-weight:600;font-variant-numeric:tabular-nums">${fmtN(val)}</span></div>
-          <div style="height:8px;background:#eef2f7;border-radius:4px;overflow:hidden"><div style="height:8px;width:${Math.max(2, val / catMax * 100)}%;background:#008dd5;border-radius:0 4px 4px 0"></div></div>
+          <div style="height:8px;background:#eef2f7;border-radius:4px;overflow:hidden"><div style="height:8px;width:${Math.max(2, val / catMax * 100)}%;background:${bcCatColor(name)};border-radius:0 4px 4px 0"></div></div>
         </div>`).join('')}
       </div>
     </div>`;
