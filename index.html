@@ -2224,6 +2224,23 @@ function setOtherIncomeField(itemId, idx, field, val) {
   it.otherIncome[idx][field] = val;
   if (field === 'amount') recalcAddTxAlloc();
 }
+// The Other Income tile starts hidden; the "Add Other Income" button in the
+// Payments picker reveals it (seeding one blank line), and its X removes it
+// along with any lines so hidden amounts never count toward the allocation.
+function openOtherIncome(itemId) {
+  const it = _addTxItems.find(i=>i.id===itemId);
+  if (!it) return;
+  it.oiOpen = true;
+  if (!it.otherIncome || !it.otherIncome.length) it.otherIncome = [{ party:'', property:'', unit:'', reference:'', account:'', job:'', memo:'', amount:'0.00' }];
+  renderAddTx();
+}
+function closeOtherIncome(itemId) {
+  const it = _addTxItems.find(i=>i.id===itemId);
+  if (!it) return;
+  it.oiOpen = false;
+  it.otherIncome = [];
+  renderAddTx();
+}
 // Spread the deposit's unallocated remainder evenly across the Other Income lines.
 function disburseOtherIncome(itemId) {
   const it = _addTxItems.find(i=>i.id===itemId);
@@ -2836,8 +2853,8 @@ function renderAddTxDeposit(tx, amt, acct, itemId) {
         </div>
       </div>
     </div>
-    <div class="at-card">
-      <div class="at-card-title">Other Income</div>
+    ${it && it.oiOpen ? `<div class="at-card">
+      <div class="at-card-title" style="display:flex;align-items:center;justify-content:space-between"><span>Other Income</span><button onclick="closeOtherIncome(${itemId})" title="Remove other income" style="background:none;border:none;cursor:pointer;display:flex;padding:2px">${ic(P.close,16,'#008dd5')}</button></div>
       <table class="at-detail-tbl">
         <thead>
           <tr>
@@ -2852,7 +2869,7 @@ function renderAddTxDeposit(tx, amt, acct, itemId) {
         <button class="at-add-link" onclick="disburseOtherIncome(${itemId})"><b>$</b>&nbsp;Disburse Amount</button>
         <button class="at-add-link" onclick="clearOtherIncomeAlloc(${itemId})"><b>≡</b>&nbsp;Clear Allocations</button>
       </div>
-    </div>
+    </div>` : ''}
     <div class="at-card dep-card">
       <div class="at-card-title">Payments</div>
       <div class="dep-picker-hdr">
@@ -2871,6 +2888,7 @@ function renderAddTxDeposit(tx, amt, acct, itemId) {
           <span class="dep-picker-hint">Select the payments you want to add to this deposit</span>
         </div>
         <div class="dep-picker-hdr-right">
+          ${it && it.oiOpen ? '' : `<button class="btn-primary" style="height:34px;padding:0 14px;display:inline-flex;align-items:center;gap:6px" onclick="openOtherIncome(${itemId})">${ic(P.add,14,'#fff')} Add Other Income</button>`}
           <button class="btn-outline" style="height:34px;padding:0 14px;display:inline-flex;align-items:center;gap:6px">${ic(P.print,14,'#008dd5')} Print</button>
         </div>
       </div>
