@@ -625,14 +625,16 @@ svg.ico{display:block;flex-shrink:0}
 .sr-seg-btn:last-child{border-radius:0 4px 4px 0}
 .sr-seg-btn.on{background:#ebf1f5;border-color:#008dd5;font-weight:600;position:relative;z-index:1}
 .sr-scroll{flex:1;overflow:auto;padding:0 20px 16px;min-height:0}
-.sr-sec{min-width:1340px}
+.sr-sec.sr-cols2{min-width:1340px}
 .sr-sec-hdr{display:flex;align-items:center;gap:8px;margin:16px 0 8px}
 .sr-sec-hdr .chev{background:none;border:none;display:flex;padding:0;cursor:pointer}
 .sr-sec-title{font-size:14px;font-weight:700;color:#13314c}
 .sr-sec-sums{margin-left:auto;display:flex;gap:16px;font-size:13px;color:#666;white-space:nowrap}
 .sr-sec-sums b{color:#13314c;font-variant-numeric:tabular-nums;margin-left:5px}
 .sr-sec-sums b.neg{color:#eb343c}
-.sr-cols2{display:flex;gap:16px;align-items:flex-start;margin-top:16px}
+.sr-cols2{display:flex;gap:16px;align-items:flex-start}
+.sr-sec{margin-top:16px;min-width:700px}
+.sr-split-toggle{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#13314c;cursor:pointer;white-space:nowrap;user-select:none}
 .sr-panel2{flex:1;min-width:0}
 .sr-tbl{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid #cedbe7;table-layout:fixed}
 .sr-tbl.sr-tbl2 thead th{height:auto;padding:6px 10px;line-height:1.35}
@@ -4629,7 +4631,7 @@ function renderCR() {
 /* ── Smart Reconciliation ── */
 const REC_STATE = {
   acctId: null, statementDate: '', statementBalance: null,
-  checked: {}, filter: 'all', search: '', collapsed: {},
+  checked: {}, filter: 'all', search: '', collapsed: {}, split: true,
   // Start-overlay state
   startOpen: false, startAcctId: null, startDate: '', startBalance: null,
 };
@@ -4769,6 +4771,7 @@ function seedReconcile(acctId, dateOverride, balanceOverride) {
   REC_STATE.filter = 'all';
   REC_STATE.search = '';
   REC_STATE.collapsed = {};
+  REC_STATE.split = true;
   const d = recData(acctId);
   REC_STATE.checked = {};
   [...d.deposits, ...d.payments].forEach(r => { REC_STATE.checked[r.id] = r.status === 'Matched'; });
@@ -4938,7 +4941,8 @@ function toggleSrRow(id, checked) {
 }
 function toggleSrAll(section, checked) {
   const d = recData(REC_STATE.acctId);
-  (section === 'dep' ? d.deposits : d.payments).forEach(r => { REC_STATE.checked[r.id] = checked; });
+  const rows = section === 'dep' ? d.deposits : section === 'pay' ? d.payments : [...d.deposits, ...d.payments];
+  rows.forEach(r => { REC_STATE.checked[r.id] = checked; });
   renderReconcile();
 }
 function srSetSearch(val) {
@@ -5032,7 +5036,7 @@ function srPanel(title, key, rows, acctId) {
   const selTotal = rows.reduce((s, r) => REC_STATE.checked[r.id] ? s + (r.bankAmt != null ? r.bankAmt : r.rmAmt) : s, 0);
   const outstanding = +(rmTotal - selTotal).toFixed(2);
   const allChecked = shown.length > 0 && shown.every(r => REC_STATE.checked[r.id]);
-  const acctLabel = key === 'dep' ? 'Income Account' : 'Expense Account';
+  const acctLabel = key === 'dep' ? 'Income Account' : key === 'pay' ? 'Expense Account' : 'Account';
   const body = shown.map(r => `
     <tr>
       <td style="text-align:center;vertical-align:middle"><input type="checkbox" ${REC_STATE.checked[r.id] ? 'checked' : ''} onclick="toggleSrRow('${r.id}',this.checked)"></td>
@@ -5115,9 +5119,15 @@ function renderReconcile() {
       </div>
     </div>
     <div class="sr-toolbar">
-      <div class="sr-search">
-        <span class="ico-wrap">${ic(P.search, 15, '#9aa7b3')}</span>
-        <input id="sr-search-input" placeholder="Find a transaction" value="${REC_STATE.search.replace(/"/g, '&quot;')}" oninput="srSetSearch(this.value)">
+      <div style="display:flex;align-items:center;gap:16px;min-width:0">
+        <div class="sr-search">
+          <span class="ico-wrap">${ic(P.search, 15, '#9aa7b3')}</span>
+          <input id="sr-search-input" placeholder="Find a transaction" value="${REC_STATE.search.replace(/"/g, '&quot;')}" oninput="srSetSearch(this.value)">
+        </div>
+        <label class="sr-split-toggle">
+          <input type="checkbox" ${REC_STATE.split ? 'checked' : ''} onchange="REC_STATE.split=this.checked;renderReconcile()">
+          Separate transactions by deposits and payments
+        </label>
       </div>
       <div class="sr-seg">
         <button class="sr-seg-btn${REC_STATE.filter === 'uncleared' ? ' on' : ''}" onclick="REC_STATE.filter='uncleared';renderReconcile()">Uncleared</button>
@@ -5125,9 +5135,10 @@ function renderReconcile() {
       </div>
     </div>
     <div class="sr-scroll">
-      <div class="sr-sec sr-cols2">
-        ${srPanel('Deposits', 'dep', d.deposits, acct.id)}
-        ${srPanel('Payments', 'pay', d.payments, acct.id)}
+      <div class="sr-sec${REC_STATE.split ? ' sr-cols2' : ''}">
+        ${REC_STATE.split
+          ? srPanel('Deposits', 'dep', d.deposits, acct.id) + srPanel('Payments', 'pay', d.payments, acct.id)
+          : srPanel('Transactions', 'all', [...d.deposits, ...d.payments].sort((a, b) => _recDateVal(a.rmDate) - _recDateVal(b.rmDate)), acct.id)}
       </div>
     </div>
     <div class="rec-foot">
