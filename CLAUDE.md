@@ -40,6 +40,7 @@ Portland, OR residential + light-commercial property manager. Demo "today" = mid
 - Review beats (order fixed for the Useberry study): Match, Select Match (multi), Add New,
   Split (inside Add), Find Matches, Exclude — then NSF Return (t7), Possible Duplicate (t8)
 - Suggested-match confidence tiers shown in an unlabeled column of filled lozenges (fixed-position why-tooltip above the row): t1=rule (High, green), t2/t3/t7=ai (Medium, amber), t8=hint (Low, pink)
+- `SEED_MATCHED` pre-matched examples (net $0.00 per account, survive account-switch resets) cover every record type: Bill/Deposit/Check/Journal in 1004 Trust Comm + 1007 Maintenance, Charge/Credit in 2001 Mastercard + 2003 Amex
 
 ## Key data locations (approx line numbers)
 

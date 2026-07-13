@@ -1034,6 +1034,11 @@ const TRANSACTIONS_BY_ACCT = {
     {id:'tc7',date:'05/29/2026',desc:'ACH DEPOSIT TENANT WALSH',deposit:1150.00,matchStatus:'match',rmLink:'05/29/2026 Deposit 7198: M. Walsh'},
     {id:'tc8',date:'05/27/2026',desc:'ACH DEPOSIT TENANT REYES',deposit:975.00,matchStatus:'none',rmLink:null},
     {id:'tc9',date:'05/22/2026',desc:'CHECK 00409 CASCADE HVAC',payment:450.00,matchStatus:'none',rmLink:null},
+    // Pre-matched examples (net $0.00 so the account's difference math is untouched)
+    {id:'tcm1',date:'05/30/2026',desc:'ACH DEBIT NW NATURAL 0530',payment:214.60,matchStatus:'match',rmLink:'05/30/2026 Bill B1148: NW Natural'},
+    {id:'tcm2',date:'05/26/2026',desc:'ACH DEPOSIT TENANT DELGADO',deposit:1025.00,matchStatus:'match',rmLink:'05/26/2026 Deposit 7192: M. Delgado'},
+    {id:'tcm3',date:'05/24/2026',desc:'CHECK 00405 ROSE CITY PLUMBING',payment:285.00,matchStatus:'match',rmLink:'05/24/2026 Check 00405: Rose City Plumbing'},
+    {id:'tcm4',date:'05/21/2026',desc:'WIRE OUTBOUND TRUST SWEEP',payment:525.40,matchStatus:'match',rmLink:'05/21/2026 Journal 4088'},
   ],
 
   // 1007 Maintenance Escrow (4 to review, diff -2,000.00)
@@ -1043,6 +1048,10 @@ const TRANSACTIONS_BY_ACCT = {
     {id:'me3',date:'06/08/2026',desc:'ACH DEBIT PORTLAND GENERAL ELECTRIC',payment:350.00,matchStatus:'none',rmLink:null},
     {id:'me4',date:'06/04/2026',desc:'WIRE INBOUND ESCROW TRANSFER',deposit:2000.00,matchStatus:'match',rmLink:'06/04/2026 Journal 4101'},
     {id:'me5',date:'05/28/2026',desc:'ACH DEBIT ABC SUPPLY ROOFING',payment:300.00,matchStatus:'none',rmLink:null},
+    // Pre-matched examples (net $0.00)
+    {id:'mem1',date:'05/26/2026',desc:'ACH DEBIT STUMPTOWN LANDSCAPING',payment:640.00,matchStatus:'match',rmLink:'05/26/2026 Bill B1141: Stumptown Landscaping'},
+    {id:'mem2',date:'05/23/2026',desc:'CHECK 00195 NW NATURAL',payment:182.35,matchStatus:'match',rmLink:'05/23/2026 Check 00195: NW Natural'},
+    {id:'mem3',date:'05/20/2026',desc:'WIRE INBOUND ESCROW FUNDING',deposit:822.35,matchStatus:'match',rmLink:'05/20/2026 Journal 4079'},
   ],
 
   // 2001 Mastercard (16 to review, diff +150.00)
@@ -1064,6 +1073,9 @@ const TRANSACTIONS_BY_ACCT = {
     {id:'cc15',date:'05/22/2026',desc:'COSTCO BUSINESS 0522',payment:412.73,matchStatus:'none',rmLink:null},
     {id:'cc16',date:'05/20/2026',desc:'SAMS CLUB BUSINESS',payment:156.90,matchStatus:'none',rmLink:null},
     {id:'cc17',date:'05/18/2026',desc:'AMAZON BUSINESS 0518',payment:93.40,matchStatus:'none',rmLink:null},
+    // Pre-matched examples: a card charge and its refund credit (net $0.00)
+    {id:'ccm1',date:'05/16/2026',desc:'HOME DEPOT #4821 0516',payment:96.20,matchStatus:'match',rmLink:'05/16/2026 Charge 1174: Home Depot'},
+    {id:'ccm2',date:'05/15/2026',desc:'HOME DEPOT RETURN 0515',deposit:96.20,matchStatus:'match',rmLink:'05/15/2026 Credit 1175: Home Depot — return'},
   ],
 
   // 2002 Visa - Maintenance (5 to review, diff -1,146.20)
@@ -1084,6 +1096,9 @@ const TRANSACTIONS_BY_ACCT = {
     {id:'ax3',date:'06/06/2026',desc:'UBER BUSINESS TRAVEL',payment:38.00,matchStatus:'match',rmLink:'06/06/2026 Check 605: Uber'},
     {id:'ax4',date:'06/02/2026',desc:'AMERICAN AIRLINES FEE',payment:38.00,matchStatus:'none',rmLink:null},
     {id:'ax5',date:'05/28/2026',desc:'ENTERPRISE RENT A CAR',payment:124.00,matchStatus:'match',rmLink:'05/28/2026 Check 602: Enterprise'},
+    // Pre-matched examples: a travel charge and its refund credit (net $0.00)
+    {id:'axm1',date:'05/26/2026',desc:'DELTA AIRLINES TICKET 0526',payment:89.00,matchStatus:'match',rmLink:'05/26/2026 Charge 1147: Delta Airlines'},
+    {id:'axm2',date:'05/25/2026',desc:'DELTA AIRLINES REFUND',deposit:89.00,matchStatus:'match',rmLink:'05/25/2026 Credit 1148: Delta Airlines — refund'},
   ],
 };
 // Wire op3487 to shared TRANSACTIONS
@@ -1119,12 +1134,17 @@ function acctReviewAmt(a) {
 }
 
 /* ── State ──────────────────────────────────────────────── */
+// Pre-matched example transactions (one of every record type across the
+// secondary accounts). Account switches reset match progress so demo beats can
+// be re-run, but these examples always stay matched.
+const SEED_MATCHED = ['tcm1','tcm2','tcm3','tcm4','mem1','mem2','mem3','ccm1','ccm2','axm1','axm2'];
 const S = {
   activeId: 'op3487',
   collapsed: false,
   expandedId: null,
   activeTab: 'match',
-  matchedIds: new Set(),
+  // Seeded with the pre-matched examples in the secondary accounts (one of every type).
+  matchedIds: new Set(SEED_MATCHED),
   excludedIds: new Set(),
   multiSel: {},   // txId → selected index for multi-match
   helpfulMap: {},
@@ -1692,7 +1712,7 @@ function dismissInsight(id) {
 function openAcct(id) {
   S.activeId = id;
   S.expandedId = null;
-  S.matchedIds = new Set();
+  S.matchedIds = new Set(SEED_MATCHED);
   S.excludedIds = new Set();
   showScreen('tr');
 }
@@ -1771,7 +1791,7 @@ function renderSbRow(a) {
 function selectAcct(id) {
   S.activeId = id;
   S.expandedId = null;
-  S.matchedIds = new Set();
+  S.matchedIds = new Set(SEED_MATCHED);
   S.excludedIds = new Set();
   S.multiSel = {};
   renderTR();
@@ -4049,7 +4069,7 @@ function paymentMethodBreakdown(payments) {
 // Falls back to Deposit/Check by cash-flow direction when the ref is generic
 // (e.g. a freshly-added record with no descriptive reference yet).
 function matchedRecordType(ref, isInflow) {
-  const m = (ref || '').match(/^(Deposit|Journal|Check|Bill)\b/);
+  const m = (ref || '').match(/^(Deposit|Journal|Check|Bill|Credit|Charge)\b/);
   if (m) return m[1] === 'Journal' ? 'Journal Entry' : m[1];
   return isInflow ? 'Deposit' : 'Check';
 }
@@ -4078,8 +4098,14 @@ function slideoutView(tx) {
     // Pre-matched via a plain rmLink string — parse it instead of using the
     // raw bank feed text, so the reference and RM comment display correctly.
     const mr = matchRowFromTx(tx);
+    const type = matchedRecordType(mr.ref, isInflow);
+    // Deposits carry one synthesized tenant payment so the payments grid and
+    // Cash/Check/Other breakdown reflect the deposit instead of showing $0.00.
+    const payments = type === 'Deposit'
+      ? [{ tenant: mr.comment || 'Tenant', date: fmtD(mr.date), checkNo: 'ACH', property: '\u2014', unit: '\u2014', comment: 'Rent payment', address: '', amount }]
+      : [];
     return { ref: mr.ref, date: mr.date, amount, bankAccount: acct?acct.gl:'', comment: mr.comment || tx.desc,
-      payments: [], type: matchedRecordType(mr.ref, isInflow) };
+      payments, type };
   }
   // Manually added via Add Transaction with no descriptive reference recorded yet.
   return { ref: 'New Rent Manager record', date: tx.date, amount,
@@ -4391,7 +4417,7 @@ function renderSlideout() {
   const tx = acctTxs().find(t=>t.id===S.slideoutTx);
   const v = slideoutView(tx);
   const isMatched = S.matchedIds.has(tx.id);
-  const titles = { Deposit: 'Deposit Details', 'Journal Entry': 'Journal Details', Check: 'Check Details', Bill: 'Bill Details' };
+  const titles = { Deposit: 'Deposit Details', 'Journal Entry': 'Journal Details', Check: 'Check Details', Bill: 'Bill Details', Credit: 'Credit Details', Charge: 'Charge Details' };
   const title = titles[v.type] || 'Transaction Details';
   const topCardFns = { Deposit: depositTopCard, 'Journal Entry': journalTopCard, Check: checkTopCard, Bill: billTopCard };
   const topCard = (topCardFns[v.type] || genericTopCard)(v);
