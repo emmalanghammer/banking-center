@@ -37,7 +37,7 @@ Portland, OR residential + light-commercial property manager. Demo "today" = mid
   pre-excluded, shows In RM $511,681.60 / Difference **−$5,250.00** at rest (−4,931.60 is only the
   static `difference` field). Resolving all remaining items still proves to $0.00.
 - 8 items whose total net = +$4,931.60: +1,850 (t1 Rivera) +2,100 (t2 Okafor) −1,240 (t3 Rose City)
-  +6,939 (t4 Zego batch) −2,860 (t5 Cascade HVAC) −318.40 (t6 café, pre-excluded via `SEED_EXCLUDED`)
+  +6,939 (t4 Zego batch — carries `depPayments`, 12 seeded resident rows that sum exactly to 6,939.00; select-all balances the split) −2,860 (t5 Cascade HVAC) −318.40 (t6 café, pre-excluded via `SEED_EXCLUDED`)
   −1,150 (t7 NSF Reyes) −389 (t8 Recology dup)
 - Review beats: Match (t1), Select Match (t2), Add New (t3), Split (t4), Match (t5 — was the Find
   Matches beat; now pre-suggested to Check 2212: Cascade HVAC), NSF Return (t7), Possible Duplicate (t8);
