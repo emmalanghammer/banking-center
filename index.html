@@ -300,6 +300,8 @@ svg.ico{display:block;flex-shrink:0}
 .tt-wrap[data-tip]:hover::after{content:attr(data-tip);position:absolute;top:calc(100% + 8px);right:0;background:#13314c;color:#fff;font-size:12px;line-height:1.4;padding:8px 10px;border-radius:4px;white-space:normal;width:220px;text-align:left;z-index:60;box-shadow:0 4px 12px rgba(0,0,0,.25)}
 .tt-wrap[data-tip]:hover::before{content:'';position:absolute;top:100%;right:14px;border:5px solid transparent;border-bottom-color:#13314c;margin-top:2px;z-index:60}
 .btn-outline{height:32px;padding:0 14px;background:#fff;color:#008dd5;border:1px solid #008dd5;border-radius:4px;font-size:13px;display:flex;align-items:center;gap:5px}
+.btn-outline:disabled{color:#b3b3b3;border-color:#ebf1f5;background:#fff;cursor:default}
+.btn-outline:disabled svg path{fill:#b3b3b3}
 .btn-outline:hover{background:#EBF1F5}
 .btn-ghost{height:32px;padding:0 12px;background:#fff;color:#13314c;border:1px solid #cedbe7;border-radius:4px;font-size:13px;display:flex;align-items:center;gap:5px}
 .btn-ghost:hover{background:#f5f8fa}
@@ -1845,6 +1847,7 @@ function renderRight() {
   const selectableIds = visibleTxIds();
   const selCount = selectableIds.filter(id=>S.selectedIds.has(id)).length;
   const bulkAllChecked = selectableIds.length>0 && selCount===selectableIds.length;
+  const bulkElig = bulkEligibility();
 
   const diffColor = liveDiff<0?'#eb343c': liveDiff>0?'#426e29':'#13314c';
   const diffVal = liveDiff===0?'$0.00':`${liveDiff<0?'-':'+'}${fmt(Math.abs(liveDiff))}`;
@@ -1884,9 +1887,13 @@ function renderRight() {
     ${ic(P.check,16,'#008dd5')}
     <span class="bulk-count">${selCount} selected</span>
     <span class="bulk-div"></span>
-    <button class="btn-outline" style="height:30px;font-size:12.5px" onclick="bulkMatch()">${ic(P.check,14,'#008dd5')} Match</button>
+    <span class="tt-wrap"${bulkElig.canMatch?'':` data-tip="${bulkElig.matchWhy}"`}>
+      <button class="btn-outline" style="height:30px;font-size:12.5px"${bulkElig.canMatch?'':' disabled'} onclick="bulkMatch()">${ic(P.check,14,bulkElig.canMatch?'#008dd5':'#b3b3b3')} Match</button>
+    </span>
     <button class="btn-outline" style="height:30px;font-size:12.5px" onclick="openBulkEdit()">${ic(P.edit,14,'#008dd5')} Edit</button>
-    <button class="btn-outline" style="height:30px;font-size:12.5px" onclick="bulkExclude()">Exclude</button>
+    <span class="tt-wrap"${bulkElig.canExclude?'':` data-tip="${bulkElig.exWhy}"`}>
+      <button class="btn-outline" style="height:30px;font-size:12.5px"${bulkElig.canExclude?'':' disabled'} onclick="bulkExclude()">Exclude</button>
+    </span>
     <div style="flex:1"></div>
     <button class="link-btn" style="font-size:12.5px" onclick="clearTxSel()">Clear selection</button>
   </div>`:''}
@@ -2315,21 +2322,39 @@ function toggleTxSelAll(on) {
 function clearTxSel() { S.selectedIds.clear(); renderRight(); }
 function selectedTxs() { return [...S.selectedIds].map(id => findTxGlobal(id)).filter(Boolean); }
 
+// A bulk action is only offered when every selected row qualifies for it —
+// no partial application, so the result is never a surprise.
+function bulkEligibility() {
+  const sel = selectedTxs();
+  const suggested = t => t.matchStatus === 'match' || t.matchStatus === 'multi';
+  const noSuggestion = sel.filter(t => !suggested(t) && !S.matchedIds.has(t.id));
+  const alreadyMatched = sel.filter(t => S.matchedIds.has(t.id));
+  const alreadyExcluded = sel.filter(t => S.excludedIds.has(t.id));
+  let matchWhy = '';
+  if (alreadyMatched.length) matchWhy = `${alreadyMatched.length} of the selected transactions ${alreadyMatched.length!==1?'are':'is'} already matched.`;
+  else if (noSuggestion.length) matchWhy = `${noSuggestion.length} of the selected transactions ${noSuggestion.length!==1?'have':'has'} no suggested match. Select only transactions with a suggestion to match them together.`;
+  let exWhy = '';
+  if (alreadyExcluded.length) exWhy = `${alreadyExcluded.length} of the selected transactions ${alreadyExcluded.length!==1?'are':'is'} already excluded.`;
+  return {
+    canMatch: sel.length > 0 && !noSuggestion.length && !alreadyMatched.length, matchWhy,
+    canExclude: sel.length > 0 && !alreadyExcluded.length, exWhy,
+  };
+}
+
 // Match every selected row that already has a suggested Rent Manager record.
 // Rows with no suggestion are left in review and called out in the toast.
 function bulkMatch() {
+  if (!bulkEligibility().canMatch) return;
   const sel = selectedTxs();
-  const matchable = sel.filter(t => t.matchStatus === 'match' || t.matchStatus === 'multi');
-  matchable.forEach(t => { S.matchedIds.add(t.id); S.excludedIds.delete(t.id); });
-  const skipped = sel.length - matchable.length;
+  sel.forEach(t => { S.matchedIds.add(t.id); S.excludedIds.delete(t.id); });
+  const n = sel.length;
   S.selectedIds.clear(); S.expandedId = null;
   renderRight(); renderSidebar(); refreshRecIfActive();
-  showToast(matchable.length
-    ? `${matchable.length} transaction${matchable.length!==1?'s':''} matched${skipped?` \u00b7 ${skipped} need${skipped===1?'s':''} a match`:''}`
-    : 'No suggested matches in the selection');
-  matchable.forEach(t => _ubMatchedSignal(t.id));
+  showToast(`${n} transaction${n!==1?'s':''} matched`);
+  sel.forEach(t => _ubMatchedSignal(t.id));
 }
 function bulkExclude() {
+  if (!bulkEligibility().canExclude) return;
   const sel = selectedTxs();
   sel.forEach(t => { S.excludedIds.add(t.id); S.matchedIds.delete(t.id); });
   const n = sel.length;

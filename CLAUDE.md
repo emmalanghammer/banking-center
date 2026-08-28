@@ -62,7 +62,10 @@ Portland, OR residential + light-commercial property manager. Demo "today" = mid
 QuickBooks-style multi-select: a checkbox column leads each row plus a header select-all
 (scoped to the rows visible in the active tab via `visibleTxIds()`). Selecting any row reveals
 the `.bulk-bar` above the filters with **Match / Edit / Exclude** + Clear selection.
-Bulk Match only matches rows that already carry a suggestion and reports the skipped count;
+A bulk action is offered only when EVERY selected row qualifies (`bulkEligibility()`): Match is
+disabled if any selection lacks a suggestion or is already matched, Exclude if any is already
+excluded — the disabled button carries a tooltip explaining which rows block it, and the handlers
+re-check before acting (no partial application);
 Bulk Edit opens an overlay applying Property / GL Account / Memo across the selection.
 `S.selectedIds` is cleared on account switch so actions can never touch off-screen rows.
 
