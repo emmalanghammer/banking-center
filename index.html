@@ -786,6 +786,10 @@ svg.ico{display:block;flex-shrink:0}
 .ta-item b{color:#008dd5;font-weight:600}
 .ta-item:hover,.ta-item.act{background:#eaf4fb}
 .ta-empty{padding:8px 10px;font-size:12.5px;color:#9aa7b3;font-style:italic}
+.rmx-dd{position:fixed;z-index:9600;background:#fff;border:1px solid #cedbe7;border-radius:4px;box-shadow:1px 2px 12px 1px rgba(76,76,76,.10),0 4px 10px -10px rgba(76,76,76,.10),0 -2px 20px -5px rgba(76,76,76,.08);padding:4px;max-height:288px;overflow-y:auto}
+.rmx-dd-item{min-height:36px;display:flex;align-items:center;padding:0 8px;font-size:14px;color:#13314c;border-radius:4px;cursor:pointer;white-space:nowrap}
+.rmx-dd-item:hover{background:#ebf1f5}
+.rmx-dd-item.sel{background:#ebf1f5;color:#008dd5}
 .br-kebab-menu{position:fixed;z-index:9300;background:#fff;border:1px solid #cedbe7;border-radius:4px;box-shadow:0 6px 20px rgba(19,49,76,.18);min-width:180px;padding:4px}
 .br-kebab-item{display:block;width:100%;text-align:left;height:34px;padding:0 12px;border:none;background:none;font-family:'Roboto',sans-serif;font-size:13.5px;color:#13314c;cursor:pointer;border-radius:4px}
 .br-kebab-item:hover{background:#f1f6fa}
@@ -6072,6 +6076,57 @@ function renderReconcile() {
     if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
   }
 }
+
+/* RMX dropdowns: native <select> popups are suppressed everywhere; options
+   render in a styled floating panel per the design system ("never native
+   selects"). The native element keeps its state and fires its own change
+   events, so every existing onchange handler works unmodified. */
+let _rmxDD = null;
+function _rmxDDClose() { if (_rmxDD) { _rmxDD.panel.remove(); _rmxDD = null; } }
+function _rmxDDOpen(sel) {
+  _rmxDDClose();
+  sel.focus();
+  const panel = document.createElement('div');
+  panel.className = 'rmx-dd';
+  panel.innerHTML = [...sel.options].map((o, i) =>
+    `<div class="rmx-dd-item${i === sel.selectedIndex ? ' sel' : ''}" data-i="${i}">${o.text || '&nbsp;'}</div>`).join('');
+  document.body.appendChild(panel);
+  const r = sel.getBoundingClientRect();
+  panel.style.minWidth = r.width + 'px';
+  panel.style.left = Math.max(8, Math.min(r.left, window.innerWidth - panel.offsetWidth - 8)) + 'px';
+  const below = r.bottom + 4;
+  panel.style.top = (below + panel.offsetHeight > window.innerHeight - 8
+    ? Math.max(8, r.top - panel.offsetHeight - 4) : below) + 'px';
+  panel.addEventListener('mousedown', ev => ev.preventDefault());
+  panel.addEventListener('click', ev => {
+    const it = ev.target.closest('.rmx-dd-item');
+    if (!it) return;
+    sel.selectedIndex = +it.dataset.i;
+    _rmxDDClose();
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  panel.querySelector('.rmx-dd-item.sel')?.scrollIntoView({ block: 'nearest' });
+  _rmxDD = { sel, panel };
+}
+document.addEventListener('mousedown', e => {
+  const sel = e.target.closest && e.target.closest('select');
+  if (!sel) { if (_rmxDD && !_rmxDD.panel.contains(e.target)) _rmxDDClose(); return; }
+  if (sel.disabled) return;
+  e.preventDefault();
+  if (_rmxDD && _rmxDD.sel === sel) { _rmxDDClose(); return; }
+  _rmxDDOpen(sel);
+});
+document.addEventListener('keydown', e => {
+  const sel = document.activeElement;
+  if (sel && sel.tagName === 'SELECT' && !sel.disabled && (e.key === ' ' || e.key === 'Enter' || (e.altKey && e.key === 'ArrowDown'))) {
+    e.preventDefault();
+    if (_rmxDD && _rmxDD.sel === sel) _rmxDDClose(); else _rmxDDOpen(sel);
+  } else if (e.key === 'Escape' && _rmxDD) {
+    _rmxDDClose();
+  }
+});
+window.addEventListener('scroll', e => { if (_rmxDD && !_rmxDD.panel.contains(e.target)) _rmxDDClose(); }, true);
+window.addEventListener('resize', () => _rmxDDClose());
 
 /* Register row kebab menu — the six production actions; Details opens a
    read-only slideout for the row, the rest are prototype no-ops. */
