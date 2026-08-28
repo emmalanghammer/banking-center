@@ -992,7 +992,7 @@ const INSIGHTS = [
 ];
 
 const ACCOUNTS = [
-  {id:'op3487',gl:'1001 Operating Account',kind:'bank',bankName:'Chase',last4:'3847',connection:'fresh',syncedMin:0,bankBalance:516931.60,inRm:512000.00,cleared:512000.00,difference:-4931.60,txStatus:{type:'review',count:6}},
+  {id:'op3487',gl:'1001 Operating Account',kind:'bank',bankName:'Chase',last4:'3847',connection:'fresh',syncedMin:0,bankBalance:516931.60,inRm:512000.00,cleared:512000.00,difference:-4931.60,txStatus:{type:'review',count:4}},
   {id:'pr9204',gl:'1002 Payroll Account',kind:'bank',bankName:'Chase',last4:'9204',connection:'fresh',syncedMin:0,bankBalance:124500.00,inRm:124500.00,cleared:124500.00,difference:0,txStatus:{type:'matched',count:0}},
   {id:'tr6612',gl:'1003 Trust Account - Res.',kind:'bank',bankName:'Umpqua Bank',last4:'6612',connection:'fresh',syncedMin:14,bankBalance:512088.30,inRm:512088.30,cleared:512088.30,difference:0,txStatus:{type:'matched',count:0}},
   {id:'tc6629',gl:'1004 Trust Account - Comm.',kind:'bank',bankName:'Umpqua Bank',last4:'6629',connection:'fresh',syncedMin:14,bankBalance:289416.75,inRm:285216.75,cleared:281016.75,difference:-4200.00,txStatus:{type:'review',count:7}},
@@ -1016,8 +1016,8 @@ const TRANSACTIONS = [
   {id:'t3',date:'06/12/2026',desc:'CHECK 2209 ROSE CITY PLUMBING',payment:1240.00,matchStatus:'match',tier:'ai',rmLink:'06/12/2026 Check 2209: Rose City Plumbing',orion:'1 check found matching $1,240.00 \u2014 Check #2209 pays Bill B1167 from Rose City Plumbing.',matchRow:{date:'06/12/2026',ref:'Check 2209',account:'1001 Operating Account',property:'Sellwood Row',vendor:'Rose City Plumbing',comment:'Drain repair \u2014 Unit 4',amount:1240.00,gl:'5402 Repairs & Maintenance',bill:{ref:'Bill B1167',invoice:'#RCP-1138',status:'Paid'}}},
   // [SPLIT] one batch deposit covering multiple residents — split to match
   {id:'t4',date:'06/11/2026',desc:'ZEGO BATCH DEPOSIT 0611',deposit:6939.00,matchStatus:'none',rmLink:null,orion:'Batch deposit of $6,939.00 likely covers multiple resident payments. Split across tenants to match.'},
-  // [FIND MATCH] vendor ACH — search the ledger for the matching record
-  {id:'t5',date:'06/09/2026',desc:'ACH DEBIT CASCADE HVAC 0609',payment:2860.00,matchStatus:'none',rmLink:null},
+  // [MATCH] vendor ACH pre-matched to its Rent Manager check
+  {id:'t5',date:'06/09/2026',desc:'ACH DEBIT CASCADE HVAC 0609',payment:2860.00,matchStatus:'match',tier:'ai',rmLink:'06/09/2026 Check 2212: Cascade HVAC'},
   // [EXCLUDE] personal / mis-posted charge — exclude without recording
   {id:'t6',date:'06/05/2026',desc:'POS DEBIT — RIVERPLACE CAFE',payment:318.40,matchStatus:'none',rmLink:null,orion:'No property association found. If this is a personal or mis-posted charge, you can exclude it.'},
   // [NSF RETURN] ACH return of a tenant rent payment — resolve with a pre-filled NSF adjustment journal
@@ -1146,6 +1146,7 @@ function acctReviewAmt(a) {
 // secondary accounts). Account switches reset match progress so demo beats can
 // be re-run, but these examples always stay matched.
 const SEED_MATCHED = ['tcm1','tcm2','tcm3','tcm4','mem1','mem2','mem3','ccm1','ccm2','axm1','axm2'];
+const SEED_EXCLUDED = ['t6']; // the mis-posted café charge starts excluded
 const S = {
   activeId: 'op3487',
   collapsed: false,
@@ -1153,7 +1154,7 @@ const S = {
   activeTab: 'match',
   // Seeded with the pre-matched examples in the secondary accounts (one of every type).
   matchedIds: new Set(SEED_MATCHED),
-  excludedIds: new Set(),
+  excludedIds: new Set(SEED_EXCLUDED),
   multiSel: {},   // txId → selected index for multi-match
   helpfulMap: {},
   slideoutTx: null,
@@ -1710,7 +1711,7 @@ function openAcct(id) {
   S.activeId = id;
   S.expandedId = null;
   S.matchedIds = new Set(SEED_MATCHED);
-  S.excludedIds = new Set();
+  S.excludedIds = new Set(SEED_EXCLUDED);
   showScreen('tr');
 }
 
@@ -1789,7 +1790,7 @@ function selectAcct(id) {
   S.activeId = id;
   S.expandedId = null;
   S.matchedIds = new Set(SEED_MATCHED);
-  S.excludedIds = new Set();
+  S.excludedIds = new Set(SEED_EXCLUDED);
   S.multiSel = {};
   renderTR();
 }

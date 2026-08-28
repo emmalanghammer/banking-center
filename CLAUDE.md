@@ -33,13 +33,17 @@ Portland, OR residential + light-commercial property manager. Demo "today" = mid
 ## Hero account
 
 **1001 Operating (`op3487`)** — Chase ••3847  
-- Bank Balance: $516,931.60 | In RM: $512,000.00 | Difference: −$4,931.60  
-- 8 review items whose net = +$4,931.60 (drives difference to $0 when all cleared):
-  +1,850 (t1 Rivera) +2,100 (t2 Okafor) −1,240 (t3 Rose City) +6,939 (t4 Zego batch)
-  −2,860 (t5 Cascade HVAC) −318.40 (t6 café) −1,150 (t7 NSF Reyes) −389 (t8 Recology dup)
-- Review beats (order fixed for the Useberry study): Match, Select Match (multi), Add New,
-  Split (inside Add), Find Matches, Exclude — then NSF Return (t7), Possible Duplicate (t8)
-- Suggested-match confidence tiers shown in an unlabeled column of filled lozenges (fixed-position why-tooltip above the row): t1=rule (High, green), t2/t3/t7=ai (Medium, amber), t8=hint (Low, pink)
+- Bank Balance: $516,931.60 | In RM: $512,000.00 static; the TR strip computes live and, with t6
+  pre-excluded, shows In RM $511,681.60 / Difference **−$5,250.00** at rest (−4,931.60 is only the
+  static `difference` field). Resolving all remaining items still proves to $0.00.
+- 8 items whose total net = +$4,931.60: +1,850 (t1 Rivera) +2,100 (t2 Okafor) −1,240 (t3 Rose City)
+  +6,939 (t4 Zego batch) −2,860 (t5 Cascade HVAC) −318.40 (t6 café, pre-excluded via `SEED_EXCLUDED`)
+  −1,150 (t7 NSF Reyes) −389 (t8 Recology dup)
+- Review beats: Match (t1), Select Match (t2), Add New (t3), Split (t4), Match (t5 — was the Find
+  Matches beat; now pre-suggested to Check 2212: Cascade HVAC), NSF Return (t7), Possible Duplicate (t8);
+  t6 starts in the Excluded tab. TR opens with In Review (7) / Matched (0) / Excluded (1);
+  `txStatus.count` is 4 (static, drives the register strip only)
+- Suggested-match confidence tiers shown in an unlabeled column of filled lozenges (fixed-position why-tooltip above the row): t1=rule (High, green), t2/t3/t5/t7=ai (Medium, amber), t8=hint (Low, pink)
 - `SEED_MATCHED` pre-matched examples (net $0.00 per account, survive account-switch resets) cover every record type: Bill/Deposit/Check/Journal in 1004 Trust Comm + 1007 Maintenance, Charge/Credit in 2001 Mastercard + 2003 Amex
 
 ## Key data locations (approx line numbers)
