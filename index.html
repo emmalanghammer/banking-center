@@ -233,7 +233,7 @@ svg.ico{display:block;flex-shrink:0}
 .flt-toggle-btn.act{background:#ebf1f5;border-color:#008dd5;font-weight:600;color:#666;z-index:1}
 
 /* Transaction table */
-.tx-wrap{flex:1;min-height:0;border:1px solid #cedbe7;border-radius:4px;overflow:hidden;display:flex;flex-direction:column}
+.tx-wrap{flex:1;min-height:0;border:1px solid #cedbe7;border-radius:4px;overflow:hidden;display:flex;flex-direction:column;position:relative}
 .tx-hdr{display:grid;background:#737373;flex-shrink:0}
 .tx-hdr-cell{padding:0 10px;height:36px;display:flex;align-items:center;gap:4px;color:#fff;font-size:12.6px;font-weight:500;letter-spacing:1.1px}
 .tx-hdr-cell.r{justify-content:flex-end}
@@ -244,9 +244,20 @@ svg.ico{display:block;flex-shrink:0}
 .tx-main-row.exp{background:#eaf4fc!important}
 .tx-cell{padding:0 10px;display:flex;align-items:center;height:100%;overflow:hidden}
 .tx-main-row.sel{background:#eaf4fb}
-.bulk-bar{display:flex;align-items:center;gap:10px;padding:8px 12px;margin-bottom:10px;background:#eaf4fb;border:1px solid #008dd5;border-radius:4px;flex-shrink:0}
-.bulk-count{font-size:13px;font-weight:600;color:#13314c;white-space:nowrap}
-.bulk-div{width:1px;height:18px;background:#cedbe7;flex-shrink:0}
+.bulk-bar{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);z-index:6;
+  display:flex;align-items:center;gap:10px;padding:8px 12px;background:#13314c;border-radius:4px;
+  box-shadow:0 6px 20px rgba(19,49,76,.28);white-space:nowrap;animation:bulkIn .14s ease-out}
+@keyframes bulkIn{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+.bulk-count{font-size:13px;font-weight:600;color:#fff;white-space:nowrap}
+.bulk-div{width:1px;height:18px;background:rgba(255,255,255,.3);flex-shrink:0}
+.bulk-bar .btn-outline{background:transparent;color:#fff;border-color:rgba(255,255,255,.55)}
+.bulk-bar .btn-outline:hover:not(:disabled){background:rgba(255,255,255,.12)}
+.bulk-bar .btn-outline:disabled{color:rgba(255,255,255,.4);border-color:rgba(255,255,255,.2);background:transparent}
+.bulk-bar .btn-outline:disabled svg path{fill:rgba(255,255,255,.4)}
+.bulk-bar .link-btn{color:#fff;opacity:.85}
+/* The bar sits at the table's bottom edge, so its tooltips open upward. */
+.bulk-bar .tt-wrap[data-tip]:hover::after{top:auto;bottom:calc(100% + 8px);right:auto;left:50%;transform:translateX(-50%)}
+.bulk-bar .tt-wrap[data-tip]:hover::before{top:auto;bottom:100%;right:auto;left:50%;margin:0 0 2px -5px;border-bottom-color:transparent;border-top-color:#13314c}
 .tx-cell.r{justify-content:flex-end}
 .tx-cell.center{justify-content:center}
 .tx-cell span.amt{font-size:13px;color:#13314c;font-variant-numeric:tabular-nums}
@@ -1883,20 +1894,6 @@ function renderRight() {
       <p style="font-size:14px;color:#9aa7b3;margin:0">Bank balance and Rent Manager balance are in sync.<br>There are no transactions to review for this account.</p>
     </div>
   </div>` : `
-  ${selCount>0?`<div class="bulk-bar">
-    ${ic(P.check,16,'#008dd5')}
-    <span class="bulk-count">${selCount} selected</span>
-    <span class="bulk-div"></span>
-    <span class="tt-wrap"${bulkElig.canMatch?'':` data-tip="${bulkElig.matchWhy}"`}>
-      <button class="btn-outline" style="height:30px;font-size:12.5px"${bulkElig.canMatch?'':' disabled'} onclick="bulkMatch()">${ic(P.check,14,bulkElig.canMatch?'#008dd5':'#b3b3b3')} Match</button>
-    </span>
-    <button class="btn-outline" style="height:30px;font-size:12.5px" onclick="openBulkEdit()">${ic(P.edit,14,'#008dd5')} Edit</button>
-    <span class="tt-wrap"${bulkElig.canExclude?'':` data-tip="${bulkElig.exWhy}"`}>
-      <button class="btn-outline" style="height:30px;font-size:12.5px"${bulkElig.canExclude?'':' disabled'} onclick="bulkExclude()">Exclude</button>
-    </span>
-    <div style="flex:1"></div>
-    <button class="link-btn" style="font-size:12.5px" onclick="clearTxSel()">Clear selection</button>
-  </div>`:''}
   <div class="flt-row">
     <div><label class="flt-lbl">Search</label>
       <input class="flt-input" value="${S.search}" placeholder="Find a transaction" oninput="S.search=this.value;renderTxRows()"></div>
@@ -1935,6 +1932,20 @@ function renderRight() {
       <div class="tx-hdr-cell r">Action</div>
     </div>
     <div class="tx-rows" id="tx-rows"></div>
+    ${selCount>0?`<div class="bulk-bar">
+      ${ic(P.check,16,'#fff')}
+      <span class="bulk-count">${selCount} selected</span>
+      <span class="bulk-div"></span>
+      <span class="tt-wrap"${bulkElig.canMatch?'':` data-tip="${bulkElig.matchWhy}"`}>
+        <button class="btn-outline" style="height:30px;font-size:12.5px"${bulkElig.canMatch?'':' disabled'} onclick="bulkMatch()">${ic(P.check,14,bulkElig.canMatch?'#fff':'rgba(255,255,255,.4)')} Match</button>
+      </span>
+      <button class="btn-outline" style="height:30px;font-size:12.5px" onclick="openBulkEdit()">${ic(P.edit,14,'#fff')} Edit</button>
+      <span class="tt-wrap"${bulkElig.canExclude?'':` data-tip="${bulkElig.exWhy}"`}>
+        <button class="btn-outline" style="height:30px;font-size:12.5px"${bulkElig.canExclude?'':' disabled'} onclick="bulkExclude()">Exclude</button>
+      </span>
+      <span class="bulk-div"></span>
+      <button class="link-btn" style="font-size:12.5px" onclick="clearTxSel()">Clear selection</button>
+    </div>`:''}
   </div>`}`;
 
   document.getElementById('tr-right-inner').innerHTML = html;

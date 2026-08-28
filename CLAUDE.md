@@ -61,7 +61,9 @@ Portland, OR residential + light-commercial property manager. Demo "today" = mid
 
 QuickBooks-style multi-select: a checkbox column leads each row plus a header select-all
 (scoped to the rows visible in the active tab via `visibleTxIds()`). Selecting any row reveals
-the `.bulk-bar` above the filters with **Match / Edit / Exclude** + Clear selection.
+the `.bulk-bar` — a floating overlay pinned to the bottom of the table (RMX filled mode-banner
+treatment: navy `#13314C`, r4, hugging its content, elevated) with **Match / Edit / Exclude** +
+Clear selection. Its tooltips open upward so they clear the table's bottom edge.
 A bulk action is offered only when EVERY selected row qualifies (`bulkEligibility()`): Match is
 disabled if any selection lacks a suggestion or is already matched, Exclude if any is already
 excluded — the disabled button carries a tooltip explaining which rows block it, and the handlers
