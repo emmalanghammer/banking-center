@@ -8,12 +8,16 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
-body{font-family:'Roboto',sans-serif;font-size:14px;color:#13314c;background:#f5f8fa}
+body{font-family:'Roboto',sans-serif;font-size:14px;color:#13314c;background:#F3F4F8}
 input,button,select{font-family:'Roboto',sans-serif}
 button{cursor:pointer}
 /* Checkbox — design system: white box w/ grey border, orange fill + white check when checked */
+::placeholder{color:#b3b3b3;font-style:italic}
 input[type="checkbox"]{appearance:none;-webkit-appearance:none;width:20px;height:20px;flex-shrink:0;margin:0;border:2px solid #b3b3b3;border-radius:2px;background:#fff;cursor:pointer;position:relative;vertical-align:middle}
-input[type="checkbox"]:checked{background:#F58220;border-color:#F58220}
+input[type="checkbox"]:checked{background:#F79B4D;border-color:#F79B4D}
+input[type="checkbox"]:indeterminate{background:#F79B4D;border-color:#F79B4D}
+input[type="checkbox"]:indeterminate::after{content:'';position:absolute;left:3px;top:7px;width:10px;height:2px;background:#fff}
+th input[type="checkbox"]:checked,th input[type="checkbox"]:indeterminate{background:#008dd5;border-color:#008dd5}
 input[type="checkbox"]:checked::after{content:'';position:absolute;left:6px;top:1.5px;width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -83,7 +87,7 @@ input[type="checkbox"]:checked::after{content:'';position:absolute;left:6px;top:
 .loz{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-style:italic;color:#13314c;white-space:nowrap}
 .loz-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .loz-dot.ok{background:#6eb744}
-.loz-dot.warn{background:#f5a623}
+.loz-dot.warn{background:#FAA61C}
 .loz-dot.off{background:#b3b3b3}
 .conf-loz{display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:4px;font-size:14px;color:#13314c;white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis}
 .conf-loz.high{background:#e2f1da}
@@ -121,7 +125,7 @@ input[type="checkbox"]:checked::after{content:'';position:absolute;left:6px;top:
 .bc-rm-lbl{font-size:12px;font-weight:600;color:#666;display:flex;align-items:center;gap:4px}
 .loz-diff{display:inline-flex;align-items:center;padding:2px 8px;background:#fbe7c6;border-radius:200px;font-size:13px;color:#13314c;margin-left:8px}
 .bc-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
-.bc-alert-dot{width:8px;height:8px;border-radius:50%;background:#f5a623}
+.bc-alert-dot{width:8px;height:8px;border-radius:50%;background:#FAA61C}
 .bc-alert-dot.err{background:#eb343c}
 .insight-pill{font-size:13px;color:#13314c;padding:8px;background:#f5f8fa;border-radius:4px;line-height:1.5;margin-bottom:8px}
 .bc-card.hi{border-color:#008dd5}
@@ -175,7 +179,7 @@ svg.ico{display:block;flex-shrink:0}
 .sb-status{display:flex;align-items:center;gap:5px;flex-shrink:0}
 .sb-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .sb-dot.ok{background:#6eb744}
-.sb-dot.warn{background:#f5a623}
+.sb-dot.warn{background:#FAA61C}
 .sb-dot.err{background:#eb343c}
 .sb-status-lbl{font-size:12px;color:#888;font-style:italic}
 .sb-bank{font-size:12px;color:#9aa7b3}
@@ -200,13 +204,13 @@ svg.ico{display:block;flex-shrink:0}
 .sum-cell:last-child{border-right:none;padding-right:0}
 .sum-lbl{font-size:14px;color:#666;white-space:nowrap}
 .sum-val{font-size:15px;font-weight:600;color:#13314c;white-space:nowrap}
-.sum-dot{width:9px;height:9px;border-radius:50%;background:#f5a623;flex-shrink:0;margin-left:auto}
+.sum-dot{width:9px;height:9px;border-radius:50%;background:#FAA61C;flex-shrink:0;margin-left:auto}
 
 /* Filter row */
 .flt-row{display:flex;align-items:flex-end;gap:14px;flex-shrink:0;flex-wrap:wrap}
 .flt-lbl{font-size:12px;color:#008dd5;display:block;margin-bottom:3px}
 .flt-input{height:34px;border:1px solid #cedbe7;border-radius:4px;padding:0 8px;font-size:13px;color:#13314c;background:#fff;outline:none;width:200px;font-style:italic}
-.flt-input::placeholder{color:#999}
+.flt-input::placeholder{color:#b3b3b3;font-style:italic}
 .flt-date{height:34px;border:1px solid #cedbe7;border-radius:4px;padding:0 8px;font-size:13px;color:#13314c;background:#fff;outline:none;width:100px}
 .flt-sel{height:34px;border:1px solid #cedbe7;border-radius:4px;padding:0 8px;font-size:13px;color:#13314c;background:#fff;outline:none;cursor:pointer;width:160px;appearance:none}
 .flt-sel-wrap{position:relative}
@@ -231,8 +235,8 @@ svg.ico{display:block;flex-shrink:0}
 
 /* Transaction table */
 .tx-wrap{flex:1;min-height:0;border:1px solid #cedbe7;border-radius:4px;overflow:hidden;display:flex;flex-direction:column}
-.tx-hdr{display:grid;background:#5a6168;flex-shrink:0}
-.tx-hdr-cell{padding:0 10px;height:36px;display:flex;align-items:center;gap:4px;color:#fff;font-size:13px;font-weight:400}
+.tx-hdr{display:grid;background:#737373;flex-shrink:0}
+.tx-hdr-cell{padding:0 10px;height:36px;display:flex;align-items:center;gap:4px;color:#fff;font-size:12.6px;font-weight:500;letter-spacing:1.1px}
 .tx-hdr-cell.r{justify-content:flex-end}
 .tx-rows{flex:1;overflow-y:auto;background:#fff;min-height:0}
 .tx-row-wrap{border-bottom:1px solid #eef2f7}
@@ -286,14 +290,14 @@ svg.ico{display:block;flex-shrink:0}
 /* Action buttons */
 .act-btns{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .btn-primary{height:32px;padding:0 16px;background:#008dd5;color:#fff;border:none;border-radius:4px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:5px}
-.btn-primary:hover{background:#0079b8}
+.btn-primary:hover{background:#0071AA}
 .btn-primary:disabled{background:#8ec8e5;cursor:not-allowed}
 .btn-primary:disabled:hover{background:#8ec8e5}
 .tt-wrap{position:relative;display:inline-flex}
 .tt-wrap[data-tip]:hover::after{content:attr(data-tip);position:absolute;top:calc(100% + 8px);right:0;background:#13314c;color:#fff;font-size:12px;line-height:1.4;padding:8px 10px;border-radius:4px;white-space:normal;width:220px;text-align:left;z-index:60;box-shadow:0 4px 12px rgba(0,0,0,.25)}
 .tt-wrap[data-tip]:hover::before{content:'';position:absolute;top:100%;right:14px;border:5px solid transparent;border-bottom-color:#13314c;margin-top:2px;z-index:60}
 .btn-outline{height:32px;padding:0 14px;background:#fff;color:#008dd5;border:1px solid #008dd5;border-radius:4px;font-size:13px;display:flex;align-items:center;gap:5px}
-.btn-outline:hover{background:#f0f8fd}
+.btn-outline:hover{background:#EBF1F5}
 .btn-ghost{height:32px;padding:0 12px;background:#fff;color:#13314c;border:1px solid #cedbe7;border-radius:4px;font-size:13px;display:flex;align-items:center;gap:5px}
 .btn-ghost:hover{background:#f5f8fa}
 .btn-split-group{display:flex;border:1px solid #cedbe7;border-radius:4px;overflow:hidden}
@@ -384,7 +388,7 @@ svg.ico{display:block;flex-shrink:0}
 /* ── Settings overlay ── */
 .settings-backdrop{position:fixed;inset:0;background:rgba(19,49,76,.35);z-index:400;display:flex;align-items:center;justify-content:center}
 /* ── Orion Chat ── */
-.oc-pane{position:fixed;background:linear-gradient(135deg,#5fbf9f,#2f9fdc);padding:1.5px;border-radius:13px;box-shadow:0 12px 40px rgba(19,49,76,.22);z-index:301;display:flex;overflow:hidden;resize:both;min-width:360px;min-height:300px;max-width:94vw;max-height:calc(100vh - 70px)}
+.oc-pane{position:fixed;background:linear-gradient(90deg,#008dd5,#6eb744);padding:1.5px;border-radius:13px;box-shadow:0 12px 40px rgba(0,141,213,.20);z-index:301;display:flex;overflow:hidden;resize:both;min-width:360px;min-height:300px;max-width:94vw;max-height:calc(100vh - 70px)}
 .oc-frame{flex:1;min-width:0;min-height:0;background:#fff;border-radius:11.5px;display:flex;flex-direction:column;overflow:hidden}
 .oc-pane .oc-hdr{cursor:grab;user-select:none}
 .oc-hdr-ico{background:none;border:none;display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:5px;cursor:pointer;padding:0}
@@ -542,7 +546,7 @@ svg.ico{display:block;flex-shrink:0}
 .conn-status{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .conn-status.ok{background:#6eb744}
 .conn-status.err{background:#eb343c}
-.conn-status.warn{background:#f5a623}
+.conn-status.warn{background:#FAA61C}
 .settings-ftr{border-top:1px solid #cedbe7;background:#f5f8fa;display:flex;align-items:center;justify-content:flex-end;padding:8px 16px;gap:16px;flex-shrink:0;border-radius:0 0 4px 4px}
 
 /* ── Bank Register ── */
@@ -1355,7 +1359,7 @@ function renderBC() {
     if (aoRc === 0) {
       txCell = `<span class="ao-tx"><span class="ao-dot" style="background:#6eb744"></span>All matched</span>`;
     } else {
-      txCell = `<span class="ao-tx"><span class="ao-dot" style="background:#f5a623"></span>${aoRc} to review</span>`;
+      txCell = `<span class="ao-tx"><span class="ao-dot" style="background:#FAA61C"></span>${aoRc} to review</span>`;
     }
     return `<tr onclick="openAcct('${a.id}')" style="cursor:pointer">
       <td style="width:44px;text-align:center">${ico}</td>
@@ -1622,8 +1626,8 @@ function insViz(ins) {
       </div>
     </div>
     <div class="ins-status-list">
-      <div class="ins-status-row"><span style="width:8px;height:8px;border-radius:50%;background:#f5a623;flex-shrink:0;display:inline-block"></span><span>1 Zego batch unreconciled</span></div>
-      <div class="ins-status-row"><span style="width:8px;height:8px;border-radius:50%;background:#f5a623;flex-shrink:0;display:inline-block"></span><span>2 checks outstanding past 45 days</span></div>
+      <div class="ins-status-row"><span style="width:8px;height:8px;border-radius:50%;background:#FAA61C;flex-shrink:0;display:inline-block"></span><span>1 Zego batch unreconciled</span></div>
+      <div class="ins-status-row"><span style="width:8px;height:8px;border-radius:50%;background:#FAA61C;flex-shrink:0;display:inline-block"></span><span>2 checks outstanding past 45 days</span></div>
     </div>`;
   }
   if (ins.viz === 'runway-chart') return `
@@ -1735,7 +1739,7 @@ function renderSidebar() {
     html += `<div class="tr-sb-hdr coll"><button onclick="toggleCollapse()" style="background:none;border:none;display:flex">${ic(P.collapseR,20,'#008dd5')}</button></div>`;
     visAccts.forEach(a => {
       const isLogin = a.connection==='login';
-      const dotColor = isLogin?'#eb343c': acctReview(a)===0?'#6eb744':'#f5a623';
+      const dotColor = isLogin?'#eb343c': acctReview(a)===0?'#6eb744':'#FAA61C';
       html += `<div class="sb-row coll${S.activeId===a.id?' act':''}" onclick="selectAcct('${a.id}')" title="${a.gl}">
         ${ic(a.kind==='card'?P.card:P.bank,16,S.activeId===a.id?'#008dd5':'#13314c')}
         <span class="sb-coll-dot" style="background:${dotColor}"></span>
@@ -1769,7 +1773,7 @@ function renderSidebar() {
 function renderSbRow(a) {
   const isLogin = a.connection==='login';
   const rc = acctReview(a);
-  const dotColor = isLogin?'#eb343c': rc===0?'#6eb744':'#f5a623';
+  const dotColor = isLogin?'#eb343c': rc===0?'#6eb744':'#FAA61C';
   const statusLbl = rc===0?'All matched':`${rc} to review`;
   const isAct = S.activeId===a.id;
   return `<div class="sb-row${isAct?' act':''}${isLogin&&!isAct?' login-bg':''}" onclick="selectAcct('${a.id}')">
@@ -1961,7 +1965,7 @@ function renderTxRow(tx) {
   } else if (tx.matchStatus==='match' && tx.rmLink) {
     rmCell = `<button class="tx-rm-link" onclick="event.stopPropagation();openSlideout('${tx.id}')">${fmtLinkD(tx.rmLink)}</button>`;
   } else if (tx.matchStatus==='multi') {
-    rmCell = `<div class="tx-rm-multi"><span style="width:8px;height:8px;border-radius:50%;background:#f5a623;flex-shrink:0;display:inline-block"></span><em style="color:#13314c">2 matches found</em></div>`;
+    rmCell = `<div class="tx-rm-multi"><span style="width:8px;height:8px;border-radius:50%;background:#FAA61C;flex-shrink:0;display:inline-block"></span><em style="color:#13314c">2 matches found</em></div>`;
   } else if (tx.nsf) {
     rmCell = `<span class="loz"><span class="loz-dot warn"></span><em>Possible NSF return</em></span>`;
   } else if (tx.dup) {
@@ -3575,10 +3579,10 @@ function renderDetailTable(tx, amt, pre = {}) {
         <td><input class="at-tbl-input search" type="text" value="${pre.property||''}"></td>
         <td><input class="at-tbl-input search" type="text" value="${pre.unit||''}"></td>
         <td><input class="at-tbl-input search" type="text" value="${pre.account||''}"></td>
-        <td style="text-align:center"><input type="checkbox" ${pre.ten99?'checked':''} style="accent-color:#F58220"></td>
+        <td style="text-align:center"><input type="checkbox" ${pre.ten99?'checked':''}></td>
         <td><input class="at-tbl-input search" type="text" placeholder="<Unassigned>" value="${pre.job||''}"></td>
         <td><input class="at-tbl-input" type="text" value="${pre.memo||''}"></td>
-        <td style="text-align:center;white-space:nowrap"><input type="checkbox" ${pre.billable?'checked':''} style="accent-color:#F58220"> <b style="color:#F58220">$</b></td>
+        <td style="text-align:center;white-space:nowrap"><input type="checkbox" ${pre.billable?'checked':''}> <b style="color:#F58220">$</b></td>
         <td><select class="at-select" style="height:30px;font-size:12.5px">${billableToOpts}</select></td>
         <td><input class="at-tbl-input" type="text" value="${pre.markup||'0.00'}"></td>
         <td class="r"><input class="at-tbl-input" type="text" value="${amt.toFixed(2)}" style="text-align:right"></td>
@@ -4355,10 +4359,10 @@ function billExpenseCard(v) {
       <span>${r.property||''}</span>
       <span>${r.unit||''}</span>
       <span>${r.account||''}</span>
-      <span class="c"><input type="checkbox" ${r.ten99?'checked':''} style="accent-color:#F58220" onclick="return false"></span>
+      <span class="c"><input type="checkbox" ${r.ten99?'checked':''} onclick="return false"></span>
       <span>${r.job||''}</span>
       <span>${r.memo||''}</span>
-      <span class="c"><input type="checkbox" ${r.billable?'checked':''} style="accent-color:#F58220" onclick="return false"> <b style="color:#F58220">$</b></span>
+      <span class="c"><input type="checkbox" ${r.billable?'checked':''} onclick="return false"> <b style="color:#F58220">$</b></span>
       <span>${r.billableTo||''}</span>
       <span class="r">${r.markup||'0.00'}</span>
       <span class="r">${fmtN(parseFloat(r.amount)||0)}</span>
@@ -6196,7 +6200,7 @@ function _renderRegister(STATE, opts) {
         <div class="br-unmatched">
           ${unmatchedCount > 0 ? `
           <span style="font-size:13px;color:#666">Transactions to Review:</span>
-          <span style="width:8px;height:8px;background:#f5a623;border-radius:50%;display:inline-block;margin-left:6px"></span>
+          <span style="width:8px;height:8px;background:#FAA61C;border-radius:50%;display:inline-block;margin-left:6px"></span>
           <span style="font-size:13px;font-weight:600;color:#13314c;margin-left:2px">${unmatchedCount}</span>
           <a href="#" onclick="openAcct('${acct.id}');return false" style="color:#008dd5;text-decoration:none;font-size:13px;margin-left:6px">Review Transactions</a>
           ` : `
@@ -6406,7 +6410,7 @@ const OC_SUGGESTIONS = [
 
 const OC_NEW_ICO = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#13314c" stroke-width="1.7"><path d="M12 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/><path d="M18.4 2.6a2.05 2.05 0 0 1 2.9 2.9L12.5 14.4 8.6 15.4l1-3.9z"/></svg>`;
 const OC_HIST_ICO = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#13314c" stroke-width="1.7"><path d="M3.2 12a8.8 8.8 0 1 0 2.6-6.2"/><path d="M3.5 3.8v4.4h4.4"/><path d="M12 7.5V12l3 2.4"/></svg>`;
-const OC_STAR = f => `<svg width="17" height="17" viewBox="0 0 24 24" ${f ? 'fill="#f5a623" stroke="#f5a623"' : 'fill="none" stroke="#9aa7b3"'} stroke-width="1.6"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
+const OC_STAR = f => `<svg width="17" height="17" viewBox="0 0 24 24" ${f ? 'fill="#FAA61C" stroke="#FAA61C"' : 'fill="none" stroke="#9aa7b3"'} stroke-width="1.6"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`;
 const OC_EXT_ICO = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#008dd5" stroke-width="1.8"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>`;
 
 function openOrionChat() {
