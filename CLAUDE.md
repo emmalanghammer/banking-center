@@ -57,6 +57,15 @@ Portland, OR residential + light-commercial property manager. Demo "today" = mid
 | `BR_TX` (Bank Register rows) | 5162 |
 | `recData` (Smart Reconciliation rows: matched bank txs + RM-only Review items) | ~5466 |
 
+## Bulk selection (Transaction Review)
+
+QuickBooks-style multi-select: a checkbox column leads each row plus a header select-all
+(scoped to the rows visible in the active tab via `visibleTxIds()`). Selecting any row reveals
+the `.bulk-bar` above the filters with **Match / Edit / Exclude** + Clear selection.
+Bulk Match only matches rows that already carry a suggestion and reports the skipped count;
+Bulk Edit opens an overlay applying Property / GL Account / Memo across the selection.
+`S.selectedIds` is cleared on account switch so actions can never touch off-screen rows.
+
 ## Key render functions
 
 `renderBC`, `renderTR`, `renderBR`, `renderSlideout`, `renderFindMatch`, `openAddTx`, `openReconcile`

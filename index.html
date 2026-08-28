@@ -243,6 +243,10 @@ svg.ico{display:block;flex-shrink:0}
 .tx-main-row:hover{background:#f7fbff!important}
 .tx-main-row.exp{background:#eaf4fc!important}
 .tx-cell{padding:0 10px;display:flex;align-items:center;height:100%;overflow:hidden}
+.tx-main-row.sel{background:#eaf4fb}
+.bulk-bar{display:flex;align-items:center;gap:10px;padding:8px 12px;margin-bottom:10px;background:#eaf4fb;border:1px solid #008dd5;border-radius:4px;flex-shrink:0}
+.bulk-count{font-size:13px;font-weight:600;color:#13314c;white-space:nowrap}
+.bulk-div{width:1px;height:18px;background:#cedbe7;flex-shrink:0}
 .tx-cell.r{justify-content:flex-end}
 .tx-cell.center{justify-content:center}
 .tx-cell span.amt{font-size:13px;color:#13314c;font-variant-numeric:tabular-nums}
@@ -1179,6 +1183,7 @@ const S = {
   search: '',
   filterBy: 'all',
   view: 'unmatched',
+  selectedIds: new Set(),   // bulk-select checkboxes in the review register
 };
 
 /* ── Helpers ──────────────────────────────────────────────── */
@@ -1730,6 +1735,7 @@ function openAcct(id) {
   S.expandedId = null;
   S.matchedIds = new Set(SEED_MATCHED);
   S.excludedIds = new Set(SEED_EXCLUDED);
+  S.selectedIds = new Set();
   showScreen('tr');
 }
 
@@ -1809,6 +1815,7 @@ function selectAcct(id) {
   S.expandedId = null;
   S.matchedIds = new Set(SEED_MATCHED);
   S.excludedIds = new Set(SEED_EXCLUDED);
+  S.selectedIds = new Set();
   S.multiSel = {};
   renderTR();
 }
@@ -1833,6 +1840,11 @@ function renderRight() {
     ? s + (t.deposit!=null ? t.deposit : (t.payment!=null ? -t.payment : 0)) : s, 0);
   const liveInRm = acct.inRm + resolvedNet;
   const liveDiff = +(liveInRm - acct.bankBalance).toFixed(2);
+
+  // Bulk selection applies to the rows currently visible in the active tab.
+  const selectableIds = visibleTxIds();
+  const selCount = selectableIds.filter(id=>S.selectedIds.has(id)).length;
+  const bulkAllChecked = selectableIds.length>0 && selCount===selectableIds.length;
 
   const diffColor = liveDiff<0?'#eb343c': liveDiff>0?'#426e29':'#13314c';
   const diffVal = liveDiff===0?'$0.00':`${liveDiff<0?'-':'+'}${fmt(Math.abs(liveDiff))}`;
@@ -1868,6 +1880,16 @@ function renderRight() {
       <p style="font-size:14px;color:#9aa7b3;margin:0">Bank balance and Rent Manager balance are in sync.<br>There are no transactions to review for this account.</p>
     </div>
   </div>` : `
+  ${selCount>0?`<div class="bulk-bar">
+    ${ic(P.check,16,'#008dd5')}
+    <span class="bulk-count">${selCount} selected</span>
+    <span class="bulk-div"></span>
+    <button class="btn-outline" style="height:30px;font-size:12.5px" onclick="bulkMatch()">${ic(P.check,14,'#008dd5')} Match</button>
+    <button class="btn-outline" style="height:30px;font-size:12.5px" onclick="openBulkEdit()">${ic(P.edit,14,'#008dd5')} Edit</button>
+    <button class="btn-outline" style="height:30px;font-size:12.5px" onclick="bulkExclude()">Exclude</button>
+    <div style="flex:1"></div>
+    <button class="link-btn" style="font-size:12.5px" onclick="clearTxSel()">Clear selection</button>
+  </div>`:''}
   <div class="flt-row">
     <div><label class="flt-lbl">Search</label>
       <input class="flt-input" value="${S.search}" placeholder="Find a transaction" oninput="S.search=this.value;renderTxRows()"></div>
@@ -1892,7 +1914,10 @@ function renderRight() {
     </div>
   </div>
   <div class="tx-wrap">
-    <div class="tx-hdr" style="grid-template-columns:30px 95px 1fr 80px 80px 1.4fr 108px 120px">
+    <div class="tx-hdr" style="grid-template-columns:36px 30px 95px 1fr 80px 80px 1.4fr 108px 120px">
+      <div class="tx-hdr-cell" style="padding:0;justify-content:center">
+        <input type="checkbox" ${bulkAllChecked?'checked':''} onclick="toggleTxSelAll(this.checked)" title="Select all">
+      </div>
       <div class="tx-hdr-cell"></div>
       <div class="tx-hdr-cell">Date ${ic(P.down,13,'rgba(255,255,255,.5)')}</div>
       <div class="tx-hdr-cell">Description ${ic(P.down,13,'rgba(255,255,255,.5)')}</div>
@@ -1968,7 +1993,7 @@ window.addEventListener('scroll', () => _confTipHide(), true);
 function renderTxRow(tx) {
   const matched = S.matchedIds.has(tx.id);
   const exp = S.expandedId===tx.id;
-  const GRID = 'grid-template-columns:30px 95px 1fr 80px 80px 1.4fr 108px 120px';
+  const GRID = 'grid-template-columns:36px 30px 95px 1fr 80px 80px 1.4fr 108px 120px';
 
   /* RM cell */
   let rmCell;
@@ -2012,7 +2037,10 @@ function renderTxRow(tx) {
   const chevronCell = matched ? ic(P.check,16,'#6eb744') : ic(exp?CHEV_UP_MAT:CHEV_DOWN_MAT,20,'#008dd5');
 
   let html = `<div class="tx-row-wrap" id="row-${tx.id}">
-    <div class="${'tx-main-row'}${exp?' exp':''}" style="${GRID}" onclick="${rowClick}">
+    <div class="${'tx-main-row'}${exp?' exp':''}${S.selectedIds.has(tx.id)?' sel':''}" style="${GRID}" onclick="${rowClick}">
+      <div class="tx-cell center" style="padding:0" onclick="event.stopPropagation()">
+        <input type="checkbox" ${S.selectedIds.has(tx.id)?'checked':''} onclick="event.stopPropagation();toggleTxSel('${tx.id}',this.checked)">
+      </div>
       <div class="tx-cell center">${chevronCell}</div>
       <div class="tx-cell"><span class="date">${fmtD(tx.date)}</span></div>
       <div class="tx-cell" style="overflow:hidden"><span class="desc">${tx.desc}</span></div>
@@ -2258,6 +2286,106 @@ function doMatch(id) {
 }
 function doAdd(id) {
   openAddTx(id);
+}
+
+/* ── Bulk selection (QuickBooks-style multi-select) ──────────
+   Checkboxes select rows in the active tab; the bulk bar then applies
+   Match / Edit / Exclude to the whole selection at once. */
+function visibleTxIds() {
+  let txs = [...acctTxs()];
+  const q = S.search.toLowerCase();
+  if (q) txs = txs.filter(t => t.desc.toLowerCase().includes(q));
+  if (S.filterBy === 'deposits') txs = txs.filter(t => t.deposit);
+  if (S.filterBy === 'payments') txs = txs.filter(t => t.payment);
+  if (S.view === 'unmatched') txs = txs.filter(t => !S.matchedIds.has(t.id) && !S.excludedIds.has(t.id));
+  else if (S.view === 'matched') txs = txs.filter(t => S.matchedIds.has(t.id));
+  else if (S.view === 'excluded') txs = txs.filter(t => S.excludedIds.has(t.id));
+  return txs.map(t => t.id);
+}
+function toggleTxSel(id, on) {
+  if (on) S.selectedIds.add(id); else S.selectedIds.delete(id);
+  renderRight();
+}
+function toggleTxSelAll(on) {
+  const ids = visibleTxIds();
+  if (on) ids.forEach(id => S.selectedIds.add(id));
+  else ids.forEach(id => S.selectedIds.delete(id));
+  renderRight();
+}
+function clearTxSel() { S.selectedIds.clear(); renderRight(); }
+function selectedTxs() { return [...S.selectedIds].map(id => findTxGlobal(id)).filter(Boolean); }
+
+// Match every selected row that already has a suggested Rent Manager record.
+// Rows with no suggestion are left in review and called out in the toast.
+function bulkMatch() {
+  const sel = selectedTxs();
+  const matchable = sel.filter(t => t.matchStatus === 'match' || t.matchStatus === 'multi');
+  matchable.forEach(t => { S.matchedIds.add(t.id); S.excludedIds.delete(t.id); });
+  const skipped = sel.length - matchable.length;
+  S.selectedIds.clear(); S.expandedId = null;
+  renderRight(); renderSidebar(); refreshRecIfActive();
+  showToast(matchable.length
+    ? `${matchable.length} transaction${matchable.length!==1?'s':''} matched${skipped?` \u00b7 ${skipped} need${skipped===1?'s':''} a match`:''}`
+    : 'No suggested matches in the selection');
+  matchable.forEach(t => _ubMatchedSignal(t.id));
+}
+function bulkExclude() {
+  const sel = selectedTxs();
+  sel.forEach(t => { S.excludedIds.add(t.id); S.matchedIds.delete(t.id); });
+  const n = sel.length;
+  S.selectedIds.clear(); S.expandedId = null;
+  renderRight(); renderSidebar(); refreshRecIfActive();
+  showToast(`${n} transaction${n!==1?'s':''} excluded`);
+}
+// Bulk Edit: apply one property / GL account / memo across the selection.
+function openBulkEdit() {
+  const n = S.selectedIds.size;
+  document.getElementById('rec-start-root').innerHTML = `
+    <div class="at-overlay" onclick="if(event.target===this)closeBulkEdit()">
+      <div class="sr-modal" style="width:520px">
+        <div class="at-hdr">
+          <span class="at-hdr-title" style="font-size:17px;font-weight:600">Edit ${n} transaction${n!==1?'s':''}</span>
+          <button class="at-hdr-ico" onclick="closeBulkEdit()" title="Close">${AT_X_ICO}</button>
+        </div>
+        <div class="sr-body" style="gap:14px">
+          <div style="font-size:13px;color:#666;line-height:1.5">Set these values on every selected transaction. Leave a field blank to keep its current value.</div>
+          <div class="at-field">
+            <label>Property</label>
+            <input id="bulk-prop" class="at-input at-input-search" type="text" placeholder="Keep existing">
+          </div>
+          <div class="at-field">
+            <label>GL Account</label>
+            <input id="bulk-gl" class="at-input at-input-search" type="text" placeholder="Keep existing">
+          </div>
+          <div class="at-field">
+            <label>Memo</label>
+            <input id="bulk-memo" class="at-input" type="text" placeholder="Keep existing">
+          </div>
+        </div>
+        <div class="sr-foot">
+          <button class="btn-primary" style="height:34px;padding:0 16px" onclick="applyBulkEdit()">Apply to ${n}</button>
+          <button class="at-cancel" style="height:34px" onclick="closeBulkEdit()">Cancel</button>
+        </div>
+      </div>
+    </div>`;
+}
+function closeBulkEdit() { document.getElementById('rec-start-root').innerHTML = ''; }
+function applyBulkEdit() {
+  const prop = (document.getElementById('bulk-prop')||{}).value || '';
+  const gl = (document.getElementById('bulk-gl')||{}).value || '';
+  const memo = (document.getElementById('bulk-memo')||{}).value || '';
+  const sel = selectedTxs();
+  sel.forEach(t => {
+    if (!t.matchRow) t.matchRow = { date: t.date, ref: 'New Rent Manager record', account: '', amount: t.deposit != null ? t.deposit : (t.payment||0) };
+    if (prop) t.matchRow.property = prop;
+    if (gl) t.matchRow.gl = gl;
+    if (memo) t.matchRow.comment = memo;
+  });
+  const n = sel.length;
+  S.selectedIds.clear();
+  closeBulkEdit();
+  renderRight();
+  showToast(`${n} transaction${n!==1?'s':''} updated`);
 }
 function doExclude(id) {
   S.excludedIds.add(id); S.matchedIds.delete(id); S.expandedId=null;
