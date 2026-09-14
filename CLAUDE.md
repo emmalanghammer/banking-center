@@ -44,7 +44,7 @@ Portland, OR residential + light-commercial property manager. Demo "today" = mid
 - Beat inventory (now in the Matched/Excluded tabs): Match (t1), Select Match (t2), Add New (t3),
   Split (t4), Match (t5 → Check 2212: Cascade HVAC), NSF Return (t7), Possible Duplicate (t8), t6 excluded
 - **Outstanding-bill beat lives in 1007 Maintenance Escrow (`me6`)** — a synced $1,450 Cascade HVAC ACH
-  that Orion ties to open Bill B1183. Primary action **Create Bill Payment** (`openBillPayment`) opens the
+  that Orion ties to open Bill B1183. The row names the bill in the Rent Manager column and its action reads **Match**, which opens the
   Add overlay on the `Bill Payment` type, whose "Bills Paid" grid applies the payment to the bill;
   "Add as Check" is offered as the lesser alternative.
 - Suggested-match confidence tiers shown in an unlabeled column of filled lozenges (fixed-position why-tooltip above the row): t1=rule (High, green), t2/t3/t5/t7=ai (Medium, amber), t8=hint (Low, pink)
@@ -111,7 +111,7 @@ in the TR sidebar (expanded + collapsed) and the **Connect** link on unlinked ac
 3. **Review Transactions → 1007 Maintenance Escrow** (6 in review; 1001 Operating is deliberately at 0
    so it can be reconciled). Select the four unassigned expenses (me1/me2/me3/me5) → floating bulk bar →
    **Create** → "4 transactions created in Rent Manager", leaving the bill beat next.
-4. **Open bill detection** — `me6` (Cascade HVAC ACH) → Create Bill Payment → applies to Bill B1183.
+4. **Open bill detection** - `me6` (Cascade HVAC ACH) names Bill B1183 and reads **Match**; matching opens the Bill Payment form, applying the payment to the bill.
 5. **Reconciliation** — 1001 Operating, Reconcile enabled, single-line rows, proves to $0.00.
 
 ## Key render functions

@@ -1981,6 +1981,7 @@ function renderRight() {
     ${acct.bankName ? `<span class="acct-hdr-bank">${acct.bankName}</span>` : ''}
     ${acct.last4 ? `<span class="acct-hdr-bank">••••${acct.last4}</span>` : ''}
     ${acct.syncedMin != null ? `<div class="acct-hdr-sync">${ic(P.refresh,14,'#aaa')}<span>${syncLbl}</span></div>` : ''}
+    ${acct.connection === 'login' ? `<span class="ao-loz-err">Login required</span><button class="acct-link" onclick="openConnect()">Log In Again</button>` : ''}
     <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
       <button style="background:none;border:none;display:flex;align-items:center;gap:5px;color:#008dd5;font-size:13px" onclick="${acct.kind==='card'?`openCR('${acct.id}')`:`openBR('${acct.id}')`}">${acct.kind==='card'?'Credit Card Register':'Bank Register'}</button>
       <span class="tt-wrap"${unmatchedCount>0?` data-tip="${unmatchedCount} bank transaction${unmatchedCount!==1?'s are':' is'} still in review, and this account cannot be reconciled."`:''}>
