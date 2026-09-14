@@ -80,6 +80,8 @@ input[type="checkbox"]:checked::after{content:'';position:absolute;left:6px;top:
 .ao-tbl tbody td.r{text-align:right;font-variant-numeric:tabular-nums}
 .ao-tbl tbody tr:hover td{background:#f7fbff}
 .ao-conn{display:flex;align-items:center;gap:6px;font-size:13px;color:#666}
+.ao-loz-ok{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 8px;border-radius:4px;background:#e2f1da;font-size:13px;color:#13314c;white-space:nowrap}
+.ao-loz-ok .dot{width:8px;height:8px;border-radius:50%;background:#6eb744;flex-shrink:0}
 .ao-loz-err{display:inline-flex;align-items:center;background:#fbd6d8;color:#13314c;font-size:14px;padding:4px 8px;border-radius:4px;white-space:nowrap}
 .ao-tx{display:inline-flex;align-items:center;gap:8px;height:24px;padding:4px 8px;border-radius:4px;font-size:14px;font-style:italic;color:#13314c;white-space:nowrap}
 .ao-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;display:inline-block}
@@ -92,6 +94,20 @@ input[type="checkbox"]:checked::after{content:'';position:absolute;left:6px;top:
 .conf-loz.high{background:#e2f1da}
 .conf-loz.med{background:#feedd2}
 .conf-loz.low{background:#fbd6d8}
+.sr-row:hover{background:#f5f8fa}
+.cx-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cx-bank{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid #cedbe7;border-radius:4px;background:#fff;cursor:pointer;text-align:left;font-family:'Roboto',sans-serif}
+.cx-bank:hover{background:#ebf1f5;border-color:#008dd5}
+.cx-bank .mark{width:32px;height:32px;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600;flex-shrink:0}
+.cx-bank .nm{font-size:14px;color:#13314c}
+.cx-bank .sub{font-size:12px;color:#9aa7b3}
+.cx-step{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#9aa7b3;margin-bottom:4px}
+.cx-step .on{color:#008dd5;font-weight:600}
+.cx-acct{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #cedbe7;border-radius:4px;margin-bottom:8px;background:#fff}
+.cx-acct.sel{border-color:#008dd5;background:#ebf1f5}
+.sb-new,.ao-new{display:inline-flex;align-items:center;height:20px;padding:0 6px;border-radius:4px;background:#cce8f7;font-size:11.5px;color:#13314c;flex-shrink:0}
+.rm-tip{position:fixed;z-index:9400;background:#13314c;color:#fff;font-size:12px;line-height:1.5;padding:8px 10px;border-radius:4px;max-width:340px;box-shadow:0 4px 12px rgba(0,0,0,.25);pointer-events:none}
+.rm-tip b{color:#9fd2ef;font-weight:500}
 .conf-tip{position:fixed;z-index:9400;background:#13314c;color:#fff;font-size:12px;line-height:1.45;padding:8px 10px;border-radius:4px;width:230px;box-shadow:0 4px 12px rgba(0,0,0,.25);pointer-events:none}
 .conf-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#13314c}
 .acct-link{background:none;border:none;color:#008dd5;font-size:14px;padding:0;cursor:pointer}
@@ -964,6 +980,7 @@ svg.ico{display:block;flex-shrink:0}
 <div id="toast-root"></div>
 <div id="rule-popup-root"></div>
 <div id="settings-root"></div>
+<div id="connect-root"></div>
 <div id="insights-root"></div>
 <div id="add-rule-root"></div>
 <div id="add-tx-root"></div>
@@ -1012,7 +1029,7 @@ const INSIGHTS = [
 ];
 
 const ACCOUNTS = [
-  {id:'op3487',gl:'1001 Operating Account',kind:'bank',bankName:'Chase',last4:'3847',connection:'fresh',syncedMin:0,bankBalance:516931.60,inRm:512000.00,cleared:512000.00,difference:-4931.60,txStatus:{type:'review',count:4}},
+  {id:'op3487',gl:'1001 Operating Account',kind:'bank',bankName:'Chase',last4:'3847',connection:'fresh',syncedMin:0,bankBalance:516931.60,inRm:512000.00,cleared:512000.00,difference:-4931.60,txStatus:{type:'matched',count:0}},
   {id:'pr9204',gl:'1002 Payroll Account',kind:'bank',bankName:'Chase',last4:'9204',connection:'fresh',syncedMin:0,bankBalance:124500.00,inRm:124500.00,cleared:124500.00,difference:0,txStatus:{type:'matched',count:0}},
   {id:'tr6612',gl:'1003 Trust Account - Res.',kind:'bank',bankName:'Umpqua Bank',last4:'6612',connection:'fresh',syncedMin:14,bankBalance:512088.30,inRm:512088.30,cleared:512088.30,difference:0,txStatus:{type:'matched',count:0}},
   {id:'tc6629',gl:'1004 Trust Account - Comm.',kind:'bank',bankName:'Umpqua Bank',last4:'6629',connection:'fresh',syncedMin:14,bankBalance:289416.75,inRm:285216.75,cleared:281016.75,difference:-4200.00,txStatus:{type:'review',count:7}},
@@ -1091,6 +1108,12 @@ const TRANSACTIONS_BY_ACCT = {
     {id:'me3',date:'06/08/2026',desc:'ACH DEBIT PORTLAND GENERAL ELECTRIC',payment:350.00,matchStatus:'none',rmLink:null},
     {id:'me4',date:'06/04/2026',desc:'WIRE INBOUND ESCROW TRANSFER',deposit:2000.00,matchStatus:'match',rmLink:'06/04/2026 Journal 4101'},
     {id:'me5',date:'05/28/2026',desc:'ACH DEBIT ABC SUPPLY ROOFING',payment:300.00,matchStatus:'none',rmLink:null},
+    // [BILL PAYMENT] a synced ACH that pays an open bill — recording it as a bill
+    // payment (not just a check) applies it to the bill and closes it out.
+    {id:'me6',date:'06/13/2026',desc:'ACH DEBIT CASCADE HVAC 0613',payment:1450.00,matchStatus:'none',tier:'ai',rmLink:null,
+      billMatch:{ref:'Bill B1183',vendor:'Cascade HVAC',invoice:'INV-4471',property:'Hawthorne Court Apartments',
+        billDate:'05/28/2026',dueDate:'06/20/2026',amount:1450.00,gl:'5404 HVAC',status:'Open'},
+      orion:"This payment matches an outstanding bill from Cascade HVAC \u2014 Bill B1183 for $1,450.00, due 06/20/2026. Record it as a bill payment so the bill is marked paid."},
     // Pre-matched examples (net $0.00)
     {id:'mem1',date:'05/26/2026',desc:'ACH DEBIT STUMPTOWN LANDSCAPING',payment:640.00,matchStatus:'match',rmLink:'05/26/2026 Bill B1141: Stumptown Landscaping'},
     {id:'mem2',date:'05/23/2026',desc:'CHECK 00195 NW NATURAL',payment:182.35,matchStatus:'match',rmLink:'05/23/2026 Check 00195: NW Natural'},
@@ -1180,7 +1203,11 @@ function acctReviewAmt(a) {
 // Pre-matched example transactions (one of every record type across the
 // secondary accounts). Account switches reset match progress so demo beats can
 // be re-run, but these examples always stay matched.
-const SEED_MATCHED = ['tcm1','tcm2','tcm3','tcm4','mem1','mem2','mem3','ccm1','ccm2','axm1','axm2'];
+const SEED_MATCHED = [
+  // 1001 Operating starts reconcile-ready: every feed item resolved (t6 excluded below).
+  't1','t2','t3','t4','t5','t7','t8',
+  'tcm1','tcm2','tcm3','tcm4','mem1','mem2','mem3','ccm1','ccm2','axm1','axm2',
+];
 const SEED_EXCLUDED = ['t6']; // the mis-posted café charge starts excluded
 const S = {
   activeId: 'op3487',
@@ -1285,7 +1312,7 @@ function orionSpark(size=14){
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-'+id).classList.add('active');
-  const titles = { bc:'Banking Center', tr:'Transaction Review', br:'Bank Register', cr:'Credit Card Register', rec:'Smart Reconciliation' };
+  const titles = { bc:'Banking Center', tr:'Transaction Review', br:'Bank Register', cr:'Credit Card Register', rec:'Reconciliation' };
   document.getElementById('ctx-title').textContent = titles[id] || id;
   document.getElementById('ctx-extra').innerHTML = (id === 'tr' || id === 'br' || id === 'cr' || id === 'rec')
     ? `<button onclick="showScreen('bc')" style="background:none;border:none;color:#fff;font-size:14px;display:flex;align-items:center;gap:4px;cursor:pointer;padding:0;font-family:'Roboto',sans-serif">Banking Center <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v2.5l-3.5 3.5 3.5 3.5V17l-6-6 6-6zm8 0l6 6-6 6v-2.5l3.5-3.5-3.5-3.5V5z" style="display:none"/><path d="M16.01 11H4v2h12.01v3L20 12l-3.99-4v3z"/></svg></button>`
@@ -1378,38 +1405,30 @@ function renderBC() {
     // Connection status cell
     let connCell;
     if (a.connection === 'none') {
-      connCell = '';
+      connCell = `<span style="display:inline-flex;align-items:center;gap:8px"><span style="color:#b3b3b3;font-size:13px">Not connected</span><button class="acct-link" style="font-size:14px" onclick="event.stopPropagation();openConnect()">Connect</button></span>`;
     } else if (a.connection === 'login') {
       connCell = `<span style="display:inline-flex;align-items:center;gap:8px"><span class="ao-conn">${SYNC_ICO} ${fmtSync(a.syncedMin)}</span><span class="ao-loz-err">Login Required</span><button class="acct-link" style="font-size:14px" onclick="event.stopPropagation()">Reconnect</button></span>`;
     } else {
-      connCell = `<span class="ao-conn">${SYNC_ICO} ${fmtSync(a.syncedMin)}</span>`;
-    }
-    // Difference cell
-    const diffVal = a.difference;
-    let diffCell;
-    if (diffVal === 0) {
-      diffCell = `<span style="color:#b3b3b3">−</span>`;
-    } else {
-      const color = diffVal > 0 ? '#6eb744' : '#eb343c';
-      const sign = diffVal > 0 ? '+' : '−';
-      diffCell = `<span style="color:${color}">${sign}${fmt(Math.abs(diffVal))}</span>`;
+      connCell = `<span style="display:inline-flex;align-items:center;gap:8px"><span class="ao-loz-ok"><span class="dot"></span>Connected</span><span class="ao-conn">${SYNC_ICO} ${fmtSync(a.syncedMin)}</span></span>`;
     }
     // Transactions cell
     let txCell;
     const aoRc = acctReview(a);
-    if (aoRc === 0) {
+    if (a.connection === 'none') {
+      // No bank feed, so there is nothing to match against — show no status at all.
+      txCell = `<span style="color:#b3b3b3">\u2014</span>`;
+    } else if (aoRc === 0) {
       txCell = `<span class="ao-tx"><span class="ao-dot" style="background:#6eb744"></span>All matched</span>`;
     } else {
       txCell = `<span class="ao-tx"><span class="ao-dot" style="background:#FAA61C"></span>${aoRc} to review</span>`;
     }
     return `<tr onclick="openAcct('${a.id}')" style="cursor:pointer">
       <td style="width:44px;text-align:center">${ico}</td>
-      <td style="color:#666;font-size:14px">${a.gl}</td>
+      <td style="color:#666;font-size:14px">${a.gl}${a.isNew?' <span class="ao-new">New</span>':''}</td>
       <td style="font-size:13px;color:#666">${bankAcctCell}</td>
       <td>${connCell}</td>
       <td class="r" style="font-size:13px">${fmt(a.bankBalance)}</td>
       <td class="r" style="font-size:13px">${fmt(a.inRm)}</td>
-      <td class="r" style="font-size:13px">${diffCell}</td>
       <td>${txCell}</td>
     </tr>`;
   }).join('');
@@ -1425,8 +1444,7 @@ function renderBC() {
             <th>Bank Account</th>
             <th>Connection Status</th>
             <th class="r">Bank Balance</th>
-            <th class="r">In Rent Manager</th>
-            <th class="r">Difference</th>
+            <th class="r">Cleared Balance</th>
             <th>Transactions</th>
           </tr></thead>
           <tbody>${rows}</tbody>
@@ -1476,21 +1494,21 @@ function renderBC() {
 
   const TILE_HTML = {
     bankBalance: `<div class="bc-card">
-      <div class="bc-card-hrow"><span class="bc-ico-badge purple">${ic(P.bank,15,'#6b53be')}</span><span class="bc-card-h">Bank Balance</span><span class="bc-card-count" style="margin-left:4px">${banks.length} accounts</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="showScreen('br')">Bank Register</button></div>
+      <div class="bc-card-hrow"><span class="bc-card-h">Bank Balance</span><span class="bc-card-count" style="margin-left:4px">${banks.length} accounts</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="showScreen('br')">Bank Register</button></div>
       <div class="bc-num">${fmt(bankTotal)}</div>
       <div class="bc-div"></div>
-      <div class="bc-rm-row">${RM_ICO}<span class="bc-rm-lbl">In Rent Manager</span><span style="font-size:12px;color:#999;margin-left:4px">${banks.length}/${allBanks.length} accounts</span></div>
+      <div class="bc-rm-row">${RM_ICO}<span class="bc-rm-lbl">Cleared Balance</span><span style="font-size:12px;color:#999;margin-left:4px">${banks.length}/${allBanks.length} accounts</span></div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:4px"><span class="bc-num2">${fmt(bankRm)}</span><span class="loz-diff">${bankDiff>=0?'+':'−'}${fmt(Math.abs(bankDiff))}</span></div>
     </div>`,
     cardBalance: `<div class="bc-card">
-      <div class="bc-card-hrow"><span class="bc-ico-badge purple">${ic(P.card,15,'#6b53be')}</span><span class="bc-card-h">Credit Card Balance</span><span class="bc-card-count" style="margin-left:4px">${cards.length} accounts</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="showScreen('cr')">Credit Card Register</button></div>
+      <div class="bc-card-hrow"><span class="bc-card-h">Credit Card Balance</span><span class="bc-card-count" style="margin-left:4px">${cards.length} accounts</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="showScreen('cr')">Credit Card Register</button></div>
       <div class="bc-num">${fmt(cardTotal)}</div>
       <div class="bc-div"></div>
-      <div class="bc-rm-row">${RM_ICO}<span class="bc-rm-lbl">In Rent Manager</span><span style="font-size:12px;color:#999;margin-left:4px">${cards.length}/${cards.length} accounts</span></div>
+      <div class="bc-rm-row">${RM_ICO}<span class="bc-rm-lbl">Cleared Balance</span><span style="font-size:12px;color:#999;margin-left:4px">${cards.length}/${cards.length} accounts</span></div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:4px"><span class="bc-num2">${fmt(cardRm)}</span><span class="loz-diff">${cardDiff>=0?'+':'−'}${fmt(Math.abs(cardDiff))}</span></div>
     </div>`,
     unmatched: `<div class="bc-card">
-      <div class="bc-card-hrow"><span class="bc-ico-badge teal">${ic(P.money,15,'#178c7e')}</span><span class="bc-card-h">Unmatched Transactions</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="showScreen('tr')">Review Transactions</button></div>
+      <div class="bc-card-hrow"><span class="bc-card-h">Unmatched Transactions</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="showScreen('tr')">Review Transactions</button></div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><div class="bc-alert-dot"></div><span class="bc-num">${unTotal}</span></div>
       <span class="bc-sub">${fmt(unAmt)} across ${unAccts} account${unAccts===1?'':'s'}</span>
     </div>`,
@@ -1500,7 +1518,7 @@ function renderBC() {
       const summary = `${BC_CAT.dir === 'out' ? 'Money Out' : 'Money In'} \u00b7 ${rangeLabels[BC_CAT.range]} \u00b7 ${acctLabel} \u00b7 ${BC_CAT.prop === 'all' ? 'All Properties' : BC_CAT.prop}`;
       const activeCount = (BC_CAT.dir !== 'out') + (BC_CAT.range !== '90') + (BC_CAT.acct !== 'all') + (BC_CAT.prop !== 'all');
       return `<div class="bc-card" style="position:relative">
-      <div class="bc-card-hrow" style="margin-bottom:4px"><span class="bc-ico-badge" style="background:#fdf0dc">${ic(P.split,15,'#c07d10')}</span><span class="bc-card-h">Category Breakdown</span><button class="bc-cat-btn" onclick="event.stopPropagation();bcCatToggleFilters()">${ic(P.filter,14,'#008dd5')} Filters${activeCount ? ` (${activeCount})` : ''}</button></div>
+      <div class="bc-card-hrow" style="margin-bottom:4px"><span class="bc-card-h">Category Breakdown</span><button class="bc-cat-btn" onclick="event.stopPropagation();bcCatToggleFilters()">${ic(P.filter,14,'#008dd5')} Filters${activeCount ? ` (${activeCount})` : ''}</button></div>
       <div class="bc-cat-sum" title="${summary}">${summary}</div>
       ${BC_CAT.open ? `<div class="bc-cat-pop" onclick="event.stopPropagation()">
         <div>
@@ -1544,7 +1562,7 @@ function renderBC() {
     </div>`;
     })(),
     connHealth: `<div class="bc-card">
-      <div class="bc-card-hrow"><span class="bc-ico-badge pink">${ic(P.refresh,15,'#c93467')}</span><span class="bc-card-h">Connection Health</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="openSettings('institutions')">Manage Connections</button></div>
+      <div class="bc-card-hrow"><span class="bc-card-h">Connection Health</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="openSettings('institutions')">Manage Connections</button></div>
       <div style="display:flex;align-items:center;gap:8px"><div class="bc-alert-dot err"></div><span style="font-size:16px;font-weight:500;color:#13314c">1 Account Disconnected</span></div>
     </div>`,
   };
@@ -1770,14 +1788,14 @@ function renderSidebar() {
     html += `<div class="tr-sb-hdr coll"><button onclick="toggleCollapse()" style="background:none;border:none;display:flex">${ic(P.collapseR,20,'#008dd5')}</button></div>`;
     visAccts.forEach(a => {
       const isLogin = a.connection==='login';
-      const dotColor = isLogin?'#eb343c': acctReview(a)===0?'#6eb744':'#FAA61C';
+      const dotColor = isLogin?'#eb343c': (a.connection==='none'||acctReview(a)===0)?'#6eb744':'#FAA61C';
       html += `<div class="sb-row coll${S.activeId===a.id?' act':''}" onclick="selectAcct('${a.id}')" title="${a.gl}">
         ${ic(a.kind==='card'?P.card:P.bank,16,S.activeId===a.id?'#008dd5':'#13314c')}
         <span class="sb-coll-dot" style="background:${dotColor}"></span>
       </div>`;
     });
     html += `<div style="margin-top:auto;padding:10px 0;border-top:1px solid #e3edf5;display:flex;flex-direction:column;align-items:center;gap:4px">
-      <button title="Add Account" style="background:none;border:none;display:flex">${ic(P.add,22,'#008dd5')}</button>
+      <button title="Add Account" onclick="openConnect()" style="background:none;border:none;display:flex">${ic(P.add,22,'#008dd5')}</button>
       <button title="Settings" onclick="openSettings('accounts')" style="background:none;border:none;display:flex">${ic(P.settings,18,'#666')}</button>
     </div>`;
   } else {
@@ -1793,7 +1811,7 @@ function renderSidebar() {
     cards.forEach(a => { html += renderSbRow(a); });
     html += `</div>
     <div class="tr-sb-foot">
-      <button class="link-btn" style="display:flex;align-items:center;gap:5px;font-size:13px">${ic(P.add,16,'#008dd5')} Add Account</button>
+      <button class="link-btn" onclick="openConnect()" style="display:flex;align-items:center;gap:5px;font-size:13px">${ic(P.add,16,'#008dd5')} Add Account</button>
       <button class="link-btn" onclick="openSettings('accounts')" style="display:flex;align-items:center;gap:5px;font-size:13px">${ic(P.settings,15,'#008dd5')} Settings</button>
     </div>`;
   }
@@ -1801,23 +1819,28 @@ function renderSidebar() {
   document.getElementById('tr-sidebar').innerHTML = html;
 }
 
+// Sidebar rows stay quiet by default: a status only appears when the account
+// needs something (items to review, or a broken connection). Accounts with no
+// bank feed show no match status at all.
 function renderSbRow(a) {
   const isLogin = a.connection==='login';
+  const noFeed = a.connection==='none';
   const rc = acctReview(a);
-  const dotColor = isLogin?'#eb343c': rc===0?'#6eb744':'#FAA61C';
-  const statusLbl = rc===0?'All matched':`${rc} to review`;
   const isAct = S.activeId===a.id;
+  const status = isLogin
+    ? `<span class="sb-status"><span class="sb-dot" style="background:#eb343c"></span><span class="sb-status-lbl">Login required</span></span>`
+    : (!noFeed && rc > 0)
+      ? `<span class="sb-status"><span class="sb-dot" style="background:#FAA61C"></span><span class="sb-status-lbl">${rc} to review</span></span>`
+      : '';
   return `<div class="sb-row${isAct?' act':''}${isLogin&&!isAct?' login-bg':''}" onclick="selectAcct('${a.id}')">
     ${ic(a.kind==='card'?P.card:P.bank,16,'#13314c')}
     <div class="sb-row-info">
       <div class="sb-name-row">
         <span class="sb-name${isAct?' bold':''}">${a.gl}</span>
-        <span class="sb-status"><span class="sb-dot" style="background:${dotColor}"></span><span class="sb-status-lbl">${statusLbl}</span></span>
+        ${a.isNew?'<span class="sb-new">New</span>':''}
+        ${status}
       </div>
-      <div style="display:flex;align-items:center">
-        <span class="sb-bank">${a.bankName}••••${a.last4}</span>
-        ${isLogin?`<span class="sb-err-lbl">${ic(P.alert,13,'#eb343c')} Login Required</span>`:''}
-      </div>
+      <span class="sb-bank">${noFeed ? 'No account linked' : `${a.bankName}\u2022\u2022\u2022\u2022${a.last4}`}</span>
     </div>
     <span class="sb-bal">${fmt(a.bankBalance)}</span>
   </div>`;
@@ -1881,7 +1904,7 @@ function renderRight() {
   <!-- Summary -->
   <div class="sum-strip">
     <div class="sum-cell"><span class="sum-lbl">Bank Balance:</span><span class="sum-val">${fmt(acct.bankBalance)}</span></div>
-    <div class="sum-cell"><span class="sum-lbl">In Rent Manager:</span><span class="sum-val">${fmt(liveInRm)}</span></div>
+    <div class="sum-cell"><span class="sum-lbl">Cleared Balance:</span><span class="sum-val">${fmt(liveInRm)}</span></div>
     <div class="sum-cell"><span class="sum-lbl">Difference:</span><span class="sum-val" style="color:${diffColor}">${diffVal}</span></div>
     <div class="sum-cell"><span class="sum-lbl">Transactions to Review:</span>${unmatchedCount>0?'<span class="sum-dot"></span>':''}<span class="sum-val">${unmatchedCount}</span></div>
   </div>
@@ -2008,6 +2031,28 @@ document.addEventListener('mouseover', e => {
 });
 window.addEventListener('scroll', () => _confTipHide(), true);
 
+/* Reconciliation rows show the bank transaction; hovering a row surfaces the
+   Rent Manager record it ties to, instead of stacking it under every cell. */
+let _rmTipEl = null;
+function _rmTipHide() { if (_rmTipEl) { _rmTipEl.remove(); _rmTipEl = null; } }
+document.addEventListener('mouseover', e => {
+  const row = e.target.closest && e.target.closest('[data-rmtip]');
+  if (!row) { _rmTipHide(); return; }
+  if (_rmTipEl && _rmTipEl._for === row) return;
+  _rmTipHide();
+  const d = document.createElement('div');
+  d.className = 'rm-tip';
+  d.innerHTML = '<b>Rent Manager</b><br>' + row.dataset.rmtip.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  document.body.appendChild(d);
+  const r = row.getBoundingClientRect();
+  d.style.left = Math.max(8, Math.min(r.left + 40, window.innerWidth - d.offsetWidth - 8)) + 'px';
+  const below = r.bottom + 6;
+  d.style.top = (below + d.offsetHeight > window.innerHeight - 8 ? Math.max(8, r.top - d.offsetHeight - 6) : below) + 'px';
+  d._for = row;
+  _rmTipEl = d;
+});
+window.addEventListener('scroll', () => _rmTipHide(), true);
+
 function renderTxRow(tx) {
   const matched = S.matchedIds.has(tx.id);
   const exp = S.expandedId===tx.id;
@@ -2021,6 +2066,8 @@ function renderTxRow(tx) {
     rmCell = `<button class="tx-rm-link" onclick="event.stopPropagation();openSlideout('${tx.id}')">${fmtLinkD(tx.rmLink)}</button>`;
   } else if (tx.matchStatus==='multi') {
     rmCell = `<div class="tx-rm-multi"><span style="width:8px;height:8px;border-radius:50%;background:#FAA61C;flex-shrink:0;display:inline-block"></span><em style="color:#13314c">2 matches found</em></div>`;
+  } else if (tx.billMatch) {
+    rmCell = `<span class="loz"><span class="loz-dot ok"></span><em>Outstanding bill found</em></span>`;
   } else if (tx.nsf) {
     rmCell = `<span class="loz"><span class="loz-dot warn"></span><em>Possible NSF return</em></span>`;
   } else if (tx.dup) {
@@ -2073,6 +2120,8 @@ function renderTxRow(tx) {
     html += `<div class="tx-exp-wrap"><div class="tx-tab-body">`;
     if (matched) {
       html += `<div class="matched-banner">${ic(P.check,16,'#6eb744')} Matched to ${tx.rmLink}</div>`;
+    } else if (tx.billMatch) {
+      html += renderExpandedBill(tx);
     } else if (tx.nsf) {
       html += renderExpandedNsf(tx);
     } else if (tx.dup) {
@@ -2191,6 +2240,42 @@ function renderExpandedMulti(tx) {
       ${rows}
     </div>
     ${expActionRow(tx)}`;
+}
+
+// Outstanding-bill beat: the synced payment lines up with an open bill, so the
+// primary action records a bill payment (applying it to the bill) rather than a
+// bare check, which would leave the bill open.
+function renderExpandedBill(tx) {
+  const b = tx.billMatch;
+  const cols = 'grid-template-columns:110px 1fr 1.2fr 120px 150px 110px';
+  return `
+    <div class="exp-top">
+      <div class="orion-msg">${orionSpark(16)}<span>${tx.orion}</span></div>
+      ${renderHelpful(tx.id)}
+    </div>
+    <div class="sub-tbl">
+      <div class="sub-tbl-hdr" style="${cols}">
+        ${['Bill Date','Reference','Vendor','Invoice #','Due Date','Amount Due'].map((h,i)=>`<div class="sub-tbl-hdr-cell"${i===5?' style="justify-content:flex-end"':''}>${h}</div>`).join('')}
+      </div>
+      <div class="sub-tbl-row" style="${cols}">
+        <div class="sub-tbl-cell">${fmtD(b.billDate)}</div>
+        <div class="sub-tbl-cell">${regRefCode(b.ref)}</div>
+        <div class="sub-tbl-cell">${b.vendor}</div>
+        <div class="sub-tbl-cell">${b.invoice}</div>
+        <div class="sub-tbl-cell">${fmtD(b.dueDate)}<span class="loz" style="margin-left:6px"><span class="loz-dot warn"></span><em>${b.status}</em></span></div>
+        <div class="sub-tbl-cell r">${fmtN(b.amount)}</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div class="act-btns">
+        <button class="btn-primary" style="height:36px" onclick="openBillPayment('${tx.id}')">${ic(CIRCLE_PLUS,16,'#fff')} Create Bill Payment</button>
+        <button class="btn-outline" style="height:36px" onclick="openAddTx('${tx.id}')">Add as Check</button>
+        <button class="btn-outline" style="height:36px" onclick="openFindMatch('${tx.id}')">${ic(P.search,14,'#008dd5')} Find Matches</button>
+      </div>
+      <div class="exp-links">
+        <button class="link-btn" onclick="doExclude('${tx.id}')">Exclude</button>
+      </div>
+    </div>`;
 }
 
 // NSF return beat: Orion proposes a pre-filled reversal journal.
@@ -2440,7 +2525,7 @@ let _addTxMenuBound = false;
 
 // Friendly labels for the "+ Add Transaction" dropdown (Write Check / Add Bill / …).
 function addTxTypeVerb(type) {
-  const m = { 'Check':'Write Check', 'Bill':'Add Bill', 'Journal Entry':'Add Journal',
+  const m = { 'Check':'Write Check', 'Bill':'Add Bill', 'Journal Entry':'Add Journal', 'Bill Payment':'Pay Bill',
     'Deposit':'Make Deposit', 'Receipt':'Add Receipt',
     'Credit Card Charge':'Add Credit Card Transaction', 'Credit Card Credit':'Add Credit Card Transaction' };
   return m[type] || ('Add ' + type);
@@ -2483,6 +2568,8 @@ function getTxTypes(acct, tx) {
   }
   // bank account. Service charges are only added from within a reconciliation.
   if (tx && tx.id === 'rec-sc') return ['Service Charge'];
+  // A payment that lines up with an open bill leads with Bill Payment.
+  if (tx && tx.billMatch) return ['Bill Payment', 'Check', 'Bill', 'Journal Entry'];
   return isPayment
     ? ['Bill', 'Check', 'Journal Entry']
     : ['Deposit', 'Journal Entry', 'Interest Income'];
@@ -2790,6 +2877,7 @@ function addTxFormBody(type, tx, amt, acct, itemId) {
   if (type === 'Receipt') return renderAddTxReceipt(tx, amt, acct, itemId);
   if (type === 'Deposit') return renderAddTxDeposit(tx, amt, acct, itemId);
   if (type === 'Service Charge' || type === 'Interest Income') return renderAddTxServiceCharge(tx, amt, acct, itemId, type);
+  if (type === 'Bill Payment') return renderAddTxBillPayment(tx, amt, acct, itemId);
   if (type === 'Journal Entry') return renderAddTxJournal(tx, amt, acct, itemId);
   if (type === 'Credit Card Charge') return renderAddTxCCCharge(tx, amt, acct, itemId);
   if (type === 'Credit Card Credit') return renderAddTxCCCredit(tx, amt, acct, itemId);
@@ -3223,6 +3311,87 @@ function nextCheckNo(acctId) {
   const max = rows.reduce((m, r) => Math.max(m, +r.ref), 2209);
   return String(max + 1);
 }
+// Create Bill Payment: opens the Add overlay already on the Bill Payment form,
+// with the matched bill applied in full.
+function openBillPayment(txId) {
+  openAddTx(txId);
+  const it = _addTxItems[0];
+  if (it) it.type = 'Bill Payment';
+  renderAddTx();
+}
+// Records the payment against an existing open bill: the Bills Paid grid is what
+// separates this from writing a plain check, which would leave the bill open.
+function renderAddTxBillPayment(tx, amt, acct, itemId) {
+  const b = tx.billMatch || {};
+  const date = tx.date || '';
+  const glName = acct ? acct.gl : '1001 Checking Account';
+  return `
+  <div class="at-cols">
+    <div class="at-card" style="flex:2.2">
+      <div class="at-card-title">Payment Information</div>
+      <div class="at-field-grid" style="grid-template-columns:1.6fr 1fr 1fr;margin-bottom:12px">
+        <div class="at-field">
+          <label>Bank</label>
+          <select class="at-select"><option>${glName}</option></select>
+        </div>
+        <div class="at-field">
+          <label>Payment Date</label>
+          <input class="at-input at-input-date" type="text" value="${date}">
+        </div>
+        <div class="at-field">
+          <label>Payment Method</label>
+          <select class="at-select"><option>ACH</option><option>Check</option><option>Wire</option></select>
+        </div>
+      </div>
+      <div class="at-field-grid" style="grid-template-columns:2fr 1fr;margin-bottom:12px">
+        <div class="at-field">
+          <label style="display:flex;align-items:center"><span style="display:inline-flex;align-items:center;gap:2px">Vendor <span style="color:#9aa7b3;font-size:11px">▾</span></span></label>
+          <input class="at-input at-input-search" type="text" value="${b.vendor||''}">
+          ${b.vendor?`<div style="font-size:12px;color:#666;padding:2px 0 0 2px">${vendorAddr(b.vendor)}</div>`:''}
+        </div>
+        <div class="at-field">
+          <label>Amount</label>
+          <div class="at-amount-wrap"><input class="at-input" type="text" value="${amt.toFixed(2)}"${atAmtBind(itemId)}><span class="at-amount-refresh">${REFRESH_ICO}</span></div>
+        </div>
+      </div>
+      <div class="at-field">
+        <label>Memo</label>
+        <input class="at-input" type="text" value="${b.ref||''} — ${b.invoice||''}">
+      </div>
+    </div>
+    ${atAttachCard()}
+  </div>
+  <div class="at-card">
+    <div class="at-card-title">Bills Paid</div>
+    <table class="at-detail-tbl">
+      <thead>
+        <tr>
+          <th style="width:110px">Bill Date</th><th style="width:110px">Reference</th><th style="width:120px">Invoice #</th>
+          <th>Property</th><th>Expense Account</th><th style="width:110px">Due Date</th>
+          <th class="r" style="width:110px">Amount Due</th><th class="r" style="width:110px">Payment</th><th style="width:24px"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>${fmtD(b.billDate||date)}</td>
+          <td><a class="at-fill-link" href="#" onclick="return false">${regRefCode(b.ref||'')}</a></td>
+          <td>${b.invoice||''}</td>
+          <td>${b.property||''}</td>
+          <td>${b.gl||''}</td>
+          <td>${fmtD(b.dueDate||date)}</td>
+          <td class="r">${fmtN(b.amount||amt)}</td>
+          <td class="r"><input class="at-tbl-input" type="text" value="${(b.amount!=null?b.amount:amt).toFixed(2)}" style="text-align:right"></td>
+          <td style="color:#9aa7b3;text-align:center;cursor:pointer">⋮</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
+      <button class="at-add-link" onclick="showToast('Open bills for this vendor')">${ic(P.add,15,'#008dd5')} Add Bill to Payment</button>
+      <span style="font-size:13px;color:#13314c"><b>Applied:</b>&nbsp;&nbsp;${fmtN(b.amount!=null?b.amount:amt)} of ${fmtN(amt)}</span>
+    </div>
+  </div>`;
+}
+
 function renderAddTxCheck(tx, amt, acct, itemId) {
   const date = tx.date || '';
   const payee = tx.desc ? tx.desc.split(' ').slice(2).join(' ') : '';
@@ -5859,6 +6028,155 @@ function closeRecStart() {
 // Picking an account "uploads" its statement automatically and extracts the
 // statement end date + ending balance from it.
 let _recLoadToken = 0;
+
+/* ── Connect a bank ─────────────────────────────────────────
+   Institution → sign in → pick accounts → connected. Accounts added this way
+   are flagged `isNew` so the newly connected banks stand out in every list. */
+const CONNECT_BANKS = [
+  { name: 'Chase',            color: '#1163b0', sub: 'Business & commercial' },
+  { name: 'Umpqua Bank',      color: '#00635b', sub: 'Business banking' },
+  { name: 'U.S. Bank',        color: '#0b2f6b', sub: 'Business banking' },
+  { name: 'KeyBank',          color: '#c8102e', sub: 'Business & escrow' },
+  { name: 'Wells Fargo',      color: '#b31b1b', sub: 'Business banking' },
+  { name: 'Bank of America',  color: '#0a3a5e', sub: 'Business & card' },
+  { name: 'Citi',             color: '#0d4f9e', sub: 'Business card' },
+  { name: 'American Express', color: '#1f6fb2', sub: 'Corporate card' },
+];
+// What the feed finds once you sign in, keyed by institution.
+const CONNECT_FOUND = {
+  'Chase':            [{ name: 'Business Complete Checking', last4: '4412', bal: 88250.40, gl: '1010 Rental Income Clearing' },
+                       { name: 'Business Savings',            last4: '4429', bal: 210500.00, gl: '1011 Reserve Savings' }],
+  'Umpqua Bank':      [{ name: 'Commercial Checking',         last4: '7781', bal: 64120.15, gl: '1012 Commercial Operating' }],
+  'U.S. Bank':        [{ name: 'Property Operating',          last4: '5530', bal: 41880.00, gl: '1013 Property Operating' },
+                       { name: 'Security Deposit Trust',      last4: '5548', bal: 126400.00, gl: '1014 Security Deposit Trust' }],
+  'KeyBank':          [{ name: 'Escrow Checking',             last4: '9014', bal: 33750.25, gl: '1015 Escrow Checking' }],
+  'Wells Fargo':      [{ name: 'Owner Distribution',          last4: '2207', bal: 97300.00, gl: '1016 Owner Distribution' }],
+  'Bank of America':  [{ name: 'Business Advantage Checking', last4: '6690', bal: 52410.80, gl: '1017 Business Checking' }],
+  'Citi':             [{ name: 'Business Card',               last4: '3312', bal: 4820.35, gl: '2005 Citi Business Card', card: true }],
+  'American Express': [{ name: 'Corporate Green',             last4: '1188', bal: 7640.00, gl: '2006 Amex Corporate', card: true }],
+};
+const CONNECT_STATE = { open: false, step: 1, bank: null, sel: new Set(), busy: false, search: '', added: [] };
+
+function openConnect() {
+  Object.assign(CONNECT_STATE, { open: true, step: 1, bank: null, sel: new Set(), busy: false, search: '', added: [] });
+  renderConnect();
+}
+function closeConnect() { CONNECT_STATE.open = false; document.getElementById('connect-root').innerHTML = ''; }
+function connectPick(name) { CONNECT_STATE.bank = name; CONNECT_STATE.step = 2; renderConnect(); }
+function connectBack() { CONNECT_STATE.step = Math.max(1, CONNECT_STATE.step - 1); renderConnect(); }
+function connectSearch(v) { CONNECT_STATE.search = v; renderConnect(); }
+// The sign-in step is a visual stand-in — the prototype never collects real credentials.
+function connectSignIn() {
+  CONNECT_STATE.busy = true; renderConnect();
+  setTimeout(() => {
+    if (!CONNECT_STATE.open) return;
+    CONNECT_STATE.busy = false;
+    CONNECT_STATE.step = 3;
+    CONNECT_STATE.sel = new Set((CONNECT_FOUND[CONNECT_STATE.bank] || []).map((_, i) => i));
+    renderConnect();
+  }, 900);
+}
+function connectToggle(i) {
+  if (CONNECT_STATE.sel.has(i)) CONNECT_STATE.sel.delete(i); else CONNECT_STATE.sel.add(i);
+  renderConnect();
+}
+function connectFinish() {
+  const found = CONNECT_FOUND[CONNECT_STATE.bank] || [];
+  const picked = [...CONNECT_STATE.sel].sort().map(i => found[i]).filter(Boolean);
+  const added = [];
+  picked.forEach(a => {
+    const id = 'nc' + a.last4;
+    if (ACCOUNTS.some(x => x.id === id)) return;
+    ACCOUNTS.push({
+      id, gl: a.gl, kind: a.card ? 'card' : 'bank', bankName: CONNECT_STATE.bank, last4: a.last4,
+      connection: 'fresh', syncedMin: 0, bankBalance: a.bal, inRm: a.bal, cleared: a.bal,
+      difference: 0, txStatus: { type: 'matched', count: 0 }, isNew: true,
+    });
+    if (typeof SETTINGS_STATE !== 'undefined') {
+      SETTINGS_STATE.accounts[id] = { sync: true, autoMatch: true, visible: true };
+      SETTINGS_STATE.accountsOrder.push(id);
+    }
+    added.push(a.gl);
+  });
+  CONNECT_STATE.added = added;
+  CONNECT_STATE.step = 4;
+  renderConnect();
+  renderSidebar(); renderBC();
+}
+function connectDone() {
+  closeConnect();
+  showToast(`${CONNECT_STATE.added.length} account${CONNECT_STATE.added.length!==1?'s':''} connected`);
+}
+
+function renderConnect() {
+  const root = document.getElementById('connect-root');
+  if (!CONNECT_STATE.open) { root.innerHTML = ''; return; }
+  const st = CONNECT_STATE;
+  const steps = ['Choose bank', 'Sign in', 'Select accounts', 'Done'];
+  const crumb = `<div class="cx-step">${steps.map((t,i)=>`<span class="${st.step===i+1?'on':''}">${i+1}. ${t}</span>${i<steps.length-1?'<span>›</span>':''}`).join('')}</div>`;
+  const found = CONNECT_FOUND[st.bank] || [];
+  const mark = n => `<span class="mark" style="background:${(CONNECT_BANKS.find(b=>b.name===n)||{}).color||'#13314c'}">${n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</span>`;
+
+  let body = '', foot = '';
+  if (st.step === 1) {
+    const q = st.search.trim().toLowerCase();
+    const list = CONNECT_BANKS.filter(b => !q || b.name.toLowerCase().includes(q));
+    body = `
+      <div class="sr-field"><label>Search for your bank</label>
+        <input class="sr-in" type="text" placeholder="Bank name" value="${st.search.replace(/"/g,'&quot;')}" oninput="connectSearch(this.value)"></div>
+      <div class="cx-grid">
+        ${list.map(b=>`<button class="cx-bank" onclick="connectPick('${b.name}')">${mark(b.name)}<span><span class="nm">${b.name}</span><br><span class="sub">${b.sub}</span></span></button>`).join('')
+          || '<div style="grid-column:1/-1;color:#9aa7b3;font-size:13px;font-style:italic;padding:8px 0">No banks match that search.</div>'}
+      </div>`;
+    foot = `<button class="at-cancel" style="height:34px" onclick="closeConnect()">Cancel</button>`;
+  } else if (st.step === 2) {
+    body = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">${mark(st.bank)}<span style="font-size:15px;font-weight:600;color:#13314c">${st.bank}</span></div>
+      <div class="sr-field"><label>Username</label><input class="sr-in" type="text" placeholder="Your ${st.bank} username"${st.busy?' disabled':''}></div>
+      <div class="sr-field"><label>Password</label><input class="sr-in" type="password" placeholder="Password"${st.busy?' disabled':''}></div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#666">
+        ${ic(P.check,15,'#6eb744')}<span>Credentials are passed straight to ${st.bank} and are never stored in Rent Manager.</span>
+      </div>
+      ${st.busy?`<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:#13314c"><span class="sr-spin"></span> Connecting to ${st.bank}\u2026</div>`:''}`;
+    foot = `<button class="btn-primary" style="height:34px;padding:0 18px"${st.busy?' disabled':''} onclick="connectSignIn()">Sign In</button>
+      <button class="at-cancel" style="height:34px" onclick="connectBack()">Back</button>`;
+  } else if (st.step === 3) {
+    body = `
+      <div style="font-size:13px;color:#666">We found ${found.length} account${found.length!==1?'s':''} at ${st.bank}. Choose which ones to add to Rent Manager.</div>
+      ${found.map((a,i)=>`
+        <label class="cx-acct${st.sel.has(i)?' sel':''}">
+          <input type="checkbox" ${st.sel.has(i)?'checked':''} onclick="connectToggle(${i})">
+          <span style="flex:1;min-width:0">
+            <span style="font-size:14px;color:#13314c">${a.name} <span style="color:#9aa7b3">\u2022\u2022\u2022\u2022${a.last4}</span></span><br>
+            <span style="font-size:12px;color:#666">Maps to ${a.gl}</span>
+          </span>
+          <span style="font-size:14px;font-weight:600;color:#13314c">${fmt(a.bal)}</span>
+        </label>`).join('')}`;
+    foot = `<button class="btn-primary" style="height:34px;padding:0 18px"${st.sel.size?'':' disabled'} onclick="connectFinish()">Add ${st.sel.size} Account${st.sel.size!==1?'s':''}</button>
+      <button class="at-cancel" style="height:34px" onclick="connectBack()">Back</button>`;
+  } else {
+    body = `
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 0 4px">
+        ${ic(P.check,44,'#6eb744')}
+        <div style="font-size:16px;font-weight:600;color:#13314c">${st.bank} connected</div>
+        <div style="font-size:13px;color:#666;text-align:center">${st.added.length} account${st.added.length!==1?'s':''} added and syncing. New accounts are flagged <span class="sb-new">New</span> until you review them.</div>
+      </div>
+      ${st.added.map(g=>`<div class="cx-acct"><span style="flex:1;font-size:14px;color:#13314c">${g}</span><span class="sb-new">New</span></div>`).join('')}`;
+    foot = `<button class="btn-primary" style="height:34px;padding:0 18px" onclick="connectDone()">Done</button>`;
+  }
+
+  root.innerHTML = `
+    <div class="at-overlay" onclick="if(event.target===this)closeConnect()">
+      <div class="sr-modal" style="width:560px">
+        <div class="at-hdr">
+          <span class="at-hdr-title" style="font-size:17px;font-weight:600">Connect a Bank</span>
+          <button class="at-hdr-ico" onclick="closeConnect()" title="Close">${AT_X_ICO}</button>
+        </div>
+        <div class="sr-body" style="gap:14px">${crumb}${body}</div>
+        <div class="sr-foot">${foot}</div>
+      </div>
+    </div>`;
+}
 function recStartPick(acctId) {
   REC_STATE.startAcctId = acctId || null;
   const acct = ACCOUNTS.find(a => a.id === acctId);
@@ -5866,23 +6184,10 @@ function recStartPick(acctId) {
   REC_STATE.startDate = '';
   REC_STATE.startBalance = null;
   REC_STATE.startLoading = 0;
-  const token = ++_recLoadToken;
+  _recLoadToken++;
   if (clean) {
-    // Simulate the statement upload: fetching the file, then extracting the
-    // end date + ending balance from it before the fields fill in.
-    REC_STATE.startLoading = 1;
-    setTimeout(() => {
-      if (_recLoadToken !== token || !REC_STATE.startOpen) return;
-      REC_STATE.startLoading = 2;
-      renderRecStart();
-    }, 700);
-    setTimeout(() => {
-      if (_recLoadToken !== token || !REC_STATE.startOpen) return;
-      REC_STATE.startLoading = 0;
-      REC_STATE.startDate = REC_STMT_DATE;
-      REC_STATE.startBalance = acct.bankBalance;
-      renderRecStart();
-    }, 1500);
+    REC_STATE.startDate = REC_STMT_DATE;
+    REC_STATE.startBalance = acct.bankBalance;
   }
   renderRecStart();
 }
@@ -5929,13 +6234,11 @@ function renderRecStart() {
   const selHtml = cSel('sr-acct', REC_STATE.startAcctId || '', acctOpts, "recStartPick(value)", 'width:100%')
     .replace('class="csel-btn"', 'class="csel-btn" style="width:100%;height:38px;background:#f5f8fa;justify-content:space-between;font-size:14px"');
 
-  const stmtFile = hasAcct ? `${acct.bankName.toLowerCase().replace(/\s+/g, '').replace(/bank$/, '')}bankstatement_june.pdf` : '';
-
   root.innerHTML = `
     <div class="at-overlay" onclick="if(event.target===this)closeRecStart()">
       <div class="sr-modal">
         <div class="at-hdr">
-          <span class="at-hdr-title" style="font-size:17px;font-weight:600">Start Smart Reconciliation</span>
+          <span class="at-hdr-title" style="font-size:17px;font-weight:600">Start Reconciliation</span>
           <button class="at-hdr-ico" onclick="closeRecStart()" title="Close">${AT_X_ICO}</button>
         </div>
         <div class="sr-body">
@@ -5958,37 +6261,14 @@ function renderRecStart() {
               <div class="sr-ro${hasAcct ? '' : ' empty'}">${hasAcct ? fmtN(recBeginningBalance(acct.id)) : '00.00'}</div>
             </div>
           </div>
-          <div>
-            <div class="sr-lbl-row">
-              <label>Bank Statement</label>
-              ${inReview
-                ? `<a class="disabled">Upload Manually</a>`
-                : `<a href="#" onclick="showToast('Statement uploaded');return false">Upload Manually</a>`}
-            </div>
-            ${loading ? `<div class="sr-stmt-box">
-              <div class="sr-file-row"><a href="#" onclick="return false">${stmtFile}</a></div>
-              ${REC_STATE.startLoading >= 2
-                ? `<div class="sr-check-row">${SR_CHECK_CIRCLE} Statement uploaded automatically</div>
-                   <div class="sr-check-row"><span class="sr-spin"></span> Extracting statement information\u2026</div>`
-                : `<div class="sr-check-row"><span class="sr-spin"></span> Uploading statement automatically\u2026</div>`}
-            </div>` : canContinue ? `<div class="sr-stmt-box">
-              <div class="sr-file-row"><a href="#" onclick="return false">${stmtFile}</a><button style="background:none;border:none;display:flex;cursor:pointer" onclick="recStartPick('')">${ic(P.close, 16, '#008dd5')}</button></div>
-              <div class="sr-check-row">${SR_CHECK_CIRCLE} Statement uploaded automatically</div>
-              <div class="sr-check-row">${SR_CHECK_CIRCLE} Statement information extracted</div>
-            </div>` : `<div class="sr-stmt-box empty">${inReview ? 'Statement upload unavailable \u2014 this account still has transactions in review' : 'Select an account for your statement to be uploaded'}</div>`}
-          </div>
-          ${canContinue ? `<div class="sr-orion-note">
-            ${orionSpark(17)}
-            <span>The <b>end date</b> and <b>ending balance</b> have been pulled from your statement. Confirm the information is correct before proceeding.</span>
-          </div>` : ''}
           <div class="sr-2col">
             <div class="sr-field">
-              <label>Statement End Date</label>
-              <input class="sr-in" type="date" value="${_recDateISO(REC_STATE.startDate)}"${inReview || loading ? ' disabled' : ''} onchange="recStartField('date',this.value)">
+              <label>Bank Balance</label>
+              <div class="sr-ro${hasAcct ? '' : ' empty'}">${hasAcct ? fmtN(acct.bankBalance) : '00.00'}</div>
             </div>
             <div class="sr-field">
-              <label>Statement Ending Balance</label>
-              <input class="sr-in" type="text" inputmode="decimal" placeholder="00.00" value="${REC_STATE.startBalance != null ? fmtN(REC_STATE.startBalance) : ''}"${inReview || loading ? ' disabled' : ''} onchange="recStartField('balance',this.value)">
+              <label>Transactions to Reconcile</label>
+              <div class="sr-ro${hasAcct ? '' : ' empty'}">${hasAcct ? (recData(acct.id).deposits.length + recData(acct.id).payments.length) : '\u2014'}</div>
             </div>
           </div>
         </div>
@@ -6061,14 +6341,6 @@ function srTryFinish() {
             <label style="font-size:13px;color:#666">Comment <span style="color:#9aa7b3">(optional)</span></label>
             <textarea class="at-textarea" style="min-height:52px" placeholder="Add a note for the reconciliation history..." oninput="REC_STATE.finishComment=this.value">${REC_STATE.finishComment || ''}</textarea>
           </div>
-          <div class="so-field">
-            <label style="font-size:13px;color:#666">Attach statement <span style="color:#9aa7b3">(optional)</span></label>
-            <div class="so-att-center" style="height:56px">
-              <div class="so-att-left">${UPLOAD_ICO} <span>Upload</span></div>
-              <div class="so-att-center-div"></div>
-              <div class="so-att-left">${PASTE_ICO} <span>Paste</span></div>
-            </div>
-          </div>
         </div>
         <div class="sr-foot">
           <button class="btn-primary" style="height:34px;padding:0 16px" onclick="srConfirmFinish()">${balanced ? 'Save & Finish' : 'Finish Anyway'}</button>
@@ -6104,9 +6376,8 @@ function finishReconciliation() {
         <div style="font-size:13px;color:#9aa7b3;margin:-8px 0 2px">This snapshot is saved to the account's reconciliation history.</div>
         <div class="rec-done-card">
           <div class="rec-done-row"><span>Reconciled on</span><span>06/16/2026</span></div>
-          <div class="rec-done-row"><span>Statement ending balance</span><span>${fmt(REC_STATE.statementBalance)}</span></div>
+          <div class="rec-done-row"><span>Bank balance</span><span>${fmt(REC_STATE.statementBalance)}</span></div>
           <div class="rec-done-row"><span>Book balance in RM</span><span>${fmt(cleared)}</span></div>
-          <div class="rec-done-row"><span>Period end date</span><span>${REC_STATE.statementDate || '\u2014'}</span></div>
           <div class="rec-done-row"><span>Cleared transactions</span><span>${clearedCount}</span></div>
           <div class="rec-done-row"><span>Transactions matched</span><span>${matchedCount}</span></div>
           ${Math.abs(srDifference()) >= 0.005 ? `<div class="rec-done-row"><span>Unresolved difference</span><span style="color:#eb343c">${fmt(Math.abs(srDifference()))}</span></div>` : ''}
@@ -6132,24 +6403,28 @@ function srPanel(title, key, rows, acctId) {
   const selTotal = rows.reduce((s, r) => REC_STATE.checked[r.id] ? s + (r.bankAmt != null ? r.bankAmt : r.rmAmt) : s, 0);
   const outstanding = +(rmTotal - selTotal).toFixed(2);
   const allChecked = shown.length > 0 && shown.every(r => REC_STATE.checked[r.id]);
-  const acctLabel = key === 'dep' ? 'Income Account' : key === 'pay' ? 'Expense Account' : 'Account';
-  const body = shown.map(r => `
-    <tr>
+  // Single-line rows: the bank side is shown, and the Rent Manager record behind
+  // it is revealed on hover instead of stacking a second line in every cell.
+  const body = shown.map(r => {
+    const rmTip = `${r.ref ? r.ref + ' \u00b7 ' : ''}${r.rmText}  |  ${fmtD(r.rmDate)}  |  ${r.account}  |  ${fmtN(r.rmAmt)}`;
+    return `
+    <tr class="sr-row" data-rmtip="${rmTip.replace(/"/g, '&quot;')}">
       <td style="text-align:center;vertical-align:middle"><input type="checkbox" ${REC_STATE.checked[r.id] ? 'checked' : ''} onclick="toggleSrRow('${r.id}',this.checked)"></td>
-      <td><div class="sr2-top">${r.bankAmt != null ? fmtD(r.date) : '-'}</div><div class="sr2-sub">${fmtD(r.rmDate)}</div></td>
-      <td><div class="sr2-top">${r.bankDesc == null ? '-' : r.bankDesc}</div><div class="sr2-sub">${r.rmText}</div></td>
-      <td><div class="sr2-top">${r.category}</div><div class="sr2-sub">${r.account}</div></td>
-      <td class="r"><div class="sr2-top">${r.bankAmt == null ? '-' : fmtN(r.bankAmt)}</div><div class="sr2-sub">${fmtN(r.rmAmt)}</div></td>
+      <td>${r.bankAmt != null ? fmtD(r.date) : fmtD(r.rmDate)}</td>
+      <td>${r.bankDesc == null ? r.rmText : r.bankDesc}</td>
+      <td>${r.category}</td>
+      <td class="r">${r.bankAmt == null ? fmtN(r.rmAmt) : fmtN(r.bankAmt)}</td>
       <td style="text-align:center;vertical-align:middle">${r.bankAmt != null ? SR_CHECK_CIRCLE : ''}</td>
       <td style="vertical-align:middle"><span class="sr-pill ${REC_STATE.checked[r.id] ? 'cleared' : 'review'}">${REC_STATE.checked[r.id] ? 'Cleared' : 'Review'}</span></td>
       <td class="sr2-info" style="text-align:center;vertical-align:middle">${r.insight ? `<span class="sr-info-tip" data-tip="${r.insight.replace(/"/g, '&quot;')}">${SR_INFO_ICO}</span>` : ''}</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
   return `
     <div class="sr-panel2">
       <div class="sr-sec-hdr" style="margin-top:0">
         <span class="sr-sec-title">${title}</span>
         <div class="sr-sec-sums">
-          <span>Statement<b>${fmt(stmtTotal)}</b></span>
+          <span>Bank<b>${fmt(stmtTotal)}</b></span>
           <span>Rent Manager<b>${fmt(rmTotal)}</b></span>
           <span>Outstanding<b class="${outstanding > 0 ? 'neg' : ''}">${outstanding > 0 ? '+' : ''}${fmt(outstanding)}</b></span>
         </div>
@@ -6161,10 +6436,10 @@ function srPanel(title, key, rows, acctId) {
         </colgroup>
         <thead><tr>
           <th style="text-align:center;padding:0;vertical-align:middle"><input type="checkbox" ${allChecked ? 'checked' : ''} onclick="toggleSrAll('${key}',this.checked)"></th>
-          <th><div>Cleared Date</div><div class="sub">Date</div></th>
-          <th><div>Bank Description</div><div class="sub">RM Transaction</div></th>
-          <th><div>Category</div><div class="sub">${acctLabel}</div></th>
-          <th class="r"><div>Bank Amount</div><div class="sub">RM Amount</div></th>
+          <th>Date</th>
+          <th>Description</th>
+          <th>Category</th>
+          <th class="r">Amount</th>
           <th style="text-align:center;vertical-align:middle">Matched</th>
           <th style="vertical-align:middle">Status</th>
           <th></th>
@@ -6190,19 +6465,7 @@ function renderReconcile() {
   const diff = +(stmtBal - cleared).toFixed(2);
   const balanced = Math.abs(diff) < 0.005;
 
-  const donutR = 14.5, donutC = 2 * Math.PI * donutR, donutFill = donutC * 0.82;
   document.getElementById('rec-inner').innerHTML = `
-    ${REC_STATE.bannerDismissed ? '' : `<div class="sr-stats-banner">
-      <svg width="36" height="36" viewBox="0 0 36 36" style="flex-shrink:0">
-        <circle cx="18" cy="18" r="${donutR}" fill="none" stroke="#e5e5e5" stroke-width="5"/>
-        <circle cx="18" cy="18" r="${donutR}" fill="none" stroke="#6eb744" stroke-width="5"
-          stroke-dasharray="${donutFill} ${donutC}" stroke-linecap="round" transform="rotate(-90 18 18)"/>
-        <text x="18" y="21" text-anchor="middle" font-size="9" font-weight="600" fill="#13314c">82%</text>
-      </svg>
-      ${orionSpark(14)}
-      <span class="txt">${INSIGHTS[4].body}</span>
-      <button class="sr-banner-x" title="Dismiss" onclick="REC_STATE.bannerDismissed=true;renderReconcile()">${ic(P.close,16,'#666')}</button>
-    </div>`}
     <div class="sr-strip">
       <div class="sr-acct">
         ${ic(P.bank, 18, '#13314c')}
@@ -6218,8 +6481,7 @@ function renderReconcile() {
         <span class="sr-op">=</span>
         <div class="sr-cell"><span class="sr-cell-lbl">Cleared Balance</span><span class="sr-cell-val">${fmt(cleared)}</span></div>
         <span class="sr-vdiv"></span>
-        <div class="sr-cell"><span class="sr-cell-lbl">Statement Ending</span><span class="sr-cell-val">${fmt(stmtBal)}</span></div>
-        <div class="sr-cell"><span class="sr-cell-lbl">Statement End Date</span><span class="sr-cell-val">${REC_STATE.statementDate || REC_STMT_DATE}</span></div>
+        <div class="sr-cell"><span class="sr-cell-lbl">Bank Balance</span><span class="sr-cell-val">${fmt(stmtBal)}</span></div>
         <div class="sr-diff${balanced ? ' ok' : ''}">
           ${balanced ? ic(P.check, 17, '#2e7d32') : SR_ALERT_ICO}
           <span class="lbl">Difference</span><span class="val">${fmt(Math.abs(diff))}</span>

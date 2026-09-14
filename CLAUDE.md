@@ -39,10 +39,16 @@ Portland, OR residential + light-commercial property manager. Demo "today" = mid
 - 8 items whose total net = +$4,931.60: +1,850 (t1 Rivera) +2,100 (t2 Okafor) −1,240 (t3 Rose City)
   +6,939 (t4 Zego batch — carries `depPayments`, 12 seeded resident rows that sum exactly to 6,939.00; select-all balances the split) −2,860 (t5 Cascade HVAC) −318.40 (t6 café, pre-excluded via `SEED_EXCLUDED`)
   −1,150 (t7 NSF Reyes) −389 (t8 Recology dup)
-- Review beats: Match (t1), Select Match (t2), Add New (t3), Split (t4), Match (t5 — was the Find
-  Matches beat; now pre-suggested to Check 2212: Cascade HVAC), NSF Return (t7), Possible Duplicate (t8);
-  t6 starts in the Excluded tab. TR opens with In Review (7) / Matched (0) / Excluded (1);
-  `txStatus.count` is 4 (static, drives the register strip only)
+- **1001 Operating opens reconcile-ready (09/14/2026):** t1–t5, t7, t8 are seeded into `SEED_MATCHED`
+  and t6 into `SEED_EXCLUDED`, so TR opens In Review (0) / Matched (7) / Excluded (1) and the Reconcile
+  button is enabled. All eight beats still exist in the data — remove their ids from `SEED_MATCHED`
+  to put them back into review. `txStatus` is `{type:'matched',count:0}`.
+- Beat inventory (now in the Matched/Excluded tabs): Match (t1), Select Match (t2), Add New (t3),
+  Split (t4), Match (t5 → Check 2212: Cascade HVAC), NSF Return (t7), Possible Duplicate (t8), t6 excluded
+- **Outstanding-bill beat lives in 1007 Maintenance Escrow (`me6`)** — a synced $1,450 Cascade HVAC ACH
+  that Orion ties to open Bill B1183. Primary action **Create Bill Payment** (`openBillPayment`) opens the
+  Add overlay on the `Bill Payment` type, whose "Bills Paid" grid applies the payment to the bill;
+  "Add as Check" is offered as the lesser alternative.
 - Suggested-match confidence tiers shown in an unlabeled column of filled lozenges (fixed-position why-tooltip above the row): t1=rule (High, green), t2/t3/t5/t7=ai (Medium, amber), t8=hint (Low, pink)
 - `SEED_MATCHED` pre-matched examples (net $0.00 per account, survive account-switch resets) cover every record type: Bill/Deposit/Check/Journal in 1004 Trust Comm + 1007 Maintenance, Charge/Credit in 2001 Mastercard + 2003 Amex
 
@@ -70,6 +76,30 @@ excluded — the disabled button carries a tooltip explaining which rows block i
 re-check before acting (no partial application);
 Bulk Edit opens an overlay applying Property / GL Account / Memo across the selection.
 `S.selectedIds` is cleared on account switch so actions can never touch off-screen rows.
+
+## Connect a Bank flow
+
+`openConnect()` → 4-step overlay in `#connect-root`: choose institution (searchable, 8 banks in
+`CONNECT_BANKS`) → sign in (visual only, no credentials collected) → select accounts found at that
+bank (`CONNECT_FOUND`) → done. Picked accounts are appended to `ACCOUNTS` with `isNew:true`, which
+renders a **New** badge in the TR sidebar and the Accounts Overview table. Entry points: Add Account
+in the TR sidebar (expanded + collapsed) and the **Connect** link on unlinked accounts in the BC table.
+
+## Banking Center / Reconciliation conventions (09/14/2026)
+
+- BC tiles have no icon badges; the Accounts Overview table dropped its **Difference** column and
+  "In Rent Manager" is now **Cleared Balance** (also in the TR summary strip and the BC tiles)
+- Connection Status shows an explicit green **Connected** lozenge; accounts with `connection:'none'`
+  (Petty Cash) show "Not connected" + a Connect link and **no** match status at all
+- TR sidebar rows are quiet by default — a status only appears when the account needs something
+  (`N to review` or `Login required`); unlinked accounts read "No account linked"
+- The screen is called **Reconciliation**, not Smart Reconciliation
+- **No statement concept**: the start overlay shows Bank Account / Last Reconciliation Date /
+  Beginning Balance / Bank Balance / Transactions to Reconcile (no upload, no statement date or
+  ending balance). `REC_STATE.statementBalance` still exists internally and defaults to the account's
+  bank balance, which is what the strip's **Bank Balance** cell and `srDifference()` compare against
+- Reconcile rows are **single-line** (bank side); the Rent Manager record behind each row appears in a
+  fixed-position hover tooltip (`data-rmtip` → `.rm-tip`). No close-forecast/pace banner
 
 ## Key render functions
 
