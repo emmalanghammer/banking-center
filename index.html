@@ -1686,9 +1686,13 @@ function renderBC() {
     connHealth: `<div class="bc-card">
       <div class="bc-card-hrow"><span class="bc-card-h">Connection Health</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="openSettings('institutions')">Manage Connections</button></div>
       <div style="display:flex;align-items:center;gap:8px"><div class="bc-alert-dot" style="background:#6eb744"></div><span style="font-size:16px;font-weight:500;color:#13314c">${visAccts.filter(a=>a.connection==='fresh').length} of ${visAccts.length} accounts syncing</span></div>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:6px"><div class="bc-alert-dot err"></div><span style="font-size:14px;color:#13314c">1 account needs to reconnect</span></div>
-      <div class="bc-div" style="margin:10px 0 8px"></div>
-      <div style="font-size:12.5px;color:#666">Connects to <b>18,000+</b> financial institutions</div>
+      ${(() => {
+        const lapsed = visAccts.filter(a => a.connection === 'login').length;
+        const unlinked = visAccts.filter(a => a.connection === 'none').length;
+        const line = (n, color, txt) => n ? `<div style="display:flex;align-items:center;gap:8px;margin-top:6px"><div class="bc-alert-dot" style="background:${color}"></div><span style="font-size:14px;color:#13314c">${n} account${n!==1?'s':''} ${txt}</span></div>` : '';
+        return line(lapsed, '#eb343c', lapsed !== 1 ? 'need to reconnect' : 'needs to reconnect')
+             + line(unlinked, '#b3b3b3', unlinked !== 1 ? 'are not connected' : 'is not connected');
+      })()}
     </div>`,
   };
 
@@ -6309,6 +6313,26 @@ function connectFinish() {
     }
     added.push(a.gl);
   });
+  if (picked.length) {
+    const rows = picked.map(a => ({
+      bankAcct: `${a.name}\u2022\u2022\u2022\u2022${a.last4}`,
+      linkedAcct: a.gl,
+      type: a.card ? 'Credit Card' : 'Bank',
+    }));
+    const existing = INSTITUTIONS.find(i => i.name === CONNECT_STATE.bank);
+    if (existing) {
+      rows.forEach(r => { if (!existing.bankAccounts.some(b => b.bankAcct === r.bankAcct)) existing.bankAccounts.push(r); });
+      existing.status = 'connected';
+      existing.collapsed = false;
+    } else {
+      INSTITUTIONS.unshift({
+        id: 'nc-' + CONNECT_STATE.bank.toLowerCase().replace(/[^a-z0-9]+/g, ''),
+        name: CONNECT_STATE.bank,
+        desc: `${CONNECT_STATE.bank} Accounts - Cascade Property Group`,
+        status: 'connected', collapsed: false, bankAccounts: rows,
+      });
+    }
+  }
   CONNECT_STATE.added = added;
   CONNECT_STATE.step = 4;
   renderConnect();

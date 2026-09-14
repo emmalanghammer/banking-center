@@ -86,7 +86,9 @@ chevrons, institution card grid, "powered by Quiltt" footer). Deliberately does 
 is a third-party surface. Steps: choose institution (searchable, 8 banks in `CONNECT_BANKS`) → sign
 in (visual only, no credentials collected) → a `connecting` step with the wire/sync graphic →
 select accounts found at that bank (`CONNECT_FOUND`) → done. Picked accounts are appended to `ACCOUNTS` with `isNew:true`, which
-renders a **New** badge in the TR sidebar and the Accounts Overview table. Entry points: Add Account
+renders a **New** badge in the TR sidebar and the Accounts Overview table, and they are registered
+in `INSTITUTIONS` so the connection shows up under Settings › Institutions (appending to an existing
+entry for that bank rather than duplicating it). Entry points: Add Account
 in the TR sidebar (expanded + collapsed) and the **Connect** link on unlinked accounts in the BC table.
 
 ## Banking Center / Reconciliation conventions (09/14/2026)
