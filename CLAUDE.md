@@ -80,9 +80,12 @@ Bulk Edit opens an overlay applying Property / GL Account / Memo across the sele
 
 ## Connect a Bank flow
 
-`openConnect()` → 4-step overlay in `#connect-root`: choose institution (searchable, 8 banks in
-`CONNECT_BANKS`) → sign in (visual only, no credentials collected) → select accounts found at that
-bank (`CONNECT_FOUND`) → done. Picked accounts are appended to `ACCOUNTS` with `isNew:true`, which
+`openConnect()` → overlay in `#connect-root`, styled as the **Quiltt Connector** from the reference
+screenshots in `~/Downloads/Quiltt` (403px modal, `#faf9fd` ground, purple `#6d28d9` accents, back/X
+chevrons, institution card grid, "powered by Quiltt" footer). Deliberately does NOT follow RMX - it
+is a third-party surface. Steps: choose institution (searchable, 8 banks in `CONNECT_BANKS`) → sign
+in (visual only, no credentials collected) → a `connecting` step with the wire/sync graphic →
+select accounts found at that bank (`CONNECT_FOUND`) → done. Picked accounts are appended to `ACCOUNTS` with `isNew:true`, which
 renders a **New** badge in the TR sidebar and the Accounts Overview table. Entry points: Add Account
 in the TR sidebar (expanded + collapsed) and the **Connect** link on unlinked accounts in the BC table.
 
@@ -153,8 +156,8 @@ header/context bar already built to their own Figma components.
 
 The connector is framed as **Quiltt** (the aggregator in use): "Secured by Quiltt" in the modal
 header, 18,000+ institutions attributed to Quiltt, and the sign-in step explains that Quiltt passes
-credentials to the institution and Rent Manager never sees or stores them. Launched from
-**Add Account** in the TR sidebar and **Add Institution** in Settings › Institutions.
+credentials to the institution and Rent Manager never sees or stores them. Launched from **Add Account** in the TR sidebar,
+**Add Institution** in Settings › Institutions, and **Reconnect** on a login-required account header.
 
 ## Visible accounts
 
