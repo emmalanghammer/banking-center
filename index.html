@@ -1520,14 +1520,14 @@ function renderBC() {
     // Bank account cell
     let bankAcctCell;
     if (a.connection === 'none') {
-      bankAcctCell = `<span style="color:#b3b3b3;font-size:13px">No Account Linked</span> <button class="acct-link" style="font-size:14px" onclick="event.stopPropagation();openConnect(null,'${a.id}')">Link Account</button>`;
+      bankAcctCell = `<span style="color:#b3b3b3;font-size:13px">No Account Linked</span>`;
     } else {
       bankAcctCell = `${a.bankName}••••${a.last4}`;
     }
     // Connection status cell
     let connCell;
     if (a.connection === 'none') {
-      connCell = `<span style="color:#b3b3b3;font-size:13px">Not connected</span>`;
+      connCell = `<span style="display:inline-flex;align-items:center;gap:12px"><span style="color:#b3b3b3;font-size:13px">Not connected</span><button class="acct-link" style="font-size:14px" onclick="event.stopPropagation();openConnect(null,'${a.id}')">Link Account</button></span>`;
     } else if (a.connection === 'login') {
       connCell = `<span style="display:inline-flex;align-items:center;gap:8px"><span class="ao-loz-err">Login Required</span><span class="ao-conn">${SYNC_ICO} ${fmtSync(a.syncedMin)}</span><button class="acct-link" style="font-size:14px" onclick="event.stopPropagation();openConnect('${a.bankName}')">Reconnect</button></span>`;
     } else {
