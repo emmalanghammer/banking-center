@@ -131,6 +131,39 @@ All six glyphs (logo, menu, reports, grade, search, notifications) are the Figma
 inlined verbatim — the reports glyph is an Express custom icon with no Material equivalent.
 The search bar is allowed to shrink below 454px so narrow viewports don't push the manage zone off.
 
+## RMX consistency pass (09/14/2026)
+
+Applied with the `rmx-prototyping` skill to every surface **except the Banking Center**, which is
+deliberately styled differently (all `.bc-*` / `.ao-*` / `.qa-*` rules are skipped), and except the
+header/context bar already built to their own Figma components.
+
+- Controls standardised at **36px / 14px**: inputs, selects, buttons, segmented controls
+- Input Field anatomy: `#F5F8FA` fill, `#CEDBE7` border, blue on focus only, italic = placeholder only
+- Register anatomy: 28px headers, 36px rows · Tile header rule is **2px `#008DD5`** (was navy)
+- Type ramp snapped to 12/14 · stray radii (3/5/6px) → 4px
+- **Deliberate divergence:** the Bank Register filter bar stays blue-bordered on white, matching
+  Figma 2732-43969 as originally requested
+- Custom selects (`.csel-menu`) switch to **fixed positioning while open** (`_cselPlace`) so overlay
+  bodies that scroll can't clip them; they flip above the trigger when short on room
+- Reconcile row hover uses the RMX hover tint `#EBF1F5`, and the hover card is the RMX
+  **Tooltip Text** component (RMX-Components 31:303): 312px white card, 1px `#CEDBE7`, 4px radius,
+  16px padding, bordered title row, 14px/20px
+- Reconcile strip: amounts are regular weight; only **Bank Balance** and **Difference** stay bold
+
+## Connect a Bank — Quiltt
+
+The connector is framed as **Quiltt** (the aggregator in use): "Secured by Quiltt" in the modal
+header, 18,000+ institutions attributed to Quiltt, and the sign-in step explains that Quiltt passes
+credentials to the institution and Rent Manager never sees or stores them. Launched from
+**Add Account** in the TR sidebar and **Add Institution** in Settings › Institutions.
+
+## Visible accounts
+
+Only accounts carrying a demo beat are visible (`SETTINGS_STATE.accounts[id].visible`): 1001
+Operating, 1004 Trust Comm., 1007 Maintenance Escrow, 1009 Petty Cash, 2001 Mastercard, 2003 Amex.
+Payroll / Trust Res. / Owner Disbursement / Visa Maintenance / Visa Vendor are hidden but intact.
+Balance counts and the reconcile account picker are scoped to visible accounts.
+
 ## Notable CSS patterns
 
 - RMX token pass applied (per the rmx-prototyping skill): page bg `#F3F4F8`, notice amber `#FAA61C`, checked checkboxes `#F79B4D` everywhere (incl. header select-alls, per user preference over the RMX blue-select-all variant), btn hovers `#0071AA`/`#EBF1F5`, register headers 12.6px/500/+1.1px on `#737373`, italic `#b3b3b3` placeholders, Orion chat border = Orion_2 gradient (`#008dd5→#6eb744`) with blue glow. Native `<select>` popups are suppressed app-wide by the `.rmx-dd` delegated component — options render in an RMX floating panel while the native element keeps state and fires its own change events (no form logic touched). Statement End Date stays a native date input by explicit request.
