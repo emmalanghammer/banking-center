@@ -87,8 +87,11 @@ is a third-party surface. Steps: choose institution (searchable, 8 banks in `CON
 in (visual only, no credentials collected) → a `connecting` step with the wire/sync graphic →
 select accounts found at that bank (`CONNECT_FOUND`) → done. Picked accounts are appended to `ACCOUNTS` with `isNew:true`, which
 renders a **New** badge in the TR sidebar and the Accounts Overview table, and they are registered
-in `INSTITUTIONS` so the connection shows up under Settings › Institutions (appending to an existing
-entry for that bank rather than duplicating it). Entry points: Add Account
+visible, which is all Settings › Institutions needs - that list is **derived from `ACCOUNTS`**
+(`institutions()`), so it always matches the Accounts Overview: one card per `bankName`, one row per
+linked account, status `action-required` when any account at that bank is `connection:'login'` and
+`connected` otherwise. Unlinked accounts (Petty Cash) belong to no institution. Collapsed state lives
+in `INST_COLLAPSED`, descriptions in `INST_DESC`. Entry points: Add Account
 in the TR sidebar (expanded + collapsed) and the **Connect** link on unlinked accounts in the BC table.
 
 ## Banking Center / Reconciliation conventions (09/14/2026)

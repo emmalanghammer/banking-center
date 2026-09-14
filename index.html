@@ -5335,48 +5335,43 @@ function renderSettingsAccounts() {
     </div>`;
 }
 
-const INSTITUTIONS = [
-  {
-    id: 'boa', name: 'Bank of America', desc: 'Bank of America Accounts - Riverview Apartments',
-    status: 'connected', collapsed: false,
-    bankAccounts: [
-      { bankAcct: 'Checking••••4821', linkedAcct: '1001 Operating Account', type: 'Bank' },
-      { bankAcct: 'Savings••••8256',  linkedAcct: '1002 Payroll Account',   type: 'Bank' },
-      { bankAcct: 'Credit Card••••5678', linkedAcct: '<None>',             type: 'Credit Card' },
-    ]
-  },
-  {
-    id: 'fn', name: 'First National', desc: 'All First National Accounts',
-    status: 'action-required', collapsed: false,
-    bankAccounts: [
-      { bankAcct: 'Checking••••6612', linkedAcct: '1003 Trust Account - Res.',  type: 'Bank' },
-      { bankAcct: 'Checking••••6629', linkedAcct: '1004 Trust Account - Comm.', type: 'Bank' },
-    ]
-  },
-  {
-    id: 'chase', name: 'Chase', desc: 'Chase Business Accounts',
-    status: 'unavailable', collapsed: false,
-    bankAccounts: [
-      { bankAcct: 'Checking••••9043', linkedAcct: '1003 Trust Account', type: 'Bank' },
-    ]
-  },
-  {
-    id: 'wf', name: 'Wells Fargo', desc: 'Wells Fargo Regular Accounts',
-    status: 'new-available', collapsed: true,
-    bankAccounts: [
-      { bankAcct: 'Checking••••1193', linkedAcct: '1005 Security Deposit Account', type: 'Bank' },
-      { bankAcct: 'Checking••••1208', linkedAcct: '1006 Reserve Fund',             type: 'Bank' },
-      { bankAcct: 'Credit Card••••8804', linkedAcct: '2004 Visa - Vendor Payments', type: 'Credit Card' },
-    ]
-  },
-  {
-    id: 'citi', name: 'CitiBank', desc: 'CitiBank Accounts',
-    status: 'action-required', collapsed: false, showDelete: true,
-    bankAccounts: [
-      { bankAcct: 'Credit Card••••2247', linkedAcct: '2001 Mastercard', type: 'Credit Card' },
-    ]
-  },
-];
+// Institutions are derived from ACCOUNTS so Settings always agrees with the
+// Accounts Overview: one card per bank, one row per linked account.
+const INST_DESC = {
+  'Chase':            'Chase Business Accounts - Cascade Property Group',
+  'Umpqua Bank':      'Umpqua Trust Accounts - Cascade Property Group',
+  'KeyBank':          'KeyBank Accounts - Cascade Property Group',
+  'Citi':             'CitiBank Accounts - Cascade Property Group',
+  'American Express': 'American Express Accounts - Cascade Property Group',
+  'Wells Fargo':      'Wells Fargo Accounts - Cascade Property Group',
+  'Bank of America':  'Bank of America Accounts - Cascade Property Group',
+  'U.S. Bank':        'U.S. Bank Accounts - Cascade Property Group',
+};
+const INST_COLLAPSED = {};
+function instId(bank) { return 'inst-' + bank.toLowerCase().replace(/[^a-z0-9]+/g, ''); }
+function institutions() {
+  const out = [], byBank = {};
+  visibleOrderedAccounts().forEach(a => {
+    if (!a.bankName) return;   // unlinked accounts belong to no institution
+    let inst = byBank[a.bankName];
+    if (!inst) {
+      inst = byBank[a.bankName] = {
+        id: instId(a.bankName), name: a.bankName,
+        desc: INST_DESC[a.bankName] || `${a.bankName} Accounts - Cascade Property Group`,
+        status: 'connected', bankAccounts: [],
+      };
+      out.push(inst);
+    }
+    if (a.connection === 'login') inst.status = 'action-required';
+    inst.bankAccounts.push({
+      bankAcct: `${a.kind === 'card' ? 'Credit Card' : 'Checking'}\u2022\u2022\u2022\u2022${a.last4}`,
+      linkedAcct: a.gl,
+      type: a.kind === 'card' ? 'Credit Card' : 'Bank',
+    });
+  });
+  out.forEach(i => { i.collapsed = !!INST_COLLAPSED[i.id]; });
+  return out;
+}
 
 const INST_STATUS = {
   'connected':      { label: 'Connected',                          bg: '#e2f1da', color: '#13314c' },
@@ -5387,8 +5382,7 @@ const INST_STATUS = {
 
 let _instMenu = null;
 function toggleInstitution(id) {
-  const inst = INSTITUTIONS.find(i => i.id === id);
-  if (inst) inst.collapsed = !inst.collapsed;
+  INST_COLLAPSED[id] = !INST_COLLAPSED[id];
   renderSettings();
 }
 function toggleInstMenu(id, e) {
@@ -5402,7 +5396,7 @@ function renderSettingsConnections() {
   const CHEVRON_DOWN = `<svg width="20" height="20" viewBox="0 0 24 24" fill="#666"><path d="M7 10l5 5 5-5H7z"/></svg>`;
   const MORE_VERT = `<svg width="20" height="20" viewBox="0 0 24 24" fill="#666"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>`;
 
-  const instCards = INSTITUTIONS.map(inst => {
+  const instCards = institutions().map(inst => {
     const st = INST_STATUS[inst.status] || INST_STATUS['connected'];
     const badge = `<span style="display:inline-flex;align-items:center;height:24px;padding:0 8px;border-radius:4px;background:${st.bg};color:${st.color};font-size:14px;white-space:nowrap">${st.label}</span>`;
     const chevron = `<span style="display:flex;align-items:center;flex-shrink:0;transition:transform .15s;transform:${inst.collapsed?'rotate(-90deg)':'rotate(0deg)'}">${CHEVRON_DOWN}</span>`;
@@ -6293,8 +6287,6 @@ function connectRestore() {
     a.syncedMin = 0;
     restored.push(a.gl);
   });
-  const inst = INSTITUTIONS.find(i => i.name === bank || i.name.includes(bank) || bank.includes(i.name));
-  if (inst) inst.status = 'connected';
   CONNECT_STATE.added = restored;
   CONNECT_STATE.step = 4;
   renderConnect();
@@ -6355,26 +6347,6 @@ function connectFinish() {
     }
     added.push(a.gl);
   });
-  if (picked.length) {
-    const rows = picked.map(a => ({
-      bankAcct: `${a.name}\u2022\u2022\u2022\u2022${a.last4}`,
-      linkedAcct: a.gl,
-      type: a.card ? 'Credit Card' : 'Bank',
-    }));
-    const existing = INSTITUTIONS.find(i => i.name === CONNECT_STATE.bank);
-    if (existing) {
-      rows.forEach(r => { if (!existing.bankAccounts.some(b => b.bankAcct === r.bankAcct)) existing.bankAccounts.push(r); });
-      existing.status = 'connected';
-      existing.collapsed = false;
-    } else {
-      INSTITUTIONS.unshift({
-        id: 'nc-' + CONNECT_STATE.bank.toLowerCase().replace(/[^a-z0-9]+/g, ''),
-        name: CONNECT_STATE.bank,
-        desc: `${CONNECT_STATE.bank} Accounts - Cascade Property Group`,
-        status: 'connected', collapsed: false, bankAccounts: rows,
-      });
-    }
-  }
   CONNECT_STATE.added = added;
   CONNECT_STATE.step = 4;
   renderConnect();
