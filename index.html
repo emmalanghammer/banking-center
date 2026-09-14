@@ -2197,7 +2197,8 @@ function renderTxRow(tx) {
   } else if (tx.matchStatus==='multi') {
     rmCell = `<div class="tx-rm-multi"><span style="width:8px;height:8px;border-radius:50%;background:#FAA61C;flex-shrink:0;display:inline-block"></span><em style="color:#13314c">2 matches found</em></div>`;
   } else if (tx.billMatch) {
-    rmCell = `<span class="loz"><span class="loz-dot ok"></span><em>Outstanding bill found</em></span>`;
+    const b = tx.billMatch;
+    rmCell = `<button class="tx-rm-link" onclick="event.stopPropagation();toggleRow('${tx.id}','add')">${fmtD(b.billDate)} ${b.ref}: ${b.vendor}</button>`;
   } else if (tx.nsf) {
     rmCell = `<span class="loz"><span class="loz-dot warn"></span><em>Possible NSF return</em></span>`;
   } else if (tx.dup) {
@@ -2219,7 +2220,7 @@ function renderTxRow(tx) {
       <button class="match-badge-arr" onclick="event.stopPropagation();toggleRow('${tx.id}','match')">${ic(P.down,14,'#008dd5')}</button>
     </div>`;
   } else {
-    const addLabel = tx.billMatch ? 'Create Bill Payment' : 'Add';
+    const addLabel = tx.billMatch ? 'Match' : 'Add';
     const addFn = tx.billMatch ? `openBillPayment('${tx.id}')` : `doAdd('${tx.id}')`;
     actionCell = `<div class="match-badge">
       <button class="match-badge-btn" onclick="event.stopPropagation();${addFn}">${addLabel}</button>
@@ -2400,7 +2401,7 @@ function renderExpandedBill(tx) {
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
       <div class="act-btns">
-        <button class="btn-primary" style="height:36px" onclick="openBillPayment('${tx.id}')">${ic(CIRCLE_PLUS,16,'#fff')} Create Bill Payment</button>
+        <button class="btn-primary" style="height:36px" onclick="openBillPayment('${tx.id}')">${ic(P.check,15,'#fff')} Match</button>
         <button class="btn-outline" style="height:36px" onclick="openAddTx('${tx.id}')">Add as Check</button>
         <button class="btn-outline" style="height:36px" onclick="openFindMatch('${tx.id}')">${ic(P.search,14,'#008dd5')} Find Matches</button>
       </div>
