@@ -189,8 +189,8 @@ svg.ico{display:block;flex-shrink:0}
 .sb-row.login-bg:hover{background:#fbe8e8}
 .sb-row.coll{padding:0;width:48px;height:48px;justify-content:center;position:relative}
 .sb-row-info{flex:1;min-width:0}
-.sb-name-row{display:flex;align-items:center;gap:6px;margin-bottom:3px}
-.sb-name{font-size:13px;color:#13314c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.sb-name-row{display:flex;align-items:center;gap:16px;margin-bottom:3px}
+.sb-name{font-size:13px;color:#13314c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:0 1 auto;min-width:0}
 .sb-name.bold{font-weight:600}
 .sb-status{display:flex;align-items:center;gap:5px;flex-shrink:0}
 .sb-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
@@ -200,7 +200,8 @@ svg.ico{display:block;flex-shrink:0}
 .sb-status-lbl{font-size:12px;color:#888;font-style:italic}
 .sb-bank{font-size:12px;color:#9aa7b3}
 .sb-err-lbl{display:flex;align-items:center;gap:3px;font-size:12px;color:#eb343c;margin-left:6px}
-.sb-bal{font-size:14px;font-weight:600;color:#13314c;flex-shrink:0}
+.sb-bal{font-size:13px;font-weight:400;color:#13314c;flex-shrink:0;margin-left:auto}
+.sb-row.act .sb-bal{font-weight:600}
 .sb-coll-dot{position:absolute;top:9px;right:9px;width:8px;height:8px;border-radius:50%}
 
 /* Right panel */
@@ -1839,10 +1840,10 @@ function renderSbRow(a) {
         <span class="sb-name${isAct?' bold':''}">${a.gl}</span>
         ${a.isNew?'<span class="sb-new">New</span>':''}
         ${status}
+        <span class="sb-bal">${fmt(a.bankBalance)}</span>
       </div>
       <span class="sb-bank">${noFeed ? 'No account linked' : `${a.bankName}\u2022\u2022\u2022\u2022${a.last4}`}</span>
     </div>
-    <span class="sb-bal">${fmt(a.bankBalance)}</span>
   </div>`;
 }
 
