@@ -147,7 +147,8 @@ header/context bar already built to their own Figma components.
   bodies that scroll can't clip them; they flip above the trigger when short on room
 - Reconcile row hover uses the RMX hover tint `#EBF1F5`, and the hover card is the RMX
   **Tooltip Text** component (RMX-Components 31:303): 312px white card, 1px `#CEDBE7`, 4px radius,
-  16px padding, bordered title row, 14px/20px
+  16px padding, bordered title row, 14px/20px. The row's insight icon uses the same card
+  ("Transaction Insight") and takes priority on hover, so the two never stack
 - Reconcile strip: amounts are regular weight; only **Bank Balance** and **Difference** stay bold
 
 ## Connect a Bank — Quiltt

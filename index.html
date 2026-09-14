@@ -120,6 +120,7 @@ input[type="checkbox"]:checked::after{content:'';position:absolute;left:6px;top:
 .rm-tip-row{display:flex;gap:8px;align-items:flex-start}
 .rm-tip-row .k{color:#666;flex:0 0 84px}
 .rm-tip-row .v{flex:1 0 0;min-width:0;color:#13314c}
+.rm-tip-body{width:100%;color:#13314c}
 .conf-tip{position:fixed;z-index:9400;background:#13314c;color:#fff;font-size:12px;line-height:1.45;padding:8px 10px;border-radius:4px;width:230px;box-shadow:0 4px 12px rgba(0,0,0,.25);pointer-events:none}
 .conf-tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#13314c}
 .acct-link{background:none;border:none;color:#008dd5;font-size:14px;padding:0;cursor:pointer}
@@ -726,8 +727,6 @@ svg.ico{display:block;flex-shrink:0}
 .sr-tbl.sr-tbl2 td.r .sr2-top,.sr-tbl.sr-tbl2 td.r .sr2-sub{font-variant-numeric:tabular-nums}
 .sr-tbl.sr-tbl2 tbody td.sr2-info{overflow:visible}
 .sr-info-tip{position:relative;display:inline-flex;cursor:default}
-.sr-info-tip[data-tip]:hover::after{content:attr(data-tip);position:absolute;top:calc(100% + 7px);right:-6px;background:#13314c;color:#fff;font-size:12px;line-height:1.45;padding:8px 10px;border-radius:4px;white-space:normal;width:260px;text-align:left;z-index:80;box-shadow:0 4px 12px rgba(0,0,0,.25)}
-.sr-info-tip[data-tip]:hover::before{content:'';position:absolute;top:100%;right:0;border:5px solid transparent;border-bottom-color:#13314c;margin-top:-3px;z-index:80}
 .sr-tbl thead th{background:#737373;color:#fff;font-size:12px;font-weight:500;letter-spacing:.5px;padding:0 10px;height:28px;text-align:left;white-space:nowrap;overflow:hidden}
 .sr-tbl thead th.r{text-align:right}
 .sr-tbl tbody td{padding:0 10px;height:36px;border-bottom:1px solid #eef2f7;color:#13314c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -2113,7 +2112,27 @@ window.addEventListener('scroll', () => _confTipHide(), true);
 let _rmTipEl = null;
 function _rmTipHide() { if (_rmTipEl) { _rmTipEl.remove(); _rmTipEl = null; } }
 document.addEventListener('mouseover', e => {
-  const row = e.target.closest && e.target.closest('[data-rmtip]');
+  if (!e.target.closest) return;
+  const esc0 = v => String(v || '').replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  // The info icon wins over the row: only its insight card shows.
+  const info = e.target.closest('.sr-info-tip[data-tip]');
+  if (info) {
+    if (_rmTipEl && _rmTipEl._for === info) return;
+    _rmTipHide();
+    const d = document.createElement('div');
+    d.className = 'rm-tip';
+    d.innerHTML = `<div class="rm-tip-title">Transaction Insight</div>
+      <div class="rm-tip-body">${esc0(info.dataset.tip)}</div>`;
+    document.body.appendChild(d);
+    const ir = info.getBoundingClientRect();
+    d.style.left = Math.max(8, Math.min(ir.right - d.offsetWidth, window.innerWidth - d.offsetWidth - 8)) + 'px';
+    const ibelow = ir.bottom + 6;
+    d.style.top = (ibelow + d.offsetHeight > window.innerHeight - 8 ? Math.max(8, ir.top - d.offsetHeight - 6) : ibelow) + 'px';
+    d._for = info;
+    _rmTipEl = d;
+    return;
+  }
+  const row = e.target.closest('[data-rmtip]');
   if (!row) { _rmTipHide(); return; }
   if (_rmTipEl && _rmTipEl._for === row) return;
   _rmTipHide();
