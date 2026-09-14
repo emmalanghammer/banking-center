@@ -120,6 +120,17 @@ in the TR sidebar (expanded + collapsed) and the **Connect** link on unlinked ac
 
 `renderBC`, `renderTR`, `renderBR`, `renderSlideout`, `renderFindMatch`, `openAddTx`, `openReconcile`
 
+## App header
+
+Built from the RMX Components library, `Header` node **18:2314**
+(`figma.com/design/YhvzfcXOniQJ7xlC8ONzS4`). One `.top-hdr` in the app shell, shared by every screen.
+Three equal `flex:1 0 0` zones so Command Launch centres in the bar: logo lockup (175×32) ·
+icon cluster (39/45/38 × 32, 1px gaps, `#425a70`, outer corners r4) + 454px search bar ·
+company code + bell + 32px avatar (32px gap, 20px between bell and avatar).
+All six glyphs (logo, menu, reports, grade, search, notifications) are the Figma-exported SVGs
+inlined verbatim — the reports glyph is an Express custom icon with no Material equivalent.
+The search bar is allowed to shrink below 454px so narrow viewports don't push the manage zone off.
+
 ## Notable CSS patterns
 
 - RMX token pass applied (per the rmx-prototyping skill): page bg `#F3F4F8`, notice amber `#FAA61C`, checked checkboxes `#F79B4D` everywhere (incl. header select-alls, per user preference over the RMX blue-select-all variant), btn hovers `#0071AA`/`#EBF1F5`, register headers 12.6px/500/+1.1px on `#737373`, italic `#b3b3b3` placeholders, Orion chat border = Orion_2 gradient (`#008dd5→#6eb744`) with blue glow. Native `<select>` popups are suppressed app-wide by the `.rmx-dd` delegated component — options render in an RMX floating panel while the native element keeps state and fires its own change events (no form logic touched). Statement End Date stays a native date input by explicit request.
