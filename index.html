@@ -178,6 +178,7 @@ svg.ico{display:block;flex-shrink:0}
 .tr-sb-search input{width:100%;height:36px;border:1px solid #cedbe7;border-radius:4px;padding:0 32px 0 10px;font-size:13px;font-style:italic;color:#13314c;background:#f5f8fa;outline:none}
 .tr-sb-list{flex:1;overflow-y:auto;min-height:0}
 .tr-sb-sec{padding:10px 16px 6px;display:flex;align-items:center;justify-content:space-between;font-size:13px;color:#5f7180}
+.tr-sb-sec .sec-lbl{display:inline-flex;align-items:center;gap:8px}
 .tr-sb-div{height:1px;background:#e3edf5;margin:6px 16px}
 .tr-sb-foot{padding:10px 16px;border-top:1px solid #e3edf5;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 
@@ -1804,10 +1805,10 @@ function renderSidebar() {
     </div>
     <div class="tr-sb-search"><input placeholder="Search" oninput="S.search=this.value;renderTxRows()" style="width:100%;height:36px;border:1px solid #cedbe7;border-radius:4px;padding:0 32px 0 10px;font-size:13px;font-style:italic;color:#13314c;background:#f5f8fa;outline:none"></div>
     <div class="tr-sb-list">
-      <div class="tr-sb-sec"><span>Bank Accounts</span><span>${banks.length}</span></div>`;
+      <div class="tr-sb-sec"><span class="sec-lbl">${ic(P.bank,16,'#5f7180')}Bank Accounts</span><span>${banks.length}</span></div>`;
     banks.forEach(a => { html += renderSbRow(a); });
     html += `<div class="tr-sb-div"></div>
-      <div class="tr-sb-sec"><span>Credit Cards</span><span>${cards.length}</span></div>`;
+      <div class="tr-sb-sec"><span class="sec-lbl">${ic(P.card,16,'#5f7180')}Credit Cards</span><span>${cards.length}</span></div>`;
     cards.forEach(a => { html += renderSbRow(a); });
     html += `</div>
     <div class="tr-sb-foot">
@@ -1833,7 +1834,6 @@ function renderSbRow(a) {
       ? `<span class="sb-status"><span class="sb-dot" style="background:#FAA61C"></span><span class="sb-status-lbl">${rc} to review</span></span>`
       : '';
   return `<div class="sb-row${isAct?' act':''}${isLogin&&!isAct?' login-bg':''}" onclick="selectAcct('${a.id}')">
-    ${ic(a.kind==='card'?P.card:P.bank,16,'#13314c')}
     <div class="sb-row-info">
       <div class="sb-name-row">
         <span class="sb-name${isAct?' bold':''}">${a.gl}</span>
