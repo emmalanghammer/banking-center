@@ -158,8 +158,16 @@ header/context bar already built to their own Figma components.
 
 The connector is framed as **Quiltt** (the aggregator in use): "Secured by Quiltt" in the modal
 header, 18,000+ institutions attributed to Quiltt, and the sign-in step explains that Quiltt passes
-credentials to the institution and Rent Manager never sees or stores them. Launched from **Add Account** in the TR sidebar,
-**Add Institution** in Settings › Institutions, and **Reconnect** on a login-required account header.
+credentials to the institution and Rent Manager never sees or stores them. Three entry paths, all through the same connector:
+- **Connect** - `openConnect()` from Add Account (TR sidebar) or Add Institution (Settings). Full flow;
+  picked accounts become new `ACCOUNTS` entries.
+- **Reconnect** - `openConnect(bankName)` from the Reconnect link in the Accounts Overview table or on
+  a login-required account header. Skips institution selection, opens on "Reconnect your account" for
+  that bank, and on success restores the existing accounts (`connection:'fresh'`) and flips the
+  institution back to Connected rather than linking new ones.
+- **Link Account** - `openConnect(null, acctId)` from an unlinked account's Link Account link. Runs the
+  full flow but the account step is single-select and reads "Pick the one to link to <GL account>";
+  finishing attaches the chosen bank account to that existing GL account instead of creating one.
 
 ## Visible accounts
 

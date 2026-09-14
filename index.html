@@ -1520,7 +1520,7 @@ function renderBC() {
     // Bank account cell
     let bankAcctCell;
     if (a.connection === 'none') {
-      bankAcctCell = `<span style="color:#b3b3b3;font-size:13px">No Account Linked</span> <button class="acct-link" style="font-size:14px" onclick="event.stopPropagation()">Link Account</button>`;
+      bankAcctCell = `<span style="color:#b3b3b3;font-size:13px">No Account Linked</span> <button class="acct-link" style="font-size:14px" onclick="event.stopPropagation();openConnect(null,'${a.id}')">Link Account</button>`;
     } else {
       bankAcctCell = `${a.bankName}••••${a.last4}`;
     }
@@ -1529,7 +1529,7 @@ function renderBC() {
     if (a.connection === 'none') {
       connCell = `<span style="color:#b3b3b3;font-size:13px">Not connected</span>`;
     } else if (a.connection === 'login') {
-      connCell = `<span style="display:inline-flex;align-items:center;gap:8px"><span class="ao-loz-err">Login Required</span><span class="ao-conn">${SYNC_ICO} ${fmtSync(a.syncedMin)}</span><button class="acct-link" style="font-size:14px" onclick="event.stopPropagation()">Reconnect</button></span>`;
+      connCell = `<span style="display:inline-flex;align-items:center;gap:8px"><span class="ao-loz-err">Login Required</span><span class="ao-conn">${SYNC_ICO} ${fmtSync(a.syncedMin)}</span><button class="acct-link" style="font-size:14px" onclick="event.stopPropagation();openConnect('${a.bankName}')">Reconnect</button></span>`;
     } else {
       connCell = `<span style="display:inline-flex;align-items:center;gap:8px"><span class="ao-loz-ok">Connected</span><span class="ao-conn">${SYNC_ICO} ${fmtSync(a.syncedMin)}</span></span>`;
     }
@@ -1619,14 +1619,14 @@ function renderBC() {
       <div class="bc-card-hrow"><span class="bc-card-h">Bank Balance</span><span class="bc-card-count" style="margin-left:4px">${banks.length} accounts</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="showScreen('br')">Bank Register</button></div>
       <div class="bc-num">${fmt(bankTotal)}</div>
       <div class="bc-div"></div>
-      <div class="bc-rm-row">${RM_ICO}<span class="bc-rm-lbl">Cleared Balance</span><span style="font-size:12px;color:#999;margin-left:4px">${banks.length}/${allBanks.length} accounts</span></div>
+      <div class="bc-rm-row"><span class="bc-rm-lbl">Cleared Balance</span><span style="font-size:12px;color:#999;margin-left:4px">${banks.length}/${allBanks.length} accounts</span></div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:4px"><span class="bc-num2">${fmt(bankRm)}</span><span class="loz-diff">${bankDiff>=0?'+':'−'}${fmt(Math.abs(bankDiff))}</span></div>
     </div>`,
     cardBalance: `<div class="bc-card">
       <div class="bc-card-hrow"><span class="bc-card-h">Credit Card Balance</span><span class="bc-card-count" style="margin-left:4px">${cards.length} accounts</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="showScreen('cr')">Credit Card Register</button></div>
       <div class="bc-num">${fmt(cardTotal)}</div>
       <div class="bc-div"></div>
-      <div class="bc-rm-row">${RM_ICO}<span class="bc-rm-lbl">Cleared Balance</span><span style="font-size:12px;color:#999;margin-left:4px">${cards.length}/${cards.length} accounts</span></div>
+      <div class="bc-rm-row"><span class="bc-rm-lbl">Cleared Balance</span><span style="font-size:12px;color:#999;margin-left:4px">${cards.length}/${cards.length} accounts</span></div>
       <div style="display:flex;align-items:center;gap:8px;margin-top:4px"><span class="bc-num2">${fmt(cardRm)}</span><span class="loz-diff">${cardDiff>=0?'+':'−'}${fmt(Math.abs(cardDiff))}</span></div>
     </div>`,
     unmatched: `<div class="bc-card">
@@ -2022,7 +2022,7 @@ function renderRight() {
     ${acct.bankName ? `<span class="acct-hdr-bank">${acct.bankName}</span>` : ''}
     ${acct.last4 ? `<span class="acct-hdr-bank">••••${acct.last4}</span>` : ''}
     ${acct.syncedMin != null ? `<div class="acct-hdr-sync">${ic(P.refresh,14,'#aaa')}<span>${syncLbl}</span></div>` : ''}
-    ${acct.connection === 'login' ? `<span class="ao-loz-err">Login required</span><button class="acct-link" onclick="openConnect()">Reconnect</button>` : ''}
+    ${acct.connection === 'login' ? `<span class="ao-loz-err">Login required</span><button class="acct-link" onclick="openConnect('${acct.bankName}')">Reconnect</button>` : ''}
     <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
       <button style="background:none;border:none;display:flex;align-items:center;gap:5px;color:#008dd5;font-size:13px" onclick="${acct.kind==='card'?`openCR('${acct.id}')`:`openBR('${acct.id}')`}">${acct.kind==='card'?'Credit Card Register':'Bank Register'}</button>
       <span class="tt-wrap"${unmatchedCount>0?` data-tip="${unmatchedCount} bank transaction${unmatchedCount!==1?'s are':' is'} still in review, and this account cannot be reconciled."`:''}>
@@ -6273,9 +6273,32 @@ const CONNECT_FOUND = {
 };
 const CONNECT_STATE = { open: false, step: 1, bank: null, sel: new Set(), busy: false, search: '', added: [] };
 
-function openConnect() {
-  Object.assign(CONNECT_STATE, { open: true, step: 1, bank: null, sel: new Set(), busy: false, search: '', added: [] });
+function openConnect(bank, linkTo) {
+  Object.assign(CONNECT_STATE, { open: true, step: 1, bank: null, sel: new Set(), busy: false, search: '', added: [], reconnect: false, linkTo: linkTo || null });
+  if (bank && CONNECT_BANKS.some(b => b.name === bank)) {
+    CONNECT_STATE.bank = bank;
+    CONNECT_STATE.step = 2;
+    CONNECT_STATE.reconnect = true;
+  }
   renderConnect();
+}
+// Re-authenticating restores the accounts already linked to that institution
+// instead of linking new ones.
+function connectRestore() {
+  const bank = CONNECT_STATE.bank;
+  const restored = [];
+  ACCOUNTS.forEach(a => {
+    if (a.bankName !== bank) return;
+    a.connection = 'fresh';
+    a.syncedMin = 0;
+    restored.push(a.gl);
+  });
+  const inst = INSTITUTIONS.find(i => i.name === bank || i.name.includes(bank) || bank.includes(i.name));
+  if (inst) inst.status = 'connected';
+  CONNECT_STATE.added = restored;
+  CONNECT_STATE.step = 4;
+  renderConnect();
+  renderSidebar(); renderBC(); renderRight();
 }
 function closeConnect() { CONNECT_STATE.open = false; document.getElementById('connect-root').innerHTML = ''; }
 function connectPick(name) { CONNECT_STATE.bank = name; CONNECT_STATE.step = 2; renderConnect(); }
@@ -6286,19 +6309,38 @@ function connectSignIn() {
   CONNECT_STATE.step = 'connecting'; renderConnect();
   setTimeout(() => {
     if (!CONNECT_STATE.open) return;
+    if (CONNECT_STATE.reconnect) { connectRestore(); return; }
     CONNECT_STATE.step = 3;
-    CONNECT_STATE.sel = new Set((CONNECT_FOUND[CONNECT_STATE.bank] || []).map((_, i) => i));
+    CONNECT_STATE.sel = CONNECT_STATE.linkTo ? new Set() : new Set((CONNECT_FOUND[CONNECT_STATE.bank] || []).map((_, i) => i));
     renderConnect();
   }, 1600);
 }
 function connectToggle(i) {
-  if (CONNECT_STATE.sel.has(i)) CONNECT_STATE.sel.delete(i); else CONNECT_STATE.sel.add(i);
+  const st = CONNECT_STATE;
+  if (st.sel.has(i)) st.sel.delete(i);
+  else { if (st.linkTo) st.sel.clear(); st.sel.add(i); }
   renderConnect();
 }
 function connectFinish() {
   const found = CONNECT_FOUND[CONNECT_STATE.bank] || [];
   const picked = [...CONNECT_STATE.sel].sort().map(i => found[i]).filter(Boolean);
   const added = [];
+  if (CONNECT_STATE.linkTo) {
+    const target = ACCOUNTS.find(x => x.id === CONNECT_STATE.linkTo);
+    const a = picked[0];
+    if (target && a) {
+      target.bankName = CONNECT_STATE.bank;
+      target.last4 = a.last4;
+      target.connection = 'fresh';
+      target.syncedMin = 0;
+      target.isNew = true;
+      added.push(target.gl);
+    }
+    CONNECT_STATE.added = added;
+    CONNECT_STATE.step = 4;
+    renderConnect(); renderSidebar(); renderBC();
+    return;
+  }
   picked.forEach(a => {
     const id = 'nc' + a.last4;
     if (ACCOUNTS.some(x => x.id === id)) return;
@@ -6340,7 +6382,7 @@ function connectFinish() {
 }
 function connectDone() {
   closeConnect();
-  showToast(`${CONNECT_STATE.added.length} account${CONNECT_STATE.added.length!==1?'s':''} connected`);
+  showToast(`${CONNECT_STATE.added.length} account${CONNECT_STATE.added.length!==1?'s':''} ${CONNECT_STATE.reconnect ? 'reconnected' : 'connected'}`);
 }
 
 function renderConnect() {
@@ -6381,7 +6423,7 @@ function renderConnect() {
       <div class="qc-center">
         ${mark(st.bank, 72)}
         <div class="qc-bankname">${st.bank}</div>
-        <p class="qc-sub" style="margin-top:4px">Sign in to your account</p>
+        <p class="qc-sub" style="margin-top:4px">${st.reconnect ? 'Reconnect your account' : 'Sign in to your account'}</p>
       </div>
       <div class="qc-field"><label>Username</label><input class="qc-input" type="text" placeholder="Username"></div>
       <div class="qc-field"><label>Password</label><input class="qc-input" type="password" placeholder="Password"></div>
@@ -6411,32 +6453,34 @@ function renderConnect() {
   } else if (st.step === 3) {
     body = `
       <div class="qc-center">${mark(st.bank, 56)}<div class="qc-bankname" style="font-size:19px">${st.bank}</div></div>
-      <h1 class="qc-h1" style="font-size:20px">Select accounts</h1>
-      <p class="qc-muted" style="text-align:left;margin:-8px 0 0">Quiltt found ${found.length} account${found.length!==1?'s':''}. Choose which to link to Rent Manager.</p>
+      <h1 class="qc-h1" style="font-size:20px">${st.linkTo ? 'Choose an account' : 'Select accounts'}</h1>
+      <p class="qc-muted" style="text-align:left;margin:-8px 0 0">${st.linkTo
+        ? `Quiltt found ${found.length} account${found.length!==1?'s':''} at ${st.bank}. Pick the one to link to <b>${(ACCOUNTS.find(x=>x.id===st.linkTo)||{}).gl||''}</b>.`
+        : `Quiltt found ${found.length} account${found.length!==1?'s':''}. Choose which to link to Rent Manager.`}</p>
       ${found.map((a,i)=>`
         <label class="qc-acct${st.sel.has(i)?' sel':''}">
           <input type="checkbox" ${st.sel.has(i)?'checked':''} onclick="connectToggle(${i})">
           <span style="flex:1;min-width:0">
             <span style="display:block;font-size:15px;font-weight:600;color:#191927">${a.name} <span style="color:#8a8a9e;font-weight:400">••••${a.last4}</span></span>
-            <span class="qc-row-sub">Maps to ${a.gl}</span>
+            <span class="qc-row-sub">${st.linkTo ? `Links to ${(ACCOUNTS.find(x=>x.id===st.linkTo)||{}).gl||''}` : `Maps to ${a.gl}`}</span>
           </span>
           <span style="font-size:15px;font-weight:600;color:#191927">${fmt(a.bal)}</span>
         </label>`).join('')}
-      <button class="qc-btn" ${st.sel.size?'':'disabled'} onclick="connectFinish()">Link ${st.sel.size} Account${st.sel.size!==1?'s':''}</button>`;
+      <button class="qc-btn" ${st.sel.size?'':'disabled'} onclick="connectFinish()">${st.linkTo ? 'Link Account' : `Link ${st.sel.size} Account${st.sel.size!==1?'s':''}`}</button>`;
   } else {
     body = `
       <div class="qc-center" style="padding-top:28px;gap:14px">
         <span class="qc-mark" style="background:#16a34a;width:64px;height:64px">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="#fff"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
         </span>
-        <div class="qc-bankname">${st.bank} connected</div>
-        <p class="qc-muted" style="margin:0">${st.added.length} account${st.added.length!==1?'s':''} linked and syncing.</p>
+        <div class="qc-bankname">${st.bank} ${st.reconnect ? 'reconnected' : 'connected'}</div>
+        <p class="qc-muted" style="margin:0">${st.added.length} account${st.added.length!==1?'s':''} ${st.reconnect ? 'syncing again' : 'linked and syncing'}.</p>
       </div>
-      ${st.added.map(g=>`<div class="qc-row"><span class="qc-row-nm">${g}</span><span class="sb-new">New</span></div>`).join('')}
+      ${st.added.map(g=>`<div class="qc-row"><span class="qc-row-nm">${g}</span>${st.reconnect?'':'<span class="sb-new">New</span>'}</div>`).join('')}
       <button class="qc-btn" onclick="connectDone()">Done</button>`;
   }
 
-  const canBack = st.step === 2 || st.step === 3;
+  const canBack = (st.step === 2 && !st.reconnect) || st.step === 3;
   root.innerHTML = `
     <div class="qc-overlay" onclick="if(event.target===this)closeConnect()">
       <div class="qc-modal">
