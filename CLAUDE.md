@@ -74,6 +74,9 @@ A bulk action is offered only when EVERY selected row qualifies (`bulkEligibilit
 disabled if any selection lacks a suggestion or is already matched, Exclude if any is already
 excluded — the disabled button carries a tooltip explaining which rows block it, and the handlers
 re-check before acting (no partial application);
+**Create** records a new Rent Manager transaction for every selected unmatched item at once
+(`bulkCreate()`, the mirror of Match — enabled only when no selected row has a suggestion); it infers
+Deposit/Check/Bill from the description and assigns refs from `NEXT_CREATED_REF`.
 Bulk Edit opens an overlay applying Property / GL Account / Memo across the selection.
 `S.selectedIds` is cleared on account switch so actions can never touch off-screen rows.
 
@@ -100,6 +103,18 @@ in the TR sidebar (expanded + collapsed) and the **Connect** link on unlinked ac
   bank balance, which is what the strip's **Bank Balance** cell and `srDifference()` compare against
 - Reconcile rows are **single-line** (bank side); the Rent Manager record behind each row appears in a
   fixed-position hover tooltip (`data-rmtip` → `.rm-tip`). No close-forecast/pace banner
+
+## Video script demo path (Attenborough spot)
+
+1. **Banking Center** — tiles (Bank Balance, Credit Card Balance, Unmatched Transactions, Category
+   Breakdown, Connection Health) + Accounts Overview with per-account Connected state. Connection
+   Health carries "N of M accounts syncing" and **18,000+ financial institutions**, which the VO names.
+2. **Connect a Bank** (optional beat) — search placeholder and helper line both cite 18,000+ institutions.
+3. **Review Transactions → 1007 Maintenance Escrow** (6 in review; 1001 Operating is deliberately at 0
+   so it can be reconciled). Select the four unassigned expenses (me1/me2/me3/me5) → floating bulk bar →
+   **Create** → "4 transactions created in Rent Manager", leaving the bill beat next.
+4. **Open bill detection** — `me6` (Cascade HVAC ACH) → Create Bill Payment → applies to Bill B1183.
+5. **Reconciliation** — 1001 Operating, Reconcile enabled, single-line rows, proves to $0.00.
 
 ## Key render functions
 

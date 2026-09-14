@@ -1565,7 +1565,10 @@ function renderBC() {
     })(),
     connHealth: `<div class="bc-card">
       <div class="bc-card-hrow"><span class="bc-card-h">Connection Health</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="openSettings('institutions')">Manage Connections</button></div>
-      <div style="display:flex;align-items:center;gap:8px"><div class="bc-alert-dot err"></div><span style="font-size:16px;font-weight:500;color:#13314c">1 Account Disconnected</span></div>
+      <div style="display:flex;align-items:center;gap:8px"><div class="bc-alert-dot" style="background:#6eb744"></div><span style="font-size:16px;font-weight:500;color:#13314c">${visAccts.filter(a=>a.connection==='fresh').length} of ${visAccts.length} accounts syncing</span></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:6px"><div class="bc-alert-dot err"></div><span style="font-size:14px;color:#13314c">1 account needs to reconnect</span></div>
+      <div class="bc-div" style="margin:10px 0 8px"></div>
+      <div style="font-size:12.5px;color:#666">Connects to <b>18,000+</b> financial institutions</div>
     </div>`,
   };
 
@@ -1962,6 +1965,9 @@ function renderRight() {
       <span class="bulk-div"></span>
       <span class="tt-wrap"${bulkElig.canMatch?'':` data-tip="${bulkElig.matchWhy}"`}>
         <button class="btn-outline" style="height:30px;font-size:12.5px"${bulkElig.canMatch?'':' disabled'} onclick="bulkMatch()">${ic(P.check,14,bulkElig.canMatch?'#fff':'rgba(255,255,255,.4)')} Match</button>
+      </span>
+      <span class="tt-wrap"${bulkElig.canCreate?'':` data-tip="${bulkElig.createWhy}"`}>
+        <button class="btn-outline" style="height:30px;font-size:12.5px"${bulkElig.canCreate?'':' disabled'} onclick="bulkCreate()">${ic(P.add,14,bulkElig.canCreate?'#fff':'rgba(255,255,255,.4)')} Create</button>
       </span>
       <button class="btn-outline" style="height:30px;font-size:12.5px" onclick="openBulkEdit()">${ic(P.edit,14,'#fff')} Edit</button>
       <span class="tt-wrap"${bulkElig.canExclude?'':` data-tip="${bulkElig.exWhy}"`}>
@@ -2432,11 +2438,46 @@ function bulkEligibility() {
   else if (noSuggestion.length) matchWhy = `${noSuggestion.length} of the selected transactions ${noSuggestion.length!==1?'have':'has'} no suggested match. Select only transactions with a suggestion to match them together.`;
   let exWhy = '';
   if (alreadyExcluded.length) exWhy = `${alreadyExcluded.length} of the selected transactions ${alreadyExcluded.length!==1?'are':'is'} already excluded.`;
+  // Create is the mirror of Match: it only applies where there is nothing to
+  // match against, so every selected row must be an unmatched, unsuggested item.
+  const hasSuggestion = sel.filter(t => suggested(t) && !S.matchedIds.has(t.id));
+  let createWhy = '';
+  if (alreadyMatched.length) createWhy = `${alreadyMatched.length} of the selected transactions ${alreadyMatched.length!==1?'are':'is'} already recorded.`;
+  else if (hasSuggestion.length) createWhy = `${hasSuggestion.length} of the selected transactions already ${hasSuggestion.length!==1?'have':'has'} a suggested match \u2014 use Match for those.`;
   return {
     canMatch: sel.length > 0 && !noSuggestion.length && !alreadyMatched.length, matchWhy,
+    canCreate: sel.length > 0 && !hasSuggestion.length && !alreadyMatched.length, createWhy,
     canExclude: sel.length > 0 && !alreadyExcluded.length, exWhy,
   };
 }
+
+// Create a Rent Manager record for every selected unmatched transaction at once,
+// inferring type and account from the bank description.
+function bulkCreate() {
+  if (!bulkEligibility().canCreate) return;
+  const sel = selectedTxs();
+  const acct = ACCOUNTS.find(a => a.id === S.activeId);
+  sel.forEach(t => {
+    const inflow = t.deposit != null;
+    const amt = inflow ? t.deposit : (t.payment || 0);
+    const type = inflow ? 'Deposit' : (/CHECK/i.test(t.desc) ? 'Check' : 'Bill');
+    if (!t.matchRow) {
+      t.matchRow = {
+        date: t.date, ref: `${type} ${NEXT_CREATED_REF++}`, account: acct ? acct.gl : '',
+        property: '\u2014', comment: t.desc, amount: amt,
+        gl: inflow ? '4100 Rental Income' : '5400 Operating Expense',
+      };
+    }
+    t.rmLink = `${t.date} ${t.matchRow.ref}`;
+    S.matchedIds.add(t.id); S.excludedIds.delete(t.id);
+  });
+  const n = sel.length;
+  S.selectedIds.clear(); S.expandedId = null;
+  renderRight(); renderSidebar(); refreshRecIfActive();
+  showToast(`${n} transaction${n!==1?'s':''} created in Rent Manager`);
+  sel.forEach(t => _ubMatchedSignal(t.id));
+}
+let NEXT_CREATED_REF = 4310;
 
 // Match every selected row that already has a suggested Rent Manager record.
 // Rows with no suggestion are left in review and called out in the toast.
@@ -6124,7 +6165,8 @@ function renderConnect() {
     const list = CONNECT_BANKS.filter(b => !q || b.name.toLowerCase().includes(q));
     body = `
       <div class="sr-field"><label>Search for your bank</label>
-        <input class="sr-in" type="text" placeholder="Bank name" value="${st.search.replace(/"/g,'&quot;')}" oninput="connectSearch(this.value)"></div>
+        <input class="sr-in" type="text" placeholder="Search 18,000+ financial institutions" value="${st.search.replace(/"/g,'&quot;')}" oninput="connectSearch(this.value)"></div>
+      <div style="font-size:12.5px;color:#666;margin-top:-6px">Most used by Cascade Property Group \u2014 or search all <b>18,000+</b> supported institutions.</div>
       <div class="cx-grid">
         ${list.map(b=>`<button class="cx-bank" onclick="connectPick('${b.name}')">${mark(b.name)}<span><span class="nm">${b.name}</span><br><span class="sub">${b.sub}</span></span></button>`).join('')
           || '<div style="grid-column:1/-1;color:#9aa7b3;font-size:13px;font-style:italic;padding:8px 0">No banks match that search.</div>'}
