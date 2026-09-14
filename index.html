@@ -824,6 +824,7 @@ svg.ico{display:block;flex-shrink:0}
 .at-link-tile:hover{background:#f5f8fa}
 .at-detail-wrap{background:#fff;border:1px solid #cedbe7;border-radius:4px;overflow:hidden;margin-bottom:4px}
 .at-detail-tbl{width:100%;border-collapse:collapse;font-size:14px}
+.at-card>.at-detail-tbl{width:calc(100% + 32px);margin:0 -16px}
 .at-detail-tbl thead th{background:#737373;color:#fff;font-size:12px;font-weight:400;padding:0 8px;height:36px;text-align:left;white-space:nowrap}
 .at-detail-tbl thead th.r{text-align:right}
 .at-detail-tbl thead th:first-child{width:28px}
@@ -1145,12 +1146,6 @@ const TRANSACTIONS_BY_ACCT = {
     {id:'tc7',date:'05/29/2026',desc:'ACH DEPOSIT TENANT WALSH',deposit:1150.00,matchStatus:'match',rmLink:'05/29/2026 Deposit 7198: M. Walsh'},
     {id:'tc8',date:'05/27/2026',desc:'ACH DEPOSIT TENANT REYES',deposit:975.00,matchStatus:'none',rmLink:null},
     {id:'tc9',date:'05/22/2026',desc:'CHECK 00409 CASCADE HVAC',payment:450.00,matchStatus:'none',rmLink:null},
-    // [BILL PAYMENT] a synced ACH that pays an open bill - recording it as a bill
-    // payment (not just a check) applies it to the bill and closes it out.
-    {id:'tcb1',date:'06/13/2026',desc:'ACH DEBIT CASCADE HVAC 0613',payment:1450.00,matchStatus:'none',tier:'rule',rmLink:null,
-      billMatch:{ref:'Bill B1183',vendor:'Cascade HVAC',invoice:'INV-4471',property:'Hawthorne Court Apartments',
-        billDate:'05/28/2026',dueDate:'06/20/2026',amount:1450.00,gl:'5404 HVAC',status:'Open'},
-      orion:"This payment matches an outstanding bill from Cascade HVAC - Bill B1183 for $1,450.00, due 06/20/2026. Record it as a bill payment so the bill is marked paid."},
     // Pre-matched examples (net $0.00 so the account's difference math is untouched)
     {id:'tcm1',date:'05/30/2026',desc:'ACH DEBIT NW NATURAL 0530',payment:214.60,matchStatus:'match',rmLink:'05/30/2026 Bill B1148: NW Natural'},
     {id:'tcm2',date:'05/26/2026',desc:'ACH DEPOSIT TENANT DELGADO',deposit:1025.00,matchStatus:'match',rmLink:'05/26/2026 Deposit 7192: M. Delgado'},
@@ -1165,6 +1160,12 @@ const TRANSACTIONS_BY_ACCT = {
     {id:'me3',date:'06/08/2026',desc:'ACH DEBIT PORTLAND GENERAL ELECTRIC',payment:350.00,matchStatus:'none',rmLink:null},
     {id:'me4',date:'06/04/2026',desc:'WIRE INBOUND ESCROW TRANSFER',deposit:2000.00,matchStatus:'match',rmLink:'06/04/2026 Journal 4101'},
     {id:'me5',date:'05/28/2026',desc:'ACH DEBIT ABC SUPPLY ROOFING',payment:300.00,matchStatus:'none',rmLink:null},
+    // [BILL PAYMENT] a synced ACH that pays an open bill - recording it as a bill
+    // payment (not just a check) applies it to the bill and closes it out.
+    {id:'me6',date:'06/13/2026',desc:'ACH DEBIT CASCADE HVAC 0613',payment:1450.00,matchStatus:'none',tier:'rule',rmLink:null,
+      billMatch:{ref:'Bill B1183',vendor:'Cascade HVAC',invoice:'INV-4471',property:'Hawthorne Court Apartments',
+        billDate:'05/28/2026',dueDate:'06/20/2026',amount:1450.00,gl:'5404 HVAC',status:'Open'},
+      orion:"This payment matches an outstanding bill from Cascade HVAC - Bill B1183 for $1,450.00, due 06/20/2026. Record it as a bill payment so the bill is marked paid."},
     // Pre-matched examples (net $0.00)
     {id:'mem1',date:'05/26/2026',desc:'ACH DEBIT STUMPTOWN LANDSCAPING',payment:640.00,matchStatus:'match',rmLink:'05/26/2026 Bill B1141: Stumptown Landscaping'},
     {id:'mem2',date:'05/23/2026',desc:'CHECK 00195 NW NATURAL',payment:182.35,matchStatus:'match',rmLink:'05/23/2026 Check 00195: NW Natural'},
@@ -1872,7 +1873,7 @@ function renderSidebar() {
   const col = S.collapsed;
   let html = `<div class="tr-sb${col?' coll':''}">`;
   if (col) {
-    html += `<div class="tr-sb-hdr coll"><button onclick="toggleCollapse()" style="background:none;border:none;display:flex">${ic(P.collapseR,20,'#008dd5')}</button></div>`;
+    html += `<div class="tr-sb-hdr coll"><button onclick="toggleCollapse()" style="background:none;border:none;display:flex"><span style="display:flex;transform:scaleX(-1)">${ic(P.collapseDouble,20,'#5f7180')}</span></button></div>`;
     visAccts.forEach(a => {
       const isLogin = a.connection==='login';
       const dotColor = isLogin?'#eb343c': (a.connection==='none'||acctReview(a)===0)?'#6eb744':'#FAA61C';
@@ -2093,9 +2094,19 @@ const TIER_CONF = {
   ai:   { label: 'Medium', cls: 'med', tip: 'Medium confidence - Orion inferred this match from the amount, date, and payee. Review before matching.' },
   hint: { label: 'Low', cls: 'low', tip: "Low confidence - based only on the bank's category for this transaction. Verify the details before acting." },
 };
+// Every row we put a suggestion against gets a confidence status, whether or
+// not the data tags one explicitly: an exact open-bill hit reads High, and
+// anything Orion inferred reads Medium unless the row overrides it.
+function txTier(tx) {
+  if (tx.tier && TIER_CONF[tx.tier]) return tx.tier;
+  if (tx.billMatch) return 'rule';
+  if (tx.matchStatus === 'match' || tx.matchStatus === 'multi') return 'ai';
+  return null;
+}
 function confidenceLoz(tx) {
-  if (!tx.tier || !TIER_CONF[tx.tier]) return '';
-  const c = TIER_CONF[tx.tier];
+  const tier = txTier(tx);
+  if (!tier) return '';
+  const c = TIER_CONF[tier];
   return `<span class="conf-loz ${c.cls}" data-conftip="${c.tip}">${c.label}</span>`;
 }
 // The row cells clip (overflow:hidden) and the list scrolls, so the confidence
