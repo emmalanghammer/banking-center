@@ -1330,11 +1330,15 @@ function _cselPlace(menu) {
   const wrap = menu.parentElement;
   const btn = wrap.querySelector('.csel-btn') || wrap;
   const r = btn.getBoundingClientRect();
-  menu.style.width = r.width + 'px';
+  // At least as wide as its trigger, but free to grow so long option labels
+  // (e.g. "2004 Visa - Vendor Payments") are readable rather than truncated.
+  menu.style.width = 'auto';
   menu.style.minWidth = r.width + 'px';
+  menu.style.maxWidth = Math.min(460, window.innerWidth - 16) + 'px';
+  const w = menu.offsetWidth;
   const h = menu.offsetHeight;
   const below = r.bottom + 3;
-  menu.style.left = Math.max(8, Math.min(r.left, window.innerWidth - r.width - 8)) + 'px';
+  menu.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + 'px';
   menu.style.top = (below + h > window.innerHeight - 8 && r.top - h - 3 > 8 ? r.top - h - 3 : below) + 'px';
 }
 window.addEventListener('resize', () => { if (_cselOpenId) _cselToggle(_cselOpenId); });
@@ -5967,7 +5971,7 @@ function openCR(acctId) {
 function renderBR() {
   _renderRegister(BR_STATE, {
     mount:'br-inner', svar:'BR_STATE', rfn:'renderBR', selId:'br-acct',
-    accounts: ACCOUNTS.filter(a=>a.kind==='bank'),
+    accounts: visibleOrderedAccounts().filter(a=>a.kind==='bank'),
     bankInfoNoLink:'No bank account linked',
     balLabel:'Bank Balance', depositLabel:'Deposit', paymentLabel:'Payment',
     reconcileLabel:'Reconcile', reconcileIcon:P.bank, addCheck:true,
@@ -5977,7 +5981,7 @@ function renderBR() {
 function renderCR() {
   _renderRegister(CR_STATE, {
     mount:'cr-inner', svar:'CR_STATE', rfn:'renderCR', selId:'cr-acct',
-    accounts: ACCOUNTS.filter(a=>a.kind==='card'),
+    accounts: visibleOrderedAccounts().filter(a=>a.kind==='card'),
     bankInfoNoLink:'No card linked',
     balLabel:'Card Balance', depositLabel:'Payments', paymentLabel:'Charges',
     reconcileLabel:'Reconcile', reconcileIcon:P.card||P.bank,
