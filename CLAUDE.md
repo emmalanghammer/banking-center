@@ -33,12 +33,10 @@ Portland, OR residential + light-commercial property manager. Demo "today" = mid
 ## Hero account
 
 **1001 Operating (`op3487`)** — Chase ••3847  
-- Bank Balance: $516,931.60 | In RM: $512,000.00 static; the TR strip computes live and, with t6
-  pre-excluded, shows In RM $511,681.60 / Difference **−$5,250.00** at rest (−4,931.60 is only the
-  static `difference` field). Resolving all remaining items still proves to $0.00.
-- 8 items whose total net = +$4,931.60: +1,850 (t1 Rivera) +2,100 (t2 Okafor) −1,240 (t3 Rose City)
-  +6,939 (t4 Zego batch — carries `depPayments`, 12 seeded resident rows that sum exactly to 6,939.00; select-all balances the split) −2,860 (t5 Cascade HVAC) −318.40 (t6 café, pre-excluded via `SEED_EXCLUDED`)
-  −1,150 (t7 NSF Reyes) −389 (t8 Recology dup)
+- Bank Balance **$516,931.60** | Cleared Balance **$516,931.60** | Difference **$0.00**, consistently
+  on the Banking Center and in Transaction Review. `inRm: 512000` is the OPENING book balance;
+  `acctLiveInRm()` adds the resolved feed on top, and every surface uses it. Do not raise the static
+  `inRm` to match the displayed figure - the live path would double-count.
 - **1001 Operating opens reconcile-ready (09/14/2026):** t1–t5, t7, t8 are seeded into `SEED_MATCHED`
   and t6 into `SEED_EXCLUDED`, so TR opens In Review (0) / Matched (7) / Excluded (1) and the Reconcile
   button is enabled. All eight beats still exist in the data — remove their ids from `SEED_MATCHED`
