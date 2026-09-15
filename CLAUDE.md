@@ -61,7 +61,10 @@ Portland, OR residential + light-commercial property manager. Demo "today" = mid
   the newly seeded net (1004 by 4,987.50, 1007 raised by 2,300) so every displayed balance is
   unchanged from before the reseed. Each account then gained 8 more already-matched items (`tcv1-8`,
   `mev1-8`) that net **exactly $0.00**, so history looks worked without touching any balance - 1004
-  reads Matched (20) / In Review (1), 1007 Matched (16) / In Review (1). `acctTxs()` sorts every feed
+  reads Matched (20), 1007 Matched (16). Each also carries two In Review rows that DO have a
+  suggestion (`tcr1`/`tcr2`, `mer1`/`mer2` - one High/rule, one Medium/ai), so **In Review is 3 on
+  both**: the beat row plus two one-click Matches. Unresolved rows do not move a balance, so the
+  displayed figures are still untouched. `acctTxs()` sorts every feed
   newest-first, so inserted rows cannot break a feed's chronology. **The bulk-Create beat no longer
   has 4 creatable rows anywhere** - restore it by removing `me1`,`me2`,`me3`,`me5` from `SEED_MATCHED`,
   clearing their `rmLink`/`matchStatus`, and re-lowering 1007's `inRm`

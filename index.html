@@ -1177,6 +1177,9 @@ const TRANSACTIONS_BY_ACCT = {
   // 1004 Trust Account - Comm. (7 to review, diff -4,200.00)
   tc6629: [
     {id:'tc1',date:'06/16/2026',desc:'ACH DEBIT HENDERSON J 0616',payment:4200.00,matchStatus:'none',rmLink:null},
+    // In review WITH a suggestion - one click to Match.
+    {id:'tcr1',date:'06/15/2026',desc:'ACH DEPOSIT TENANT RIVERA 0615',deposit:1320.00,matchStatus:'match',tier:'rule',rmLink:'06/15/2026 Deposit 7203: A. Rivera'},
+    {id:'tcr2',date:'06/12/2026',desc:'CHECK 00414 MULTNOMAH COUNTY',payment:865.00,matchStatus:'match',tier:'ai',rmLink:'06/12/2026 Check 00414: Multnomah County'},
     {id:'tc2',date:'06/13/2026',desc:'WIRE INBOUND TENANT CHEN',deposit:850.00,matchStatus:'match',rmLink:'06/13/2026 Deposit 7201: A. Chen'},
     {id:'tc3',date:'06/11/2026',desc:'ACH DEPOSIT TENANT FLORES',deposit:1100.00,matchStatus:'match',rmLink:'06/11/2026 Deposit 7199: L. Flores'},
     {id:'tc4',date:'06/09/2026',desc:'CHECK 00412 CITY OF PORTLAND',payment:312.50,matchStatus:'match',rmLink:'06/09/2026 Check 00412: City of Portland'},
@@ -1205,6 +1208,9 @@ const TRANSACTIONS_BY_ACCT = {
   // 1007 Maintenance Escrow (4 to review, diff -2,000.00)
   me4471: [
     {id:'me1',date:'06/15/2026',desc:'WIRE OUTBOUND CASCADE HVAC',payment:1200.00,matchStatus:'match',rmLink:'06/15/2026 Check 00199: Cascade HVAC'},
+    // In review WITH a suggestion - one click to Match.
+    {id:'mer1',date:'06/14/2026',desc:'ACH DEBIT NW NATURAL 0614',payment:268.40,matchStatus:'match',tier:'rule',rmLink:'06/14/2026 Bill B1185: NW Natural'},
+    {id:'mer2',date:'06/09/2026',desc:'CHECK 00200 STUMPTOWN LANDSCAPING',payment:740.00,matchStatus:'match',tier:'ai',rmLink:'06/09/2026 Check 00200: Stumptown Landscaping'},
     {id:'me2',date:'06/11/2026',desc:'CHECK 00198 ROSE CITY PLUMBING',payment:450.00,matchStatus:'match',rmLink:'06/11/2026 Check 00198: Rose City Plumbing'},
     {id:'me3',date:'06/08/2026',desc:'ACH DEBIT PORTLAND GENERAL ELECTRIC',payment:350.00,matchStatus:'match',rmLink:'06/08/2026 Bill B1179: Portland General Electric'},
     {id:'me4',date:'06/04/2026',desc:'WIRE INBOUND ESCROW TRANSFER',deposit:2000.00,matchStatus:'match',rmLink:'06/04/2026 Journal 4101'},
