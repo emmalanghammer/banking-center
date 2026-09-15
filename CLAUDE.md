@@ -177,6 +177,16 @@ header/context bar already built to their own Figma components.
 
 - Controls standardised at **36px / 14px**: inputs, selects, buttons, segmented controls
 - Input Field anatomy: `#F5F8FA` fill, `#CEDBE7` border, blue on focus only, italic = placeholder only
+  -- enforced globally by `::placeholder{font-style:italic!important}` (09/15/2026); several inputs had
+  been italicising the TYPED value, which is now upright everywhere. The Quiltt connector opts out
+  (`.qc-search input` / `.qc-input` placeholders stay upright) since it is a third-party surface
+- **Transaction Date filter** is the RMX **Input Field / Date Range** (RMX-Components 1106:12535): one
+  36px `#cedbe7` r4 control holding From input, calendar button, To input, calendar button and the
+  relative-date button, all on `#f5f8fa`, placeholders `mm/dd/yyyy`. The calendar buttons open the RMX
+  **Date Picker** (5350:5786) - `dpOpen`/`dpRender`, a fixed-position white popover with month chevrons,
+  a 32px 7-column grid, striped alternate rows, `#008dd5` selected day and Today / Clear links. Picking
+  a date fills the field and filters the rows (`S.dateFrom` / `S.dateTo`); the third button clears both.
+  All four glyphs are the Figma exports inlined verbatim
 - Register anatomy: 28px headers, 36px rows · Tile header rule is **2px `#008DD5`** (was navy)
 - Type ramp snapped to 12/14 · stray radii (3/5/6px) → 4px
 - **Deliberate divergence:** the Bank Register filter bar stays blue-bordered on white, matching

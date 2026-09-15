@@ -11,8 +11,9 @@ html,body{height:100%;overflow:hidden}
 body{font-family:'Roboto',sans-serif;font-size:14px;color:#13314c;background:#F3F4F8}
 input,button,select{font-family:'Roboto',sans-serif}
 button{cursor:pointer}
+/* Italic grey is reserved for placeholder text - never for a typed value. */
+::placeholder{color:#b3b3b3;font-style:italic!important}
 /* Checkbox - design system: white box w/ grey border, orange fill + white check when checked */
-::placeholder{color:#b3b3b3;font-style:italic}
 input[type="checkbox"]{appearance:none;-webkit-appearance:none;width:20px;height:20px;flex-shrink:0;margin:0;border:2px solid #b3b3b3;border-radius:2px;background:#fff;cursor:pointer;position:relative;vertical-align:middle}
 input[type="checkbox"]:checked{background:#F79B4D;border-color:#F79B4D}
 input[type="checkbox"]:indeterminate{background:#F79B4D;border-color:#F79B4D}
@@ -114,7 +115,7 @@ input[type="checkbox"]:checked::after{content:'';position:absolute;left:6px;top:
 .qc-h1{font-size:26px;font-weight:700;color:#191927;letter-spacing:-.01em;margin:0}
 .qc-search{display:flex;align-items:center;gap:10px;height:48px;flex-shrink:0;padding:0 12px;background:#f1f0f7;border:1px solid #e6e4ef;border-radius:8px}
 .qc-search input{flex:1;border:none;background:none;outline:none;font-size:15px;color:#191927;font-family:inherit}
-.qc-search input::placeholder{color:#8a8a9e;font-style:normal}
+.qc-search input::placeholder{color:#8a8a9e;font-style:normal!important}
 .qc-sub{font-size:16px;font-weight:700;color:#191927;text-align:center;margin:0}
 .qc-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .qc-card{background:#fff;border:1px solid #e6e4ef;border-radius:8px;padding:18px 12px;display:flex;flex-direction:column;align-items:center;gap:12px;cursor:pointer;font-family:inherit}
@@ -130,6 +131,7 @@ input[type="checkbox"]:checked::after{content:'';position:absolute;left:6px;top:
 .qc-muted{font-size:14px;color:#6b6b80;text-align:center}
 .qc-field label{display:block;font-size:13px;font-weight:600;color:#191927;margin-bottom:6px}
 .qc-input{width:100%;height:46px;padding:0 12px;background:#fff;border:1px solid #e6e4ef;border-radius:8px;font-size:15px;color:#191927;outline:none;font-family:inherit}
+.qc-input::placeholder{color:#8a8a9e;font-style:normal!important}
 .qc-input:focus{border-color:#6d28d9}
 .qc-btn{width:100%;height:48px;border:none;border-radius:8px;background:#6d28d9;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
 .qc-btn:hover{background:#5b21b6}
@@ -225,7 +227,7 @@ svg.ico{display:block;flex-shrink:0}
 .tr-sb-hdr.coll{justify-content:center;padding:0;height:48px}
 .tr-sb-title{font-size:16px;font-weight:400;color:#13314c}
 .tr-sb-search{padding:10px 16px;flex-shrink:0}
-.tr-sb-search input{width:100%;height:36px;border:1px solid #cedbe7;border-radius:4px;padding:0 32px 0 10px;font-size:14px;font-style:italic;color:#13314c;background:#f5f8fa;outline:none}
+.tr-sb-search input{width:100%;height:36px;border:1px solid #cedbe7;border-radius:4px;padding:0 32px 0 10px;font-size:14px;color:#13314c;background:#f5f8fa;outline:none}
 .tr-sb-list{flex:1;overflow-y:auto;min-height:0}
 .tr-sb-sec{padding:10px 16px 6px;display:flex;align-items:center;justify-content:space-between;font-size:14px;color:#5f7180}
 .tr-sb-sec .sec-lbl{display:inline-flex;align-items:center;gap:8px}
@@ -280,6 +282,35 @@ svg.ico{display:block;flex-shrink:0}
 .flt-input:focus{border-color:#008dd5}
 .flt-input::placeholder{color:#b3b3b3;font-style:italic}
 .flt-date{height:36px;border:1px solid #cedbe7;border-radius:4px;padding:0 8px;font-size:14px;color:#13314c;background:#fff;outline:none;width:100px}
+/* RMX Input Field / Date Range (RMX-Components 1106:12535): one 36px control -
+   input, calendar, input, calendar, relative-date - sharing a border and fill. */
+.dr-field{display:flex;align-items:center;height:36px;border:1px solid #cedbe7;border-radius:4px;overflow:hidden;background:#f5f8fa;width:270px}
+.dr-input{flex:1 0 0;min-width:0;height:100%;border:none;background:#f5f8fa;padding:0 8px;font-size:14px;color:#13314c;outline:none;font-family:'Roboto',sans-serif}
+.dr-input::placeholder{color:#b3b3b3;font-style:italic}
+.dr-input:focus{background:#fff}
+.dr-ico{width:28px;height:100%;flex-shrink:0;border:none;border-left:1px solid #cedbe7;border-right:1px solid #cedbe7;background:#f5f8fa;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.dr-ico:last-child{border-right:none}
+.dr-ico:hover{background:#ebf1f5}
+/* RMX Date Picker, Calendar variant (RMX-Components 5350:5786) */
+.dp-pop{position:fixed;z-index:9700;background:#fff;border:1px solid #cedbe7;border-radius:4px;padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;box-shadow:1px 2px 12px 1px rgba(76,76,76,.10),0 4px 10px -10px rgba(76,76,76,.10),0 -2px 20px -5px rgba(76,76,76,.08)}
+.dp-hdr{display:flex;align-items:center;justify-content:space-between;padding:0 8px;width:100%}
+.dp-nav{background:none;border:none;padding:0;cursor:pointer;display:flex;line-height:0}
+.dp-month{font-size:14px;font-weight:600;color:#13314c;white-space:nowrap}
+.dp-grid{display:flex;flex-direction:column;gap:4px}
+.dp-week{display:flex;gap:8px}
+.dp-week.dow{border-bottom:1px solid #cedbe7}
+.dp-week.alt{background:#f5f8fa}
+.dp-cell{width:32px;padding:8px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#13314c;box-sizing:border-box}
+.dp-cell.dow{font-weight:600}
+.dp-day{cursor:pointer;border-radius:2px}
+.dp-day:hover{background:#ebf1f5}
+.dp-day.out{color:#b3b3b3}
+.dp-day.sel{background:#008dd5;color:#fff;font-weight:600;height:36px;padding:8px 0}
+.dp-day.sel:hover{background:#008dd5}
+.dp-div{width:272px;height:1px;background:#cedbe7;flex-shrink:0}
+.dp-foot{display:flex;align-items:center;justify-content:space-between;padding:0 8px;width:100%}
+.dp-foot button{background:none;border:none;padding:0;font-size:14px;color:#008dd5;cursor:pointer;font-family:'Roboto',sans-serif}
+.dp-foot button:hover{text-decoration:underline}
 .flt-sel{height:36px;border:1px solid #cedbe7;border-radius:4px;padding:0 8px;font-size:14px;color:#13314c;background:#fff;outline:none;cursor:pointer;width:160px;appearance:none}
 .flt-sel-wrap{position:relative}
 .flt-sel-wrap svg{position:absolute;right:6px;top:50%;transform:translateY(-50%);pointer-events:none}
@@ -1344,6 +1375,8 @@ const SEED_MATCHED = [
 const SEED_EXCLUDED = ['t6']; // the mis-posted café charge starts excluded
 const S = {
   activeId: 'op3487',
+  dateFrom: '',
+  dateTo: '',
   collapsed: false,
   expandedId: null,
   activeTab: 'match',
@@ -1995,7 +2028,7 @@ function renderSidebar() {
     html += `<div class="tr-sb-hdr"><span class="tr-sb-title">Accounts Overview</span>
       <button onclick="toggleCollapse()" style="margin-left:auto;background:none;border:none;display:flex">${ic(P.collapseDouble,20,'#5f7180')}</button>
     </div>
-    <div class="tr-sb-search"><input placeholder="Search" oninput="S.search=this.value;renderTxRows()" style="width:100%;height:36px;border:1px solid #cedbe7;border-radius:4px;padding:0 32px 0 10px;font-size:13px;font-style:italic;color:#13314c;background:#f5f8fa;outline:none"></div>
+    <div class="tr-sb-search"><input placeholder="Search" oninput="S.search=this.value;renderTxRows()" style="width:100%;height:36px;border:1px solid #cedbe7;border-radius:4px;padding:0 32px 0 10px;font-size:13px;color:#13314c;background:#f5f8fa;outline:none"></div>
     <div class="tr-sb-list">
       <div class="tr-sb-sec"><span class="sec-lbl">${ic(P.bank,16,'#5f7180')}Bank Accounts</span><span>${banks.length}</span></div>`;
     banks.forEach(a => { html += renderSbRow(a); });
@@ -2113,10 +2146,12 @@ function renderRight() {
     <div><label class="flt-lbl">Search</label>
       <input class="flt-input" value="${S.search}" placeholder="Find a transaction" oninput="S.search=this.value;renderTxRows()"></div>
     <div><label class="flt-lbl">Transaction Date</label>
-      <div style="display:flex;align-items:center;gap:4px">
-        <input class="flt-date" placeholder="From">
-        <input class="flt-date" placeholder="To">
-        <button class="btn-ghost" style="height:36px;width:34px;padding:0;justify-content:center">${ic(P.filter,16,'#666')}</button>
+      <div class="dr-field">
+        <input class="dr-input" id="dr-from" placeholder="mm/dd/yyyy" value="${S.dateFrom}" oninput="drType('from',this.value)">
+        <button class="dr-ico" onclick="dpOpen('from',this)" title="Choose a start date">${DR_CAL_ICO}</button>
+        <input class="dr-input" id="dr-to" placeholder="mm/dd/yyyy" value="${S.dateTo}" oninput="drType('to',this.value)">
+        <button class="dr-ico" onclick="dpOpen('to',this)" title="Choose an end date">${DR_CAL_ICO}</button>
+        <button class="dr-ico" onclick="drClear()" title="Relative date">${DR_REORDER_ICO}</button>
       </div>
     </div>
     <div><label class="flt-lbl">Filter By</label>
@@ -2171,11 +2206,109 @@ function renderRight() {
 }
 
 /* ─ Transaction rows ─ */
+/* RMX Date Range field + Date Picker (RMX-Components 1106:12535 / 5350:5786).
+   Icons are the Figma exports, inlined. The popover is fixed-position so the
+   scrolling filter row can never clip it. */
+const DR_CAL_ICO = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16.6667 2.5H15.8333V0.833333H14.1667V2.5H5.83333V0.833333H4.16667V2.5H3.33333C2.41667 2.5 1.66667 3.25 1.66667 4.16667V17.5C1.66667 18.4167 2.41667 19.1667 3.33333 19.1667H16.6667C17.5833 19.1667 18.3333 18.4167 18.3333 17.5V4.16667C18.3333 3.25 17.5833 2.5 16.6667 2.5ZM16.6667 17.5H3.33333V8.33333H16.6667V17.5ZM16.6667 6.66667H3.33333V4.16667H16.6667V6.66667Z" fill="#666666"/></svg>`;
+const DR_REORDER_ICO = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.33333 12.5H16.6667V10.8333H3.33333V12.5ZM3.33333 15.8333H16.6667V14.1667H3.33333V15.8333ZM3.33333 9.16667H16.6667V7.5H3.33333V9.16667ZM3.33333 4.16667V5.83333H16.6667V4.16667H3.33333Z" fill="#666666"/></svg>`;
+const DP_CHEV_L = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.705 7.41L14.295 6L8.295 12L14.295 18L15.705 16.59L11.125 12L15.705 7.41Z" fill="#666666"/></svg>`;
+const DP_CHEV_R = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.705 6L8.295 7.41L12.875 12L8.295 16.59L9.705 18L15.705 12L9.705 6Z" fill="#666666"/></svg>`;
+const DP_MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+// Demo "today" is mid-June 2026, so the picker opens where the data lives.
+const DP_TODAY = new Date(2026, 5, 16);
+let DP = null;   // {which, y, m, anchor}
+
+function _dpParse(v) {
+  const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec((v || '').trim());
+  if (!m) return null;
+  const d = new Date(+m[3], +m[1] - 1, +m[2]);
+  return isNaN(d) ? null : d;
+}
+function _dpFmt(d) {
+  return String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0') + '/' + d.getFullYear();
+}
+function drType(which, v) {
+  S[which === 'from' ? 'dateFrom' : 'dateTo'] = v;
+  renderTxRows();
+}
+function drClear() {
+  S.dateFrom = ''; S.dateTo = '';
+  dpClose(); renderRight();
+}
+function dpClose() { DP = null; const r = document.getElementById('dp-root'); if (r) r.innerHTML = ''; }
+function dpOpen(which, btn) {
+  if (DP && DP.which === which) { dpClose(); return; }
+  const cur = _dpParse(which === 'from' ? S.dateFrom : S.dateTo) || DP_TODAY;
+  DP = { which, y: cur.getFullYear(), m: cur.getMonth(), anchor: btn };
+  dpRender();
+}
+function dpStep(n) { if (!DP) return; const d = new Date(DP.y, DP.m + n, 1); DP.y = d.getFullYear(); DP.m = d.getMonth(); dpRender(); }
+function dpPick(y, m, day) {
+  const v = _dpFmt(new Date(y, m, day));
+  S[DP.which === 'from' ? 'dateFrom' : 'dateTo'] = v;
+  dpClose(); renderRight();
+}
+function dpToday() { dpPick(DP_TODAY.getFullYear(), DP_TODAY.getMonth(), DP_TODAY.getDate()); }
+function dpClearOne() { S[DP.which === 'from' ? 'dateFrom' : 'dateTo'] = ''; dpClose(); renderRight(); }
+function dpRender() {
+  let root = document.getElementById('dp-root');
+  if (!root) { root = document.createElement('div'); root.id = 'dp-root'; document.body.appendChild(root); }
+  if (!DP) { root.innerHTML = ''; return; }
+  const first = new Date(DP.y, DP.m, 1);
+  const lead = first.getDay();
+  const days = new Date(DP.y, DP.m + 1, 0).getDate();
+  const prevDays = new Date(DP.y, DP.m, 0).getDate();
+  const sel = _dpParse(DP.which === 'from' ? S.dateFrom : S.dateTo);
+  const cells = [];
+  for (let i = lead - 1; i >= 0; i--) cells.push({ d: prevDays - i, out: true });
+  for (let d = 1; d <= days; d++) cells.push({ d, out: false });
+  while (cells.length % 7) cells.push({ d: cells.length - lead - days + 1, out: true });
+  const weeks = [];
+  for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
+
+  root.innerHTML = `
+    <div class="dp-pop" id="dp-pop" onclick="event.stopPropagation()">
+      <div class="dp-hdr">
+        <button class="dp-nav" onclick="dpStep(-1)" title="Previous month">${DP_CHEV_L}</button>
+        <span class="dp-month">${DP_MONTHS[DP.m]} ${DP.y}</span>
+        <button class="dp-nav" onclick="dpStep(1)" title="Next month">${DP_CHEV_R}</button>
+      </div>
+      <div class="dp-grid">
+        <div class="dp-week dow">${['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => `<span class="dp-cell dow">${d}</span>`).join('')}</div>
+        ${weeks.map((w, i) => `<div class="dp-week${i % 2 ? ' alt' : ''}">${w.map(c => {
+          const on = !c.out && sel && sel.getFullYear() === DP.y && sel.getMonth() === DP.m && sel.getDate() === c.d;
+          return `<span class="dp-cell dp-day${c.out ? ' out' : ''}${on ? ' sel' : ''}"${c.out ? '' : ` onclick="dpPick(${DP.y},${DP.m},${c.d})"`}>${c.d}</span>`;
+        }).join('')}</div>`).join('')}
+      </div>
+      <div class="dp-div"></div>
+      <div class="dp-foot">
+        <button onclick="dpToday()">Today</button>
+        <button onclick="dpClearOne()">Clear</button>
+      </div>
+    </div>`;
+
+  const pop = document.getElementById('dp-pop');
+  const r = DP.anchor.getBoundingClientRect();
+  let top = r.bottom + 4;
+  if (top + pop.offsetHeight > window.innerHeight - 8) top = Math.max(8, r.top - pop.offsetHeight - 4);
+  pop.style.top = top + 'px';
+  pop.style.left = Math.max(8, Math.min(r.left, window.innerWidth - pop.offsetWidth - 8)) + 'px';
+}
+document.addEventListener('click', e => {
+  if (!DP) return;
+  if (e.target.closest && (e.target.closest('#dp-pop') || e.target.closest('.dr-ico'))) return;
+  dpClose();
+});
+window.addEventListener('resize', dpClose);
+
 function renderTxRows() {
   if (!document.getElementById('tx-rows')) return;
   let txs = [...acctTxs()];
   const search = S.search.toLowerCase();
   if (search) txs = txs.filter(t=>t.desc.toLowerCase().includes(search));
+  const dFrom = _dpParse(S.dateFrom), dTo = _dpParse(S.dateTo);
+  if (dFrom) txs = txs.filter(t => { const d = _dpParse(t.date); return d && d >= dFrom; });
+  if (dTo) txs = txs.filter(t => { const d = _dpParse(t.date); return d && d <= dTo; });
   if (S.filterBy==='deposits') txs = txs.filter(t=>t.deposit);
   if (S.filterBy==='payments') txs = txs.filter(t=>t.payment);
   if (S.view==='unmatched') txs = txs.filter(t=>!S.matchedIds.has(t.id) && !S.excludedIds.has(t.id));
@@ -5383,7 +5516,7 @@ function renderSettingsAccounts() {
       <label style="font-size:14px;color:#666;display:block;margin-bottom:4px">Search</label>
       <div style="display:flex;align-items:center;gap:8px;height:36px;background:#f5f8fa;border:1px solid #cedbe7;border-radius:4px;padding:0 8px">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="#999"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-        <input id="acct-search" type="text" placeholder="Find an account" style="border:none;background:none;outline:none;font-size:14px;font-style:italic;color:#b3b3b3;width:100%;font-family:Roboto,sans-serif" oninput="filterAcctSearch(this.value)">
+        <input id="acct-search" type="text" placeholder="Find an account" style="border:none;background:none;outline:none;font-size:14px;color:#13314c;width:100%;font-family:Roboto,sans-serif" oninput="filterAcctSearch(this.value)">
       </div>
     </div>
     <div style="background:#fff;border:1px solid #cedbe7;border-radius:4px;overflow:hidden">
@@ -5531,7 +5664,7 @@ function renderSettingsConnections() {
         <label style="font-size:14px;color:#666;display:block;margin-bottom:4px">Search</label>
         <div style="display:flex;align-items:center;gap:8px;height:36px;background:#f5f8fa;border:1px solid #cedbe7;border-radius:4px;padding:0 8px">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="#999"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-          <input type="text" placeholder="Find an account" style="border:none;background:none;outline:none;font-size:14px;font-style:italic;color:#b3b3b3;width:100%;font-family:Roboto,sans-serif">
+          <input type="text" placeholder="Find an account" style="border:none;background:none;outline:none;font-size:14px;color:#13314c;width:100%;font-family:Roboto,sans-serif">
         </div>
       </div>
       <button class="btn-primary" style="height:36px;white-space:nowrap" onclick="openConnect()">${ic(P.add,15,'#fff')} Add Institution</button>
@@ -5802,7 +5935,7 @@ function renderSettingsMatching() {
         <label style="font-size:14px;color:#666;display:block;margin-bottom:4px">Search</label>
         <div style="display:flex;align-items:center;gap:8px;height:36px;background:#f5f8fa;border:1px solid #cedbe7;border-radius:4px;padding:0 8px">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="#999"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-          <input type="text" placeholder="Find a rule" style="border:none;background:none;outline:none;font-size:14px;font-style:italic;color:#b3b3b3;width:100%;font-family:Roboto,sans-serif">
+          <input type="text" placeholder="Find a rule" style="border:none;background:none;outline:none;font-size:14px;color:#13314c;width:100%;font-family:Roboto,sans-serif">
         </div>
       </div>
       <button class="btn-primary" style="height:36px;white-space:nowrap" onclick="openAddRule()">Add Rule</button>
@@ -5858,7 +5991,7 @@ function renderSettingsCategories() {
         <label style="font-size:14px;color:#666">Search</label>
         <div style="display:flex;align-items:center;gap:8px;height:36px;background:#f5f8fa;border:1px solid #cedbe7;border-radius:4px;padding:0 8px">
           ${SEARCH_CAT_ICO}
-          <input type="text" placeholder="Find a category" style="border:none;background:none;outline:none;font-size:14px;font-style:italic;color:#b3b3b3;flex:1;font-family:Roboto,sans-serif">
+          <input type="text" placeholder="Find a category" style="border:none;background:none;outline:none;font-size:14px;color:#13314c;flex:1;font-family:Roboto,sans-serif">
         </div>
       </div>
       <button class="btn-primary" style="height:36px">Add Category</button>
