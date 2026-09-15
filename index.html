@@ -6493,6 +6493,407 @@ function renderConnect() {
     </div>`;
 }
 
+function recStartPick(acctId) {
+  REC_STATE.startAcctId = acctId || null;
+  const acct = ACCOUNTS.find(a => a.id === acctId);
+  const clean = !!acct && !recHasInReview(acct.id);
+  REC_STATE.startDate = '';
+  REC_STATE.startBalance = null;
+  REC_STATE.startLoading = 0;
+  _recLoadToken++;
+  if (clean) {
+    REC_STATE.startDate = REC_STMT_DATE;
+    REC_STATE.startBalance = acct.bankBalance;
+  }
+  renderRecStart();
+}
+function recStartField(field, val) {
+  if (field === 'date') {
+    // Native date inputs emit ISO (YYYY-MM-DD); keep MM/DD/YYYY internally.
+    const m = String(val).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    REC_STATE.startDate = m ? `${m[2]}/${m[3]}/${m[1]}` : val;
+  }
+  else { const n = parseFloat(String(val).replace(/[^0-9.-]/g, '')); REC_STATE.startBalance = isNaN(n) ? null : n; }
+}
+function _recDateISO(mdY) {
+  const m = String(mdY).match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  return m ? `${m[3]}-${m[1]}-${m[2]}` : '';
+}
+function recStartContinue() {
+  const acctId = REC_STATE.startAcctId;
+  if (!acctId || recHasInReview(acctId)) return;
+  seedReconcile(acctId, REC_STATE.startDate, REC_STATE.startBalance);
+  closeRecStart();
+  showScreen('rec');
+}
+
+const SR_CHECK_CIRCLE = `<svg width="15" height="15" viewBox="0 0 24 24" fill="#6eb744" style="flex-shrink:0"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`;
+const SR_INFO_ICO = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#008dd5" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8" stroke-width="3" stroke-linecap="round"/></svg>`;
+const SR_ALERT_ICO = `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#eb343c" stroke-width="2" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16" stroke-width="3" stroke-linecap="round"/></svg>`;
+
+function renderRecStart() {
+  const root = document.getElementById('rec-start-root');
+  if (!REC_STATE.startOpen) { root.innerHTML = ''; return; }
+  const acct = ACCOUNTS.find(a => a.id === REC_STATE.startAcctId);
+  const hasAcct = !!acct;
+  const inReview = hasAcct && recHasInReview(acct.id);
+  const loading = !!REC_STATE.startLoading;
+  const canContinue = hasAcct && !inReview && !loading;
+
+  const acctOpts = [
+    { value: '', label: '<span style="color:#9aa7b3">Select an account\u2026</span>' },
+    ...visibleOrderedAccounts().filter(a => a.kind === 'bank' && a.bankName).map(a => ({
+      value: a.id,
+      label: `${a.gl} <span style="color:#9aa7b3">- Last synced ${a.syncedMin != null ? fmtSyncLong(a.syncedMin).toLowerCase() : '-'}</span>`,
+    })),
+  ];
+  const selHtml = cSel('sr-acct', REC_STATE.startAcctId || '', acctOpts, "recStartPick(value)", 'width:100%')
+    .replace('class="csel-btn"', 'class="csel-btn" style="width:100%;height:38px;background:#f5f8fa;justify-content:space-between;font-size:14px"');
+
+  root.innerHTML = `
+    <div class="at-overlay" onclick="if(event.target===this)closeRecStart()">
+      <div class="sr-modal">
+        <div class="at-hdr">
+          <span class="at-hdr-title" style="font-size:17px;font-weight:600">Start Reconciliation</span>
+          <button class="at-hdr-ico" onclick="closeRecStart()" title="Close">${AT_X_ICO}</button>
+        </div>
+        <div class="sr-body">
+          ${inReview ? `<div class="sr-banner">
+            ${SR_INFO_ICO}
+            <span>Accounts with bank transactions in review are unable to be reconciled.</span>
+            <a href="#" onclick="closeRecStart();openAcct('${acct.id}');return false">Review Transactions</a>
+          </div>` : ''}
+          <div class="sr-field">
+            <label>Bank Account</label>
+            ${selHtml}
+          </div>
+          <div class="sr-2col">
+            <div class="sr-field">
+              <label>Last Reconciliation Date</label>
+              <div class="sr-ro${hasAcct ? '' : ' empty'}">${hasAcct ? REC_LAST_REC_DATE : 'mm/dd/yyyy'}</div>
+            </div>
+            <div class="sr-field">
+              <label>Beginning Balance</label>
+              <div class="sr-ro${hasAcct ? '' : ' empty'}">${hasAcct ? fmtN(recBeginningBalance(acct.id)) : '00.00'}</div>
+            </div>
+          </div>
+          <div class="sr-2col">
+            <div class="sr-field">
+              <label>Bank Balance</label>
+              <div class="sr-ro${hasAcct ? '' : ' empty'}">${hasAcct ? fmtN(acct.bankBalance) : '00.00'}</div>
+            </div>
+            <div class="sr-field">
+              <label>Transactions to Reconcile</label>
+              <div class="sr-ro${hasAcct ? '' : ' empty'}">${hasAcct ? (recData(acct.id).deposits.length + recData(acct.id).payments.length) : '-'}</div>
+            </div>
+          </div>
+        </div>
+        <div class="sr-foot">
+          <button class="btn-primary" style="height:36px;padding:0 18px"${canContinue ? '' : ' disabled'} onclick="recStartContinue()">Continue</button>
+          <button class="at-cancel" style="height:36px" onclick="closeRecStart()">Cancel</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── Smart Reconciliation screen ──
+
+function toggleSrRow(id, checked) {
+  REC_STATE.checked[id] = checked;
+  renderReconcile();
+}
+function toggleSrAll(section, checked) {
+  const d = recData(REC_STATE.acctId);
+  const rows = section === 'dep' ? d.deposits : section === 'pay' ? d.payments : [...d.deposits, ...d.payments];
+  rows.forEach(r => { REC_STATE.checked[r.id] = checked; });
+  renderReconcile();
+}
+function srSetSearch(val) {
+  REC_STATE.search = val;
+  REC_STATE._focusSearch = true;
+  renderReconcile();
+}
+function srToggleSection(key) {
+  REC_STATE.collapsed[key] = !REC_STATE.collapsed[key];
+  renderReconcile();
+}
+
+// Current out-of-balance amount, same math the strip's Difference box shows.
+function srDifference() {
+  const acct = ACCOUNTS.find(a => a.id === REC_STATE.acctId);
+  if (!acct) return 0;
+  const d = recData(acct.id);
+  const amtOf = r => r.bankAmt != null ? r.bankAmt : r.rmAmt;
+  const selNet = [...d.deposits, ...d.payments].reduce((s, r) => REC_STATE.checked[r.id]
+    ? s + (r.inflow ? 1 : -1) * amtOf(r) : s, 0);
+  const stmtBal = REC_STATE.statementBalance != null ? REC_STATE.statementBalance : acct.bankBalance;
+  return +(stmtBal - (recBeginningBalance(acct.id) + selNet)).toFixed(2);
+}
+
+// Save & Finish: balanced accounts finish straight away; out-of-balance ones
+// get a confirmation overlay so finishing with a difference is deliberate.
+function srTryFinish() {
+  const diff = srDifference();
+  const balanced = Math.abs(diff) < 0.005;
+  document.getElementById('rec-start-root').innerHTML = `
+    <div class="at-overlay" onclick="if(event.target===this)srCloseWarn()">
+      <div class="sr-modal" style="width:480px">
+        <div class="at-hdr">
+          <span class="at-hdr-title" style="font-size:17px;font-weight:600">${balanced ? 'Finish reconciliation' : 'Finish with a difference?'}</span>
+          <button class="at-hdr-ico" onclick="srCloseWarn()" title="Close">${AT_X_ICO}</button>
+        </div>
+        <div class="sr-body" style="gap:14px">
+          ${balanced ? `
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            ${ic(P.check, 20, '#6eb744')}
+            <div style="font-size:14px;color:#13314c;line-height:1.5">This account is balanced - the difference is <b>$0.00</b>. Finishing saves the reconciliation snapshot to the account's history.</div>
+          </div>` : `
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            ${SR_ALERT_ICO}
+            <div style="font-size:14px;color:#13314c;line-height:1.5">This account is out of balance by <b>${fmt(Math.abs(diff))}</b>. Finishing now will record the reconciliation with an unresolved difference.</div>
+          </div>
+          <div style="font-size:13px;color:#666;line-height:1.5;margin-top:-6px">You can go back to review the remaining transactions before finishing.</div>`}
+          <div class="so-field">
+            <label style="font-size:13px;color:#666">Comment <span style="color:#9aa7b3">(optional)</span></label>
+            <textarea class="at-textarea" style="min-height:52px" placeholder="Add a note for the reconciliation history..." oninput="REC_STATE.finishComment=this.value">${REC_STATE.finishComment || ''}</textarea>
+          </div>
+        </div>
+        <div class="sr-foot">
+          <button class="btn-primary" style="height:36px;padding:0 16px" onclick="srConfirmFinish()">${balanced ? 'Save & Finish' : 'Finish Anyway'}</button>
+          <button class="at-cancel" style="height:36px" onclick="srCloseWarn()">Go Back</button>
+        </div>
+      </div>
+    </div>`;
+}
+function srCloseWarn() { document.getElementById('rec-start-root').innerHTML = ''; }
+function srConfirmFinish() { srCloseWarn(); finishReconciliation(); }
+
+function finishReconciliation() {
+  const acct = ACCOUNTS.find(a => a.id === REC_STATE.acctId);
+  if (!acct) return;
+  const d = recData(acct.id);
+  const all = [...d.deposits, ...d.payments];
+  const matchedCount = all.filter(r => r.status === 'Matched').length;
+  const selNet = all.reduce((s, r) => REC_STATE.checked[r.id]
+    ? s + (r.inflow ? 1 : -1) * (r.bankAmt != null ? r.bankAmt : r.rmAmt) : s, 0);
+  const cleared = recBeginningBalance(acct.id) + selNet;
+  const clearedCount = all.filter(r => REC_STATE.checked[r.id]).length;
+  const scItems = SC_CREATED.filter(c => c.type === 'Service Charge');
+  const iiItems = SC_CREATED.filter(c => c.type === 'Interest Income');
+  const scParts = [];
+  if (scItems.length) scParts.push(`${scItems.length} service charge${scItems.length > 1 ? 's' : ''} disbursed across ${scItems.reduce((s, c) => s + c.props, 0)} propert${scItems.reduce((s, c) => s + c.props, 0) > 1 ? 'ies' : 'y'}`);
+  if (iiItems.length) scParts.push(`${iiItems.length} interest income entr${iiItems.length > 1 ? 'ies' : 'y'}`);
+  const scTotal = SC_CREATED.reduce((s, c) => s + c.total, 0);
+  document.getElementById('rec-inner').innerHTML = `
+    <div class="rec-done-wrap">
+      <div class="rec-done-panel">
+        ${ic(P.check, 48, '#6eb744')}
+        <div class="rec-done-title">Reconciliation complete.</div>
+        <div style="font-size:13px;color:#9aa7b3;margin:-8px 0 2px">This snapshot is saved to the account's reconciliation history.</div>
+        <div class="rec-done-card">
+          <div class="rec-done-row"><span>Reconciled on</span><span>06/16/2026</span></div>
+          <div class="rec-done-row"><span>Bank balance</span><span>${fmt(REC_STATE.statementBalance)}</span></div>
+          <div class="rec-done-row"><span>Book balance in RM</span><span>${fmt(cleared)}</span></div>
+          <div class="rec-done-row"><span>Cleared transactions</span><span>${clearedCount}</span></div>
+          <div class="rec-done-row"><span>Transactions matched</span><span>${matchedCount}</span></div>
+          ${Math.abs(srDifference()) >= 0.005 ? `<div class="rec-done-row"><span>Unresolved difference</span><span style="color:#eb343c">${fmt(Math.abs(srDifference()))}</span></div>` : ''}
+          ${REC_STATE.finishComment ? `<div class="rec-done-row"><span>Comment</span><span style="max-width:260px;text-align:right">${REC_STATE.finishComment}</span></div>` : ''}
+        </div>
+        ${scParts.length ? `<div style="font-size:13px;color:#13314c;background:#f0f7fc;border:1px solid #cfe6f5;border-radius:4px;padding:9px 14px;display:flex;align-items:center;gap:8px">${orionSpark(14)}<span>${scParts.join(' and ')} - <b>${fmtN(scTotal)}</b></span><button class="link-btn" style="font-size:14px" onclick="showToast('Allocation detail opens in the register')">View</button></div>` : ''}
+        <div style="display:flex;gap:10px">
+          <button class="btn-primary" style="height:36px;padding:0 18px" onclick="showToast('Reconciliation report sent to printer')">${ic(P.print,15,'#fff')} Print Report</button>
+          <button class="btn-outline" style="height:36px;padding:0 18px" onclick="openReconcile()">Start New Reconciliation</button>
+        </div>
+        <button class="link-btn" style="font-size:14px;cursor:pointer" onclick="showScreen('bc')">Back to Banking Center</button>
+      </div>
+    </div>`;
+}
+
+function srPanel(title, key, rows, acctId) {
+  const q = REC_STATE.search.trim().toLowerCase();
+  let shown = rows;
+  if (REC_STATE.filter === 'uncleared') shown = shown.filter(r => !REC_STATE.checked[r.id]);
+  if (q) shown = shown.filter(r => [r.bankDesc, r.rmText, r.ref, r.account, r.category].join(' ').toLowerCase().includes(q));
+  const stmtTotal = rows.reduce((s, r) => s + (r.bankAmt || 0), 0);
+  const rmTotal = rows.reduce((s, r) => s + r.rmAmt, 0);
+  const selTotal = rows.reduce((s, r) => REC_STATE.checked[r.id] ? s + (r.bankAmt != null ? r.bankAmt : r.rmAmt) : s, 0);
+  const outstanding = +(rmTotal - selTotal).toFixed(2);
+  const allChecked = shown.length > 0 && shown.every(r => REC_STATE.checked[r.id]);
+  // Single-line rows: the bank side is shown, and the Rent Manager record behind
+  // it is revealed on hover instead of stacking a second line in every cell.
+  const body = shown.map(r => {
+    const q = v => String(v == null ? '' : v).replace(/"/g, '&quot;');
+    return `
+    <tr class="sr-row" data-rmtip="1" data-rm-ref="${q(r.ref)}" data-rm-text="${q(r.rmText)}" data-rm-date="${q(fmtD(r.rmDate))}" data-rm-acct="${q(r.account)}" data-rm-amt="${q(fmtN(r.rmAmt))}">
+      <td style="text-align:center;vertical-align:middle"><input type="checkbox" ${REC_STATE.checked[r.id] ? 'checked' : ''} onclick="toggleSrRow('${r.id}',this.checked)"></td>
+      <td>${r.bankAmt != null ? fmtD(r.date) : fmtD(r.rmDate)}</td>
+      <td>${r.bankDesc == null ? r.rmText : r.bankDesc}</td>
+      <td>${r.category}</td>
+      <td class="r">${r.bankAmt == null ? fmtN(r.rmAmt) : fmtN(r.bankAmt)}</td>
+      <td style="text-align:center;vertical-align:middle">${r.bankAmt != null ? SR_CHECK_CIRCLE : ''}</td>
+      <td style="vertical-align:middle"><span class="sr-pill ${REC_STATE.checked[r.id] ? 'cleared' : 'review'}">${REC_STATE.checked[r.id] ? 'Cleared' : 'Review'}</span></td>
+      <td class="sr2-info" style="text-align:center;vertical-align:middle">${r.insight ? `<span class="sr-info-tip" data-tip="${r.insight.replace(/"/g, '&quot;')}">${SR_INFO_ICO}</span>` : ''}</td>
+    </tr>`;
+  }).join('');
+  return `
+    <div class="sr-panel2">
+      <div class="sr-sec-hdr" style="margin-top:0">
+        <span class="sr-sec-title">${title}</span>
+        <div class="sr-sec-sums">
+          <span>Bank<b>${fmt(stmtTotal)}</b></span>
+          <span>Rent Manager<b>${fmt(rmTotal)}</b></span>
+          <span>Outstanding<b class="${outstanding > 0 ? 'neg' : ''}">${outstanding > 0 ? '+' : ''}${fmt(outstanding)}</b></span>
+        </div>
+      </div>
+      <table class="sr-tbl sr-tbl2">
+        <colgroup>
+          <col style="width:34px"><col style="width:96px"><col><col style="width:168px">
+          <col style="width:104px"><col style="width:62px"><col style="width:76px"><col style="width:36px">
+        </colgroup>
+        <thead><tr>
+          <th style="text-align:center;padding:0;vertical-align:middle"><input type="checkbox" ${allChecked ? 'checked' : ''} onclick="toggleSrAll('${key}',this.checked)"></th>
+          <th>Date</th>
+          <th>Description</th>
+          <th>Category</th>
+          <th class="r">Amount</th>
+          <th style="text-align:center;vertical-align:middle">Matched</th>
+          <th style="vertical-align:middle">Status</th>
+          <th></th>
+        </tr></thead>
+        <tbody>${body || `<tr><td colspan="8" style="text-align:center;color:#9aa7b3;padding:20px 0;vertical-align:middle">No transactions</td></tr>`}</tbody>
+      </table>
+    </div>`;
+}
+
+function renderReconcile() {
+  const acct = ACCOUNTS.find(a => a.id === REC_STATE.acctId);
+  if (!acct) return;
+  const d = recData(acct.id);
+  const all = [...d.deposits, ...d.payments];
+  const beginning = recBeginningBalance(acct.id);
+  const selDeps = d.deposits.filter(r => REC_STATE.checked[r.id]);
+  const selPays = d.payments.filter(r => REC_STATE.checked[r.id]);
+  const amtOf = r => r.bankAmt != null ? r.bankAmt : r.rmAmt;
+  const selDepTotal = selDeps.reduce((s, r) => s + amtOf(r), 0);
+  const selPayTotal = selPays.reduce((s, r) => s + amtOf(r), 0);
+  const cleared = beginning + selDepTotal - selPayTotal;
+  const stmtBal = REC_STATE.statementBalance != null ? REC_STATE.statementBalance : acct.bankBalance;
+  const diff = +(stmtBal - cleared).toFixed(2);
+  const balanced = Math.abs(diff) < 0.005;
+
+  document.getElementById('rec-inner').innerHTML = `
+    <div class="sr-strip">
+      <div class="sr-acct">
+        <span>${acct.gl}</span>
+        <span class="bank">${acct.bankName ? acct.bankName + '\u2022\u2022\u2022\u2022' + acct.last4 : ''}</span>
+      </div>
+      <div class="sr-cells">
+        <div class="sr-cell"><span class="sr-cell-lbl">Beginning Balance</span><span class="sr-cell-val">${fmt(beginning)}</span></div>
+        <span class="sr-op">+</span>
+        <div class="sr-cell"><span class="sr-cell-lbl">Selected Deposits (${selDeps.length})</span><span class="sr-cell-val pos">${fmt(selDepTotal)}</span></div>
+        <span class="sr-op">\u2212</span>
+        <div class="sr-cell"><span class="sr-cell-lbl">Selected Payments (${selPays.length})</span><span class="sr-cell-val neg">${fmt(selPayTotal)}</span></div>
+        <span class="sr-op">=</span>
+        <div class="sr-cell"><span class="sr-cell-lbl">Cleared Balance</span><span class="sr-cell-val">${fmt(cleared)}</span></div>
+        <span class="sr-vdiv"></span>
+        <div class="sr-cell"><span class="sr-cell-lbl">Bank Balance</span><span class="sr-cell-val strong">${fmt(stmtBal)}</span></div>
+        <div class="sr-diff${balanced ? ' ok' : ''}">
+          ${balanced ? ic(P.check, 17, '#2e7d32') : SR_ALERT_ICO}
+          <span class="lbl">Difference</span><span class="val">${fmt(Math.abs(diff))}</span>
+        </div>
+      </div>
+    </div>
+    <div class="sr-toolbar">
+      <div style="display:flex;align-items:center;gap:16px;min-width:0">
+        <div class="sr-search">
+          <span class="ico-wrap">${ic(P.search, 15, '#9aa7b3')}</span>
+          <input id="sr-search-input" placeholder="Find a transaction" value="${REC_STATE.search.replace(/"/g, '&quot;')}" oninput="srSetSearch(this.value)">
+        </div>
+        <label class="sr-split-toggle">
+          <input type="checkbox" ${REC_STATE.split ? 'checked' : ''} onchange="REC_STATE.split=this.checked;renderReconcile()">
+          Separate transactions by deposits and payments
+        </label>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="btn-outline" style="height:36px;padding:0 12px;display:inline-flex;align-items:center;gap:6px;font-size:12.5px" onclick="openRecServiceCharge()">${ic(P.add,14,'#008dd5')} Add Service Charge</button>
+        <div class="sr-seg">
+          <button class="sr-seg-btn${REC_STATE.filter === 'uncleared' ? ' on' : ''}" onclick="REC_STATE.filter='uncleared';renderReconcile()">Uncleared</button>
+          <button class="sr-seg-btn${REC_STATE.filter === 'all' ? ' on' : ''}" onclick="REC_STATE.filter='all';renderReconcile()">All</button>
+        </div>
+      </div>
+    </div>
+    <div class="sr-scroll">
+      <div class="sr-sec${REC_STATE.split ? ' sr-cols2' : ''}">
+        ${REC_STATE.split
+          ? srPanel('Deposits', 'dep', d.deposits, acct.id) + srPanel('Payments', 'pay', d.payments, acct.id)
+          : srPanel('Transactions', 'all', [...d.deposits, ...d.payments].sort((a, b) => _recDateVal(a.rmDate) - _recDateVal(b.rmDate)), acct.id)}
+      </div>
+    </div>
+    <div class="rec-foot">
+      ${balanced ? '' : `<span class="rec-foot-notice">${SR_ALERT_ICO} Account is not in balance</span>`}
+      <button class="btn-primary" style="height:36px;padding:0 16px" onclick="srTryFinish()">Save &amp; Finish</button>
+      <button class="btn-primary" style="height:36px;padding:0 16px" onclick="showToast('Progress saved');showScreen('br')">Save For Later</button>
+      <button class="at-cancel" style="height:36px" onclick="showScreen('br')">Cancel</button>
+    </div>`;
+
+  if (REC_STATE._focusSearch) {
+    REC_STATE._focusSearch = false;
+    const inp = document.getElementById('sr-search-input');
+    if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+  }
+}
+
+/* RMX dropdowns: native <select> popups are suppressed everywhere; options
+   render in a styled floating panel per the design system ("never native
+   selects"). The native element keeps its state and fires its own change
+   events, so every existing onchange handler works unmodified. */
+let _rmxDD = null;
+function _rmxDDClose() { if (_rmxDD) { _rmxDD.panel.remove(); _rmxDD = null; } }
+function _rmxDDOpen(sel) {
+  _rmxDDClose();
+  sel.focus();
+  const panel = document.createElement('div');
+  panel.className = 'rmx-dd';
+  panel.innerHTML = [...sel.options].map((o, i) =>
+    `<div class="rmx-dd-item${i === sel.selectedIndex ? ' sel' : ''}" data-i="${i}">${o.text || '&nbsp;'}</div>`).join('');
+  document.body.appendChild(panel);
+  const r = sel.getBoundingClientRect();
+  panel.style.minWidth = r.width + 'px';
+  panel.style.left = Math.max(8, Math.min(r.left, window.innerWidth - panel.offsetWidth - 8)) + 'px';
+  const below = r.bottom + 4;
+  panel.style.top = (below + panel.offsetHeight > window.innerHeight - 8
+    ? Math.max(8, r.top - panel.offsetHeight - 4) : below) + 'px';
+  panel.addEventListener('mousedown', ev => ev.preventDefault());
+  panel.addEventListener('click', ev => {
+    const it = ev.target.closest('.rmx-dd-item');
+    if (!it) return;
+    sel.selectedIndex = +it.dataset.i;
+    _rmxDDClose();
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  panel.querySelector('.rmx-dd-item.sel')?.scrollIntoView({ block: 'nearest' });
+  _rmxDD = { sel, panel };
+}
+document.addEventListener('mousedown', e => {
+  const sel = e.target.closest && e.target.closest('select');
+  if (!sel) { if (_rmxDD && !_rmxDD.panel.contains(e.target)) _rmxDDClose(); return; }
+  if (sel.disabled) return;
+  e.preventDefault();
+  if (_rmxDD && _rmxDD.sel === sel) { _rmxDDClose(); return; }
+  _rmxDDOpen(sel);
+});
+document.addEventListener('keydown', e => {
+  const sel = document.activeElement;
+  if (sel && sel.tagName === 'SELECT' && !sel.disabled && (e.key === ' ' || e.key === 'Enter' || (e.altKey && e.key === 'ArrowDown'))) {
+    e.preventDefault();
+    if (_rmxDD && _rmxDD.sel === sel) _rmxDDClose(); else _rmxDDOpen(sel);
+  } else if (e.key === 'Escape' && _rmxDD) {
+    _rmxDDClose();
+  }
+});
+window.addEventListener('scroll', e => { if (_rmxDD && !_rmxDD.panel.contains(e.target)) _rmxDDClose(); }, true);
+window.addEventListener('resize', () => _rmxDDClose());
+
 /* Register row kebab menu - the six production actions; Details opens a
    read-only slideout for the row, the rest are prototype no-ops. */
 let _brMenu = null;
