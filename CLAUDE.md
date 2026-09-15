@@ -99,7 +99,13 @@ in the TR sidebar (expanded + collapsed) and the **Connect** link on unlinked ac
 - BC tiles have no icon badges; the Accounts Overview table dropped its **Difference** column and
   "In Rent Manager" is now **Cleared Balance** (also in the TR summary strip and the BC tiles)
 - Connection Status shows an explicit green **Connected** lozenge; accounts with `connection:'none'`
-  (Petty Cash) show "Not connected" + a Connect link and **no** match status at all
+  (Petty Cash) show "Not connected" + a Link Account link and **no** match status at all. Every cell in a
+  row is 14px - no per-cell size overrides
+- **Connection Health tile (Option A, 09/15/2026):** the summary line stays ("4 of 6 accounts syncing",
+  "All 6" when clean), and under a hairline every account that needs something is NAMED with the action
+  that fixes it - lapsed accounts first (`Citi****2247 - last synced 5 days ago` / **Reconnect**), then
+  unlinked (`No bank account linked` / **Link Account**). Both run the Quiltt connector. With nothing to
+  act on the tile collapses to the one summary line
 - TR sidebar rows are quiet by default — a status only appears when the account needs something
   (`N to review` or `Login required`); unlinked accounts read "No account linked"
 - The screen is called **Reconciliation**, not Smart Reconciliation

@@ -1692,17 +1692,35 @@ function renderBC() {
       </div>
     </div>`;
     })(),
-    connHealth: `<div class="bc-card">
+    connHealth: (() => {
+      const syncing = visAccts.filter(a => a.connection === 'fresh').length;
+      // Every account that needs something is named, with the action that fixes it.
+      const needs = visAccts.filter(a => a.connection === 'login' || a.connection === 'none')
+        .sort((x, y) => (x.connection === 'login' ? 0 : 1) - (y.connection === 'login' ? 0 : 1));  // a dead feed outranks one that never had one
+      const row = a => {
+        const lapsed = a.connection === 'login';
+        const sub = lapsed
+          ? `${a.bankName}\u2022\u2022\u2022\u2022${a.last4} - last synced ${fmtSyncLong(a.syncedMin)}`
+          : 'No bank account linked';
+        const act = lapsed
+          ? `<button class="acct-link" onclick="openConnect('${a.bankName}')">Reconnect</button>`
+          : `<button class="acct-link" onclick="openConnect(null,'${a.id}')">Link Account</button>`;
+        return `<div style="display:flex;align-items:center;gap:10px">
+          <div class="bc-alert-dot" style="background:${lapsed ? '#eb343c' : '#b3b3b3'};flex-shrink:0"></div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;color:#13314c;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.gl}</div>
+            <div style="font-size:12px;color:#9aa7b3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sub}</div>
+          </div>
+          ${act}
+        </div>`;
+      };
+      return `<div class="bc-card">
       <div class="bc-card-hrow"><span class="bc-card-h">Connection Health</span><button class="link-btn sm bc-card-hover-btn" style="margin-left:auto" onclick="openSettings('institutions')">Manage Connections</button></div>
-      <div style="display:flex;align-items:center;gap:8px"><div class="bc-alert-dot" style="background:#6eb744"></div><span style="font-size:16px;font-weight:500;color:#13314c">${visAccts.filter(a=>a.connection==='fresh').length} of ${visAccts.length} accounts syncing</span></div>
-      ${(() => {
-        const lapsed = visAccts.filter(a => a.connection === 'login').length;
-        const unlinked = visAccts.filter(a => a.connection === 'none').length;
-        const line = (n, color, txt) => n ? `<div style="display:flex;align-items:center;gap:8px;margin-top:6px"><div class="bc-alert-dot" style="background:${color}"></div><span style="font-size:14px;color:#13314c">${n} account${n!==1?'s':''} ${txt}</span></div>` : '';
-        return line(lapsed, '#eb343c', lapsed !== 1 ? 'need to reconnect' : 'needs to reconnect')
-             + line(unlinked, '#b3b3b3', unlinked !== 1 ? 'are not connected' : 'is not connected');
-      })()}
-    </div>`,
+      <div style="display:flex;align-items:center;gap:8px"><div class="bc-alert-dot" style="background:#6eb744"></div><span style="font-size:16px;font-weight:500;color:#13314c">${needs.length ? `${syncing} of ${visAccts.length}` : `All ${visAccts.length}`} accounts syncing</span></div>
+      ${needs.length ? `<div style="height:1px;background:#e4ebf2;margin:14px 0"></div>
+      <div style="display:flex;flex-direction:column;gap:14px">${needs.map(row).join('')}</div>` : ''}
+    </div>`;
+    })(),
   };
 
   const visibleTiles = QA.tilesOrder.filter(k => QA.tiles[k]);
