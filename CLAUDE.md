@@ -51,7 +51,16 @@ Portland, OR residential + light-commercial property manager. Demo "today" = mid
   Add overlay on the `Bill Payment` type, whose "Bills Paid" grid applies the payment to the bill;
   "Add as Check" is offered as the lesser alternative.
 - Suggested-match confidence tiers shown in an unlabeled column of filled lozenges (fixed-position why-tooltip above the row): t1=rule (High, green), t2/t3/t5/t7=ai (Medium, amber), t8=hint (Low, pink)
-- `SEED_MATCHED` pre-matched examples (net $0.00 per account, survive account-switch resets) cover every record type: Bill/Deposit/Check/Journal in 1004 Trust Comm + 1007 Maintenance, Charge/Credit in 2001 Mastercard + 2003 Amex
+- `SEED_MATCHED` pre-matched examples (survive account-switch resets) cover every record type:
+  Bill/Deposit/Check/Journal in 1004 Trust Comm + 1007 Maintenance, Charge/Credit in 2001 Mastercard
+  + 2003 Amex
+- **1004 and 1007 open nearly clean (09/15/2026):** 1004 Trust Comm. shows Matched (12) / In Review (1)
+  - the one left is `tc1`, a 4,200.00 ACH debit with no suggestion, so its action is **Add**, and it is
+  exactly the account's Bank-vs-Cleared difference. 1007 Maintenance Escrow shows Matched (8) / In
+  Review (1) - only the open-bill beat `me6`. Their `inRm`/`cleared` opening balances were lowered by
+  the newly seeded net (1004 by 4,987.50, 1007 raised by 2,300) so every displayed balance is
+  unchanged from before the reseed. **The bulk-Create beat no longer has 4 creatable rows anywhere** -
+  restore it by removing `me1`,`me2`,`me3`,`me5` from `SEED_MATCHED` and re-lowering 1007's `inRm`
 
 ## Key data locations (approx line numbers)
 

@@ -1123,10 +1123,10 @@ const ACCOUNTS = [
   {id:'op3487',gl:'1001 Operating Account',lastRec:'05/31/2026',kind:'bank',bankName:'Chase',last4:'3847',connection:'fresh',syncedMin:0,bankBalance:516931.60,inRm:512000.00,cleared:512000.00,difference:0,txStatus:{type:'matched',count:0}},
   {id:'pr9204',gl:'1002 Payroll Account',lastRec:'05/31/2026',kind:'bank',bankName:'Chase',last4:'9204',connection:'fresh',syncedMin:0,bankBalance:124500.00,inRm:124500.00,cleared:124500.00,difference:0,txStatus:{type:'matched',count:0}},
   {id:'tr6612',gl:'1003 Trust Account - Res.',lastRec:'05/31/2026',kind:'bank',bankName:'Umpqua Bank',last4:'6612',connection:'fresh',syncedMin:14,bankBalance:512088.30,inRm:512088.30,cleared:512088.30,difference:0,txStatus:{type:'matched',count:0}},
-  {id:'tc6629',gl:'1004 Trust Account - Comm.',lastRec:'05/31/2026',kind:'bank',bankName:'Umpqua Bank',last4:'6629',connection:'fresh',syncedMin:14,bankBalance:289416.75,inRm:285216.75,cleared:281016.75,difference:-4200.00,txStatus:{type:'review',count:7}},
+  {id:'tc6629',gl:'1004 Trust Account - Comm.',lastRec:'05/31/2026',kind:'bank',bankName:'Umpqua Bank',last4:'6629',connection:'fresh',syncedMin:14,bankBalance:289416.75,inRm:280229.25,cleared:276029.25,difference:-4200.00,txStatus:{type:'review',count:1}},
   {id:'sd1193',gl:'1005 Security Deposit Account',lastRec:'05/31/2026',kind:'bank',bankName:'Wells Fargo',last4:'1193',connection:'fresh',syncedMin:60,bankBalance:318740.00,inRm:318740.00,cleared:318740.00,difference:0,txStatus:{type:'matched',count:0}},
   {id:'rf1208',gl:'1006 Reserve Fund',lastRec:'05/31/2026',kind:'bank',bankName:'Wells Fargo',last4:'1208',connection:'fresh',syncedMin:60,bankBalance:95000.00,inRm:95000.00,cleared:95000.00,difference:0,txStatus:{type:'matched',count:0}},
-  {id:'me4471',gl:'1007 Maintenance Escrow',lastRec:'04/30/2026',kind:'bank',bankName:'KeyBank',last4:'4471',connection:'fresh',syncedMin:180,bankBalance:44363.22,inRm:42363.22,cleared:40363.22,difference:-2000.00,txStatus:{type:'review',count:4}},
+  {id:'me4471',gl:'1007 Maintenance Escrow',lastRec:'04/30/2026',kind:'bank',bankName:'KeyBank',last4:'4471',connection:'fresh',syncedMin:180,bankBalance:44363.22,inRm:44663.22,cleared:42663.22,difference:-2000.00,txStatus:{type:'review',count:1}},
   {id:'od7732',gl:'1008 Owner Disbursement',lastRec:'05/31/2026',kind:'bank',bankName:'Bank of America',last4:'7732',connection:'fresh',syncedMin:0,bankBalance:620000.00,inRm:620000.00,cleared:620000.00,difference:0,txStatus:{type:'matched',count:0}},
   {id:'pc0000',gl:'1009 Leasing Office Cash',lastRec:'05/31/2026',kind:'bank',bankName:null,last4:null,connection:'none',syncedMin:null,bankBalance:8000.00,inRm:8000.00,cleared:8000.00,difference:0,txStatus:{type:'matched',count:0}},
   {id:'cc2247',gl:'2001 Mastercard',lastRec:'03/31/2026',kind:'card',bankName:'Citi',last4:'2247',connection:'login',syncedMin:7200,bankBalance:14872.40,inRm:14872.40,cleared:14722.40,difference:0,txStatus:{type:'review',count:15}},
@@ -1305,7 +1305,10 @@ function acctReviewAmt(a) {
 const SEED_MATCHED = [
   // 1001 Operating starts reconcile-ready: every feed item resolved (t6 excluded below).
   't1','t2','t3','t4','t5','t7','t8',
-  'me4',  // already matched to Journal 4101, so 1007's select-all is purely creatable rows
+  // 1007 Maintenance Escrow is all but clean - only the open-bill beat (me6) is left.
+  'me1','me2','me3','me4','me5',
+  // 1004 Trust Comm. is all but clean too, leaving tc1 as the one item to add.
+  'tc2','tc3','tc4','tc5','tc6','tc7','tc8','tc9',
   'tcm1','tcm2','tcm3','tcm4','mem1','mem2','mem3','ccm1','ccm2','axm1','axm2',
 ];
 const SEED_EXCLUDED = ['t6']; // the mis-posted café charge starts excluded
