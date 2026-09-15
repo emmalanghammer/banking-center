@@ -738,22 +738,24 @@ svg.ico{display:block;flex-shrink:0}
 .sr-seg-btn:first-child{border-radius:4px 0 0 4px}
 .sr-seg-btn:last-child{border-radius:0 4px 4px 0}
 .sr-seg-btn.on{background:#ebf1f5;border-color:#008dd5;font-weight:600;position:relative;z-index:1}
-.sr-scroll{flex:1;overflow:auto;padding:0 20px 16px;min-height:0}
-.sr-sec.sr-cols2{min-width:1340px}
+.sr-scroll{flex:1;overflow-x:auto;overflow-y:hidden;padding:0 20px 16px;min-height:0;display:flex;flex-direction:column}
+.sr-sec.sr-cols2{min-width:1340px;flex-direction:row;align-items:stretch;gap:16px}
 .sr-sec-hdr{display:flex;align-items:center;gap:8px;margin:16px 0 8px}
 .sr-sec-hdr .chev{background:none;border:none;display:flex;padding:0;cursor:pointer}
 .sr-sec-title{font-size:14px;font-weight:700;color:#13314c}
 .sr-sec-sums{margin-left:auto;display:flex;gap:16px;font-size:14px;color:#666;white-space:nowrap}
 .sr-sec-sums b{color:#13314c;font-variant-numeric:tabular-nums;margin-left:5px}
 .sr-sec-sums b.neg{color:#eb343c}
-.sr-cols2{display:flex;gap:16px;align-items:flex-start}
-.sr-sec{margin-top:16px;min-width:700px}
+.sr-sec{margin-top:16px;min-width:700px;display:flex;flex-direction:column;flex:1;min-height:0}
 .sr-split-toggle{display:flex;align-items:center;gap:8px;font-size:12px;color:#13314c;cursor:pointer;white-space:nowrap;user-select:none}
 .sr-stats-banner{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #cedbe7;border-radius:4px;padding:10px 16px;margin:16px 20px 0;min-height:48px}
 .sr-stats-banner .txt{font-size:14px;color:#13314c;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sr-banner-x{margin-left:auto;flex-shrink:0;background:none;border:none;cursor:pointer;display:flex;align-items:center;padding:4px;border-radius:4px}
 .sr-banner-x:hover{background:#ebf1f5}
-.sr-panel2{flex:1;min-width:0}
+.sr-panel2{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+.sr-tblwrap{flex:1;min-height:0;overflow-y:auto;background:#fff;border:1px solid #cedbe7}
+.sr-tblwrap .sr-tbl{border:none}
+.sr-tblwrap .sr-tbl thead th{position:sticky;top:0;z-index:2}
 .sr-tbl{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border:1px solid #cedbe7;table-layout:fixed}
 .sr-tbl.sr-tbl2 thead th{height:auto;padding:6px 10px;line-height:1.35}
 .sr-tbl.sr-tbl2 thead th .sub{font-weight:400;opacity:.8}
@@ -6747,6 +6749,7 @@ function srPanel(title, key, rows, acctId) {
           <span>Outstanding<b class="${outstanding > 0 ? 'neg' : ''}">${outstanding > 0 ? '+' : ''}${fmt(outstanding)}</b></span>
         </div>
       </div>
+      <div class="sr-tblwrap">
       <table class="sr-tbl sr-tbl2">
         <colgroup>
           <col style="width:34px"><col style="width:96px"><col><col style="width:168px">
@@ -6764,6 +6767,7 @@ function srPanel(title, key, rows, acctId) {
         </tr></thead>
         <tbody>${body || `<tr><td colspan="8" style="text-align:center;color:#9aa7b3;padding:20px 0;vertical-align:middle">No transactions</td></tr>`}</tbody>
       </table>
+      </div>
     </div>`;
 }
 
