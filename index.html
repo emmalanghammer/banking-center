@@ -1178,14 +1178,24 @@ const TRANSACTIONS_BY_ACCT = {
   tc6629: [
     {id:'tc1',date:'06/16/2026',desc:'ACH DEBIT HENDERSON J 0616',payment:4200.00,matchStatus:'none',rmLink:null},
     {id:'tc2',date:'06/13/2026',desc:'WIRE INBOUND TENANT CHEN',deposit:850.00,matchStatus:'match',rmLink:'06/13/2026 Deposit 7201: A. Chen'},
-    {id:'tc3',date:'06/11/2026',desc:'ACH DEPOSIT TENANT FLORES',deposit:1100.00,matchStatus:'none',rmLink:null},
-    {id:'tc4',date:'06/09/2026',desc:'CHECK 00412 CITY OF PORTLAND',payment:312.50,matchStatus:'none',rmLink:null},
-    {id:'tc5',date:'06/05/2026',desc:'ACH DEPOSIT TENANT PARK',deposit:925.00,matchStatus:'none',rmLink:null},
-    {id:'tc6',date:'06/02/2026',desc:'ZELLE PAYMENT NGUYEN 0602',deposit:750.00,matchStatus:'none',rmLink:null},
+    {id:'tc3',date:'06/11/2026',desc:'ACH DEPOSIT TENANT FLORES',deposit:1100.00,matchStatus:'match',rmLink:'06/11/2026 Deposit 7199: L. Flores'},
+    {id:'tc4',date:'06/09/2026',desc:'CHECK 00412 CITY OF PORTLAND',payment:312.50,matchStatus:'match',rmLink:'06/09/2026 Check 00412: City of Portland'},
+    {id:'tc5',date:'06/05/2026',desc:'ACH DEPOSIT TENANT PARK',deposit:925.00,matchStatus:'match',rmLink:'06/05/2026 Deposit 7196: S. Park'},
+    {id:'tc6',date:'06/02/2026',desc:'ZELLE PAYMENT NGUYEN 0602',deposit:750.00,matchStatus:'match',rmLink:'06/02/2026 Deposit 7194: H. Nguyen'},
     {id:'tc7',date:'05/29/2026',desc:'ACH DEPOSIT TENANT WALSH',deposit:1150.00,matchStatus:'match',rmLink:'05/29/2026 Deposit 7198: M. Walsh'},
-    {id:'tc8',date:'05/27/2026',desc:'ACH DEPOSIT TENANT REYES',deposit:975.00,matchStatus:'none',rmLink:null},
-    {id:'tc9',date:'05/22/2026',desc:'CHECK 00409 CASCADE HVAC',payment:450.00,matchStatus:'none',rmLink:null},
+    {id:'tc8',date:'05/27/2026',desc:'ACH DEPOSIT TENANT REYES',deposit:975.00,matchStatus:'match',rmLink:'05/27/2026 Deposit 7193: C. Reyes'},
+    {id:'tc9',date:'05/22/2026',desc:'CHECK 00409 CASCADE HVAC',payment:450.00,matchStatus:'match',rmLink:'05/22/2026 Check 00409: Cascade HVAC'},
     // Pre-matched examples (net $0.00 so the account's difference math is untouched)
+    // Prior-period volume, all already matched and netting $0.00 so the
+    // account's difference math stays put.
+    {id:'tcv1',date:'05/19/2026',desc:'ACH DEPOSIT TENANT STEINBERG',deposit:1250.00,matchStatus:'match',rmLink:'05/19/2026 Deposit 7186: R. Steinberg'},
+    {id:'tcv2',date:'05/16/2026',desc:'ACH DEPOSIT TENANT JOHNSON',deposit:1375.00,matchStatus:'match',rmLink:'05/16/2026 Deposit 7184: T. Johnson'},
+    {id:'tcv3',date:'05/14/2026',desc:'ACH DEBIT RECOLOGY 0514',payment:645.00,matchStatus:'match',rmLink:'05/14/2026 Bill B1136: Recology'},
+    {id:'tcv4',date:'05/12/2026',desc:'ACH DEPOSIT TENANT MORRISON',deposit:900.00,matchStatus:'match',rmLink:'05/12/2026 Deposit 7181: K. Morrison'},
+    {id:'tcv5',date:'05/08/2026',desc:'CHECK 00401 STUMPTOWN LANDSCAPING',payment:1890.00,matchStatus:'match',rmLink:'05/08/2026 Check 00401: Stumptown Landscaping'},
+    {id:'tcv6',date:'05/06/2026',desc:'ACH DEPOSIT TENANT OKAFOR',deposit:780.00,matchStatus:'match',rmLink:'05/06/2026 Deposit 7178: D. Okafor'},
+    {id:'tcv7',date:'05/04/2026',desc:'CHECK 00398 CITY OF PORTLAND',payment:1120.00,matchStatus:'match',rmLink:'05/04/2026 Check 00398: City of Portland'},
+    {id:'tcv8',date:'05/01/2026',desc:'ACH DEBIT CENTURYLINK 0501',payment:650.00,matchStatus:'match',rmLink:'05/01/2026 Bill B1129: CenturyLink'},
     {id:'tcm1',date:'05/30/2026',desc:'ACH DEBIT NW NATURAL 0530',payment:214.60,matchStatus:'match',rmLink:'05/30/2026 Bill B1148: NW Natural'},
     {id:'tcm2',date:'05/26/2026',desc:'ACH DEPOSIT TENANT DELGADO',deposit:1025.00,matchStatus:'match',rmLink:'05/26/2026 Deposit 7192: M. Delgado'},
     {id:'tcm3',date:'05/24/2026',desc:'CHECK 00405 ROSE CITY PLUMBING',payment:285.00,matchStatus:'match',rmLink:'05/24/2026 Check 00405: Rose City Plumbing'},
@@ -1194,11 +1204,11 @@ const TRANSACTIONS_BY_ACCT = {
 
   // 1007 Maintenance Escrow (4 to review, diff -2,000.00)
   me4471: [
-    {id:'me1',date:'06/15/2026',desc:'WIRE OUTBOUND CASCADE HVAC',payment:1200.00,matchStatus:'none',rmLink:null},
-    {id:'me2',date:'06/11/2026',desc:'CHECK 00198 ROSE CITY PLUMBING',payment:450.00,matchStatus:'none',rmLink:null},
-    {id:'me3',date:'06/08/2026',desc:'ACH DEBIT PORTLAND GENERAL ELECTRIC',payment:350.00,matchStatus:'none',rmLink:null},
+    {id:'me1',date:'06/15/2026',desc:'WIRE OUTBOUND CASCADE HVAC',payment:1200.00,matchStatus:'match',rmLink:'06/15/2026 Check 00199: Cascade HVAC'},
+    {id:'me2',date:'06/11/2026',desc:'CHECK 00198 ROSE CITY PLUMBING',payment:450.00,matchStatus:'match',rmLink:'06/11/2026 Check 00198: Rose City Plumbing'},
+    {id:'me3',date:'06/08/2026',desc:'ACH DEBIT PORTLAND GENERAL ELECTRIC',payment:350.00,matchStatus:'match',rmLink:'06/08/2026 Bill B1179: Portland General Electric'},
     {id:'me4',date:'06/04/2026',desc:'WIRE INBOUND ESCROW TRANSFER',deposit:2000.00,matchStatus:'match',rmLink:'06/04/2026 Journal 4101'},
-    {id:'me5',date:'05/28/2026',desc:'ACH DEBIT ABC SUPPLY ROOFING',payment:300.00,matchStatus:'none',rmLink:null},
+    {id:'me5',date:'05/28/2026',desc:'ACH DEBIT ABC SUPPLY ROOFING',payment:300.00,matchStatus:'match',rmLink:'05/28/2026 Bill B1176: ABC Supply Roofing'},
     // [BILL PAYMENT] a synced ACH that pays an open bill - recording it as a bill
     // payment (not just a check) applies it to the bill and closes it out.
     {id:'me6',date:'06/13/2026',desc:'ACH DEBIT CASCADE HVAC 0613',payment:1450.00,matchStatus:'none',tier:'rule',rmLink:null,
@@ -1206,6 +1216,15 @@ const TRANSACTIONS_BY_ACCT = {
         billDate:'05/28/2026',dueDate:'06/20/2026',amount:1450.00,gl:'5404 HVAC',status:'Open'},
       orion:"This payment matches an outstanding bill from Cascade HVAC - Bill B1183 for $1,450.00, due 06/20/2026. Record it as a bill payment so the bill is marked paid."},
     // Pre-matched examples (net $0.00)
+    // Prior-period volume, all already matched and netting $0.00.
+    {id:'mev1',date:'05/18/2026',desc:'WIRE INBOUND ESCROW TRANSFER',deposit:3200.00,matchStatus:'match',rmLink:'05/18/2026 Journal 4072'},
+    {id:'mev2',date:'05/15/2026',desc:'CHECK 00192 ROSE CITY PLUMBING',payment:1150.00,matchStatus:'match',rmLink:'05/15/2026 Check 00192: Rose City Plumbing'},
+    {id:'mev3',date:'05/11/2026',desc:'ACH DEBIT STUMPTOWN LANDSCAPING',payment:825.00,matchStatus:'match',rmLink:'05/11/2026 Bill B1133: Stumptown Landscaping'},
+    {id:'mev4',date:'05/07/2026',desc:'WIRE INBOUND ESCROW FUNDING',deposit:1450.00,matchStatus:'match',rmLink:'05/07/2026 Journal 4068'},
+    {id:'mev5',date:'05/05/2026',desc:'CHECK 00189 CASCADE HVAC',payment:1340.00,matchStatus:'match',rmLink:'05/05/2026 Check 00189: Cascade HVAC'},
+    {id:'mev6',date:'04/30/2026',desc:'ACH DEBIT ABC SUPPLY ROOFING',payment:1335.00,matchStatus:'match',rmLink:'04/30/2026 Bill B1124: ABC Supply Roofing'},
+    {id:'mev7',date:'04/27/2026',desc:'WIRE INBOUND ESCROW REIMBURSEMENT',deposit:960.00,matchStatus:'match',rmLink:'04/27/2026 Journal 4061'},
+    {id:'mev8',date:'04/22/2026',desc:'ACH DEBIT MULTNOMAH COUNTY PERMITS',payment:960.00,matchStatus:'match',rmLink:'04/22/2026 Bill B1119: Multnomah County'},
     {id:'mem1',date:'05/26/2026',desc:'ACH DEBIT STUMPTOWN LANDSCAPING',payment:640.00,matchStatus:'match',rmLink:'05/26/2026 Bill B1141: Stumptown Landscaping'},
     {id:'mem2',date:'05/23/2026',desc:'CHECK 00195 NW NATURAL',payment:182.35,matchStatus:'match',rmLink:'05/23/2026 Check 00195: NW Natural'},
     {id:'mem3',date:'05/20/2026',desc:'WIRE INBOUND ESCROW FUNDING',deposit:822.35,matchStatus:'match',rmLink:'05/20/2026 Journal 4079'},
@@ -1262,7 +1281,10 @@ const TRANSACTIONS_BY_ACCT = {
 TRANSACTIONS_BY_ACCT.op3487 = TRANSACTIONS;
 
 function acctTxs(id) {
-  return TRANSACTIONS_BY_ACCT[id || S.activeId] || [];
+  const rows = TRANSACTIONS_BY_ACCT[id || S.activeId] || [];
+  // Newest first, whatever order the feed was written in.
+  const val = d => { const [m, dd, y] = String(d).split('/').map(Number); return y * 10000 + m * 100 + dd; };
+  return rows.slice().sort((a, b) => val(b.date) - val(a.date));
 }
 // Find a transaction (and its owning account) across every account feed - needed
 // when acting on a transaction from a screen whose account differs from S.activeId
@@ -1309,6 +1331,8 @@ const SEED_MATCHED = [
   'me1','me2','me3','me4','me5',
   // 1004 Trust Comm. is all but clean too, leaving tc1 as the one item to add.
   'tc2','tc3','tc4','tc5','tc6','tc7','tc8','tc9',
+  'tcv1','tcv2','tcv3','tcv4','tcv5','tcv6','tcv7','tcv8',
+  'mev1','mev2','mev3','mev4','mev5','mev6','mev7','mev8',
   'tcm1','tcm2','tcm3','tcm4','mem1','mem2','mem3','ccm1','ccm2','axm1','axm2',
 ];
 const SEED_EXCLUDED = ['t6']; // the mis-posted café charge starts excluded
@@ -6284,6 +6308,7 @@ const CONNECT_BANKS = [
   { name: 'Bank of America',  color: '#0a3a5e', sub: 'Business & card' },
   { name: 'Citi',             color: '#0d4f9e', sub: 'Business card' },
   { name: 'American Express', color: '#1f6fb2', sub: 'Corporate card' },
+  { name: 'Legacy Bank',       color: '#1f5c4a', sub: 'Business checking' },
 ];
 // What the feed finds once you sign in, keyed by institution.
 const CONNECT_FOUND = {
@@ -6297,6 +6322,7 @@ const CONNECT_FOUND = {
   'Bank of America':  [{ name: 'Business Advantage Checking', last4: '6690', bal: 52410.80, gl: '1017 Business Checking' }],
   'Citi':             [{ name: 'Business Card',               last4: '3312', bal: 4820.35, gl: '2005 Citi Business Card', card: true }],
   'American Express': [{ name: 'Corporate Green',             last4: '1188', bal: 7640.00, gl: '2006 Amex Corporate', card: true }],
+  'Legacy Bank':      [{ name: 'Business Checking',          last4: '3092', bal: 18450.00, gl: '1018 Legacy Operating' }],
 };
 const CONNECT_STATE = { open: false, step: 1, bank: null, sel: new Set(), busy: false, search: '', added: [] };
 

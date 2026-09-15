@@ -59,8 +59,12 @@ Portland, OR residential + light-commercial property manager. Demo "today" = mid
   exactly the account's Bank-vs-Cleared difference. 1007 Maintenance Escrow shows Matched (8) / In
   Review (1) - only the open-bill beat `me6`. Their `inRm`/`cleared` opening balances were lowered by
   the newly seeded net (1004 by 4,987.50, 1007 raised by 2,300) so every displayed balance is
-  unchanged from before the reseed. **The bulk-Create beat no longer has 4 creatable rows anywhere** -
-  restore it by removing `me1`,`me2`,`me3`,`me5` from `SEED_MATCHED` and re-lowering 1007's `inRm`
+  unchanged from before the reseed. Each account then gained 8 more already-matched items (`tcv1-8`,
+  `mev1-8`) that net **exactly $0.00**, so history looks worked without touching any balance - 1004
+  reads Matched (20) / In Review (1), 1007 Matched (16) / In Review (1). `acctTxs()` sorts every feed
+  newest-first, so inserted rows cannot break a feed's chronology. **The bulk-Create beat no longer
+  has 4 creatable rows anywhere** - restore it by removing `me1`,`me2`,`me3`,`me5` from `SEED_MATCHED`,
+  clearing their `rmLink`/`matchStatus`, and re-lowering 1007's `inRm`
 
 ## Key data locations (approx line numbers)
 
@@ -95,7 +99,7 @@ Bulk Edit opens an overlay applying Property / GL Account / Memo across the sele
 `openConnect()` → overlay in `#connect-root`, styled as the **Quiltt Connector** from the reference
 screenshots in `~/Downloads/Quiltt` (403px modal, `#faf9fd` ground, purple `#6d28d9` accents, back/X
 chevrons, institution card grid, "powered by Quiltt" footer). Deliberately does NOT follow RMX - it
-is a third-party surface. Steps: choose institution (searchable, 8 banks in `CONNECT_BANKS`) → sign
+is a third-party surface. Steps: choose institution (searchable, 9 banks in `CONNECT_BANKS`, including fictional **Legacy Bank** whose single find is a plain Business Checking ••3092) → sign
 in (visual only, no credentials collected) → a `connecting` step with the wire/sync graphic →
 select accounts found at that bank (`CONNECT_FOUND`) → done. Picked accounts are appended to `ACCOUNTS` with `isNew:true`, which
 carries no badge any more (the **New** lozenge was removed 09/15/2026 from the TR sidebar, the
