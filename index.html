@@ -86,8 +86,8 @@ input[type="checkbox"]:checked::after{content:'';position:absolute;left:6px;top:
 .ao-tbl tbody td{height:48px;padding:0 12px;border-top:1px solid #eef2f7;font-size:14px;color:#13314c;vertical-align:middle}
 .ao-tbl tbody td.r{text-align:right;font-variant-numeric:tabular-nums}
 .ao-tbl tbody tr:hover td{background:#f7fbff}
-.ao-conn{display:flex;align-items:center;gap:6px;font-size:13px;color:#666}
-.ao-loz-ok{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:4px;background:#e2f1da;font-size:13px;color:#13314c;white-space:nowrap}
+.ao-conn{display:flex;align-items:center;gap:6px;font-size:14px;color:#666}
+.ao-loz-ok{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:4px;background:#e2f1da;font-size:14px;color:#13314c;white-space:nowrap}
 .ao-loz-err{display:inline-flex;align-items:center;background:#fbd6d8;color:#13314c;font-size:14px;padding:4px 8px;border-radius:4px;white-space:nowrap}
 .ao-tx{display:inline-flex;align-items:center;gap:8px;height:24px;padding:4px 8px;border-radius:4px;font-size:14px;font-style:italic;color:#13314c;white-space:nowrap}
 .ao-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;display:inline-block}
@@ -1520,16 +1520,16 @@ function renderBC() {
     // Bank account cell
     let bankAcctCell;
     if (a.connection === 'none') {
-      bankAcctCell = `<span style="color:#b3b3b3;font-size:13px">No Account Linked</span>`;
+      bankAcctCell = `<span style="color:#b3b3b3">No Account Linked</span>`;
     } else {
       bankAcctCell = `${a.bankName}••••${a.last4}`;
     }
     // Connection status cell
     let connCell;
     if (a.connection === 'none') {
-      connCell = `<span style="display:inline-flex;align-items:center;gap:12px"><span style="color:#b3b3b3;font-size:13px">Not connected</span><button class="acct-link" style="font-size:14px" onclick="event.stopPropagation();openConnect(null,'${a.id}')">Link Account</button></span>`;
+      connCell = `<span style="display:inline-flex;align-items:center;gap:12px"><span style="color:#b3b3b3">Not connected</span><button class="acct-link" onclick="event.stopPropagation();openConnect(null,'${a.id}')">Link Account</button></span>`;
     } else if (a.connection === 'login') {
-      connCell = `<span style="display:inline-flex;align-items:center;gap:8px"><span class="ao-loz-err">Login Required</span><span class="ao-conn">${SYNC_ICO} ${fmtSync(a.syncedMin)}</span><button class="acct-link" style="font-size:14px" onclick="event.stopPropagation();openConnect('${a.bankName}')">Reconnect</button></span>`;
+      connCell = `<span style="display:inline-flex;align-items:center;gap:8px"><span class="ao-loz-err">Login Required</span><span class="ao-conn">${SYNC_ICO} ${fmtSync(a.syncedMin)}</span><button class="acct-link" onclick="event.stopPropagation();openConnect('${a.bankName}')">Reconnect</button></span>`;
     } else {
       connCell = `<span style="display:inline-flex;align-items:center;gap:8px"><span class="ao-loz-ok">Connected</span><span class="ao-conn">${SYNC_ICO} ${fmtSync(a.syncedMin)}</span></span>`;
     }
@@ -1546,11 +1546,11 @@ function renderBC() {
     }
     return `<tr onclick="openAcct('${a.id}')" style="cursor:pointer">
       <td style="width:44px;text-align:center">${ico}</td>
-      <td style="color:#666;font-size:14px">${a.gl}${a.isNew?' <span class="ao-new">New</span>':''}</td>
-      <td style="font-size:13px;color:#666">${bankAcctCell}</td>
+      <td style="color:#666">${a.gl}${a.isNew?' <span class="ao-new">New</span>':''}</td>
+      <td style="color:#666">${bankAcctCell}</td>
       <td>${connCell}</td>
-      <td class="r" style="font-size:13px">${fmt(a.bankBalance)}</td>
-      <td class="r" style="font-size:13px">${fmt(acctLiveInRm(a))}</td>
+      <td class="r">${fmt(a.bankBalance)}</td>
+      <td class="r">${fmt(acctLiveInRm(a))}</td>
       <td>${txCell}</td>
     </tr>`;
   }).join('');
