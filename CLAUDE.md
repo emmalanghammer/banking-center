@@ -101,6 +101,11 @@ in the TR sidebar (expanded + collapsed) and the **Connect** link on unlinked ac
 
 - BC tiles have no icon badges; the Accounts Overview table dropped its **Difference** column and
   "In Rent Manager" is now **Cleared Balance** (also in the TR summary strip and the BC tiles)
+- The Accounts Overview carries a **Last Reconciled** column between Cleared Balance and
+  Transactions, from a per-account `lastRec` field (the Start Reconciliation overlay reads the same
+  field, falling back to `REC_LAST_REC_DATE`). Most accounts closed 05/31/2026; 1007 Maintenance
+  Escrow sits at 04/30/2026 and 2001 Mastercard at 03/31/2026, so the column shows real variance.
+  An account with no `lastRec` renders a grey "Never"
 - Connection Status shows an explicit green **Connected** lozenge; accounts with `connection:'none'`
   (Petty Cash) show "Not connected" + a Link Account link and **no** match status at all. Every cell in a
   row is 14px - no per-cell size overrides
