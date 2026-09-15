@@ -37,6 +37,9 @@ Portland, OR residential + light-commercial property manager. Demo "today" = mid
   on the Banking Center and in Transaction Review. `inRm: 512000` is the OPENING book balance;
   `acctLiveInRm()` adds the resolved feed on top, and every surface uses it. Do not raise the static
   `inRm` to match the displayed figure - the live path would double-count.
+- The Bank/Credit Card Register strip tracks the same resolved feed (`resolvedDelta`), so Actual
+  Balance always equals the Banking Center's Cleared Balance while each account's static
+  Actual-vs-Cleared gap is preserved.
 - **1001 Operating opens reconcile-ready (09/14/2026):** t1–t5, t7, t8 are seeded into `SEED_MATCHED`
   and t6 into `SEED_EXCLUDED`, so TR opens In Review (0) / Matched (7) / Excluded (1) and the Reconcile
   button is enabled. All eight beats still exist in the data — remove their ids from `SEED_MATCHED`
