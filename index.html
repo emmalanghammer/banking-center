@@ -262,7 +262,7 @@ svg.ico{display:block;flex-shrink:0}
 .acct-hdr{background:#fff;border:1px solid #cedbe7;border-radius:4px;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0}
 .acct-hdr-name{font-size:15px;font-weight:600;color:#13314c}
 .acct-hdr-bank{font-size:14px;color:#888}
-.acct-hdr-sync{display:flex;align-items:center;gap:4px;color:#aaa;font-size:14px;margin-left:4px}
+.acct-hdr-sync{display:flex;align-items:center;gap:4px;color:#aaa;font-size:14px;margin-left:4px;white-space:nowrap;flex-shrink:0}
 
 /* Summary strip */
 .sum-strip{background:#fff;border:1px solid #cedbe7;border-radius:4px;padding:10px 20px;display:flex;align-items:center;flex-shrink:0;justify-content:space-between}
@@ -1453,6 +1453,15 @@ function fmtSync(min) {
   if (min < 1440) return Math.round(min/60) + 'h';
   return Math.round(min/1440) + 'd';
 }
+// Long form for the account header, where there is room to spell it out.
+function fmtSyncLong(min) {
+  if (min === null) return '';
+  if (min === 0) return 'Just now';
+  const plur = (n, unit) => `${n} ${unit}${n === 1 ? '' : 's'} ago`;
+  if (min < 60) return plur(min, 'minute');
+  if (min < 1440) return plur(Math.round(min/60), 'hour');
+  return plur(Math.round(min/1440), 'day');
+}
 const SYNC_ICO = `<svg width="14" height="14" viewBox="0 0 24 24" fill="#999"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>`;
 const BANK_ICO = `<svg width="16" height="16" viewBox="0 0 24 24" fill="#13314c"><path d="M4 10v7h3v-7H4zm6 0v7h3v-7h-3zM2 22h19v-3H2v3zm14-12v7h3v-7h-3zm-4.5-9L2 6v2h19V6l-9.5-5z"/></svg>`;
 const CARD_ICO = `<svg width="16" height="16" viewBox="0 0 24 24" fill="#13314c"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>`;
@@ -1996,7 +2005,7 @@ function renderRight() {
   const unmatchedCount = allTxs.filter(t=>!S.matchedIds.has(t.id) && !S.excludedIds.has(t.id)).length;
   const matchedCount = allTxs.filter(t=>S.matchedIds.has(t.id)).length;
   const excludedCount = allTxs.filter(t=>S.excludedIds.has(t.id)).length;
-  const syncLbl = acct.syncedMin===0?'Just now':`${acct.syncedMin}m ago`;
+  const syncLbl = fmtSyncLong(acct.syncedMin);
 
   // Live recompute: each resolved (matched or excluded) bank item the book catches up on
   // closes the gap. Book += deposit / −= payment for every resolved item.
