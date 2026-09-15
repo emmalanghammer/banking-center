@@ -1560,7 +1560,7 @@ function renderBC() {
     }
     return `<tr onclick="openAcct('${a.id}')" style="cursor:pointer">
       <td style="width:44px;text-align:center">${ico}</td>
-      <td style="color:#666">${a.gl}${a.isNew?' <span class="ao-new">New</span>':''}</td>
+      <td style="color:#666">${a.gl}</td>
       <td style="color:#666">${bankAcctCell}</td>
       <td>${connCell}</td>
       <td class="r">${fmt(a.bankBalance)}</td>
@@ -1999,7 +1999,6 @@ function renderSbRow(a) {
     <div class="sb-row-info">
       <div class="sb-name-row">
         <span class="sb-name${isAct?' bold':''}">${a.gl}</span>
-        ${a.isNew?'<span class="sb-new">New</span>':''}
         ${status}
         <span class="sb-bal">${fmt(a.bankBalance)}</span>
       </div>
@@ -6482,7 +6481,7 @@ function renderConnect() {
         <div class="qc-bankname">${st.bank} ${st.reconnect ? 'reconnected' : 'connected'}</div>
         <p class="qc-muted" style="margin:0">${st.added.length} account${st.added.length!==1?'s':''} ${st.reconnect ? 'syncing again' : 'linked and syncing'}.</p>
       </div>
-      ${st.added.map(g=>`<div class="qc-row"><span class="qc-row-nm">${g}</span>${st.reconnect?'':'<span class="sb-new">New</span>'}</div>`).join('')}
+      ${st.added.map(g=>`<div class="qc-row"><span class="qc-row-nm">${g}</span></div>`).join('')}
       <button class="qc-btn" onclick="connectDone()">Done</button>`;
   }
 

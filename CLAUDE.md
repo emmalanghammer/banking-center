@@ -98,7 +98,9 @@ chevrons, institution card grid, "powered by Quiltt" footer). Deliberately does 
 is a third-party surface. Steps: choose institution (searchable, 8 banks in `CONNECT_BANKS`) → sign
 in (visual only, no credentials collected) → a `connecting` step with the wire/sync graphic →
 select accounts found at that bank (`CONNECT_FOUND`) → done. Picked accounts are appended to `ACCOUNTS` with `isNew:true`, which
-renders a **New** badge in the TR sidebar and the Accounts Overview table, and they are registered
+carries no badge any more (the **New** lozenge was removed 09/15/2026 from the TR sidebar, the
+Accounts Overview and the connector's done step; `isNew` and the `.sb-new`/`.ao-new` CSS remain, so
+re-adding one span restores it), and they are registered
 visible, which is all Settings › Institutions needs - that list is **derived from `ACCOUNTS`**
 (`institutions()`), so it always matches the Accounts Overview: one card per `bankName`, one row per
 linked account, status `action-required` when any account at that bank is `connection:'login'` and
