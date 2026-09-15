@@ -6981,8 +6981,11 @@ function _renderRegister(STATE, opts) {
 
   const unmatchedCount = acct.txStatus.count;
   const bankBal = acct.bankBalance;
-  const actualBal = acct.inRm;
-  const clearedBal = acct.cleared;
+  // Track the resolved feed like every other surface, so the register cannot
+  // disagree with the Banking Center about the same account.
+  const resolvedDelta = acctLiveInRm(acct) - acct.inRm;
+  const actualBal = acct.inRm + resolvedDelta;
+  const clearedBal = acct.cleared + resolvedDelta;
 
   // Intentional divergence from production's register columns (Date | Vendor |
   // Reference | Information | Cleared | Payee Name): the Banking Center register
