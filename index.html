@@ -1126,7 +1126,7 @@ const ACCOUNTS = [
   {id:'rf1208',gl:'1006 Reserve Fund',kind:'bank',bankName:'Wells Fargo',last4:'1208',connection:'fresh',syncedMin:60,bankBalance:95000.00,inRm:95000.00,cleared:95000.00,difference:0,txStatus:{type:'matched',count:0}},
   {id:'me4471',gl:'1007 Maintenance Escrow',kind:'bank',bankName:'KeyBank',last4:'4471',connection:'fresh',syncedMin:180,bankBalance:44363.22,inRm:42363.22,cleared:40363.22,difference:-2000.00,txStatus:{type:'review',count:4}},
   {id:'od7732',gl:'1008 Owner Disbursement',kind:'bank',bankName:'Bank of America',last4:'7732',connection:'fresh',syncedMin:0,bankBalance:620000.00,inRm:620000.00,cleared:620000.00,difference:0,txStatus:{type:'matched',count:0}},
-  {id:'pc0000',gl:'1009 Petty Cash - Admin',kind:'bank',bankName:null,last4:null,connection:'none',syncedMin:null,bankBalance:8000.00,inRm:8000.00,cleared:8000.00,difference:0,txStatus:{type:'matched',count:0}},
+  {id:'pc0000',gl:'1009 Petty Cash',kind:'bank',bankName:null,last4:null,connection:'none',syncedMin:null,bankBalance:8000.00,inRm:8000.00,cleared:8000.00,difference:0,txStatus:{type:'matched',count:0}},
   {id:'cc2247',gl:'2001 Mastercard',kind:'card',bankName:'Citi',last4:'2247',connection:'login',syncedMin:7200,bankBalance:14872.40,inRm:14872.40,cleared:14722.40,difference:0,txStatus:{type:'review',count:15}},
   {id:'cc5581',gl:'2002 Visa - Maintenance',kind:'card',bankName:'Bank of America',last4:'5581',connection:'fresh',syncedMin:0,bankBalance:9418.20,inRm:8272.00,cleared:8272.00,difference:-1146.20,txStatus:{type:'review',count:5}},
   {id:'cc3390',gl:'2003 Amex - Travel',kind:'card',bankName:'American Express',last4:'3390',connection:'fresh',syncedMin:120,bankBalance:7640.00,inRm:7459.00,cleared:7459.00,difference:-181.00,txStatus:{type:'review',count:3}},
@@ -5946,7 +5946,7 @@ const BR_TX = {
     { date:'04/31/26', ref:'1804',  type:'Check',      info:'Owner Distribution - Sellwood Owner LLC', gl:'2100 Owner Liability',       deposit:null,     payment:15000.00, cleared:true },
     { date:'04/31/26', ref:'1803',  type:'Check',      info:'Owner Distribution - Hawthorne Holdings LLC',   gl:'2100 Owner Liability',       deposit:null,     payment:25000.00, cleared:true },
   ],
-  // 1009 Petty Cash - Admin - small office expenses (no bank feed)
+  // 1009 Petty Cash - small office expenses (no bank feed)
   pc0000: [
     { date:'05/28/26', ref:'PC112', type:'Check',      info:'Office supplies - Staples',              gl:'5500 Office Expense',        deposit:null,     payment:45.20,    cleared:true },
     { date:'05/22/26', ref:'PC111', type:'Check',      info:'Postage - USPS',                         gl:'5500 Office Expense',        deposit:null,     payment:28.00,    cleared:true },
