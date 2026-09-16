@@ -227,6 +227,9 @@ Balance counts and the reconcile account picker are scoped to visible accounts.
 
 - Banking Insights tile REMOVED from the Banking Center (08/28/2026) — the `INSIGHTS` data, `openInsights()` overlay, and `.bc-card.hi::before` gradient-border CSS (`-webkit-mask` composite trick) remain in the file unused, so it can be restored by re-adding the `orionInsights` tile entry
 - Background image inlined as base64 data URL on `#screen-bc` to avoid GitHub Pages path issues
+- **Favicon:** the RMX brand house (RMX-Iconography `doVDYRtepBULKGZntmmS5B` node **68:2992**),
+  recoloured from `#008DD5` to **`#3776BC`**. Kept at `assets/favicon.svg` and inlined in the head as a
+  percent-encoded `data:image/svg+xml` URI, so it resolves on GitHub Pages, the dev server and file://
 - Find Match overlay: grey `#f2f2f2` background via `#find-match-root .at-modal`
 
 ## Figma file
