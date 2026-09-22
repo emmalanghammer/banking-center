@@ -226,7 +226,11 @@ Balance counts and the reconcile account picker are scoped to visible accounts.
 - RMX token pass applied (per the rmx-prototyping skill): page bg `#F3F4F8`, notice amber `#FAA61C`, checked checkboxes `#F79B4D` everywhere (incl. header select-alls, per user preference over the RMX blue-select-all variant), btn hovers `#0071AA`/`#EBF1F5`, register headers 12.6px/500/+1.1px on `#737373`, italic `#b3b3b3` placeholders, Orion chat border = Orion_2 gradient (`#008dd5→#6eb744`) with blue glow. Native `<select>` popups are suppressed app-wide by the `.rmx-dd` delegated component — options render in an RMX floating panel while the native element keeps state and fires its own change events (no form logic touched). Statement End Date stays a native date input by explicit request.
 
 - Banking Insights tile REMOVED from the Banking Center (08/28/2026) — the `INSIGHTS` data, `openInsights()` overlay, and `.bc-card.hi::before` gradient-border CSS (`-webkit-mask` composite trick) remain in the file unused, so it can be restored by re-adding the `orionInsights` tile entry
-- Background image inlined as base64 data URL on `#screen-bc` to avoid GitHub Pages path issues
+- **`index.html` is fully self-contained** - open it anywhere, no sibling folders. The background
+  (`#screen-bc`) and the Orion icon (`ORION_ICON_URL`) are inlined data URIs, as is the favicon; the
+  only network requests left are the Google Fonts stylesheet (Roboto, falls back to system sans) and
+  the Useberry study script, and the prototype works with both blocked. `assets/` is kept as the
+  source of truth for those graphics but nothing loads from it at runtime
 - **Favicon:** the RMX brand house (RMX-Iconography `doVDYRtepBULKGZntmmS5B` node **68:2992**),
   recoloured from `#008DD5` to **`#3776BC`**. Kept at `assets/favicon.svg` and inlined in the head as a
   percent-encoded `data:image/svg+xml` URI, so it resolves on GitHub Pages, the dev server and file://
